@@ -207,28 +207,28 @@ module.exports = function(s,config){
         }
         return url
     }
-    s.file = function(x,e,callback){
+    s.file = async function(x,e,callback){
         if(!e){e={}};
         switch(x){
             case'size':
                  return fs.statSync(e.filename)["size"];
             break;
             case'delete':
-                if(!e){return false;}
-                fs.rm(e,(err)=>{
-                    if(err){
-                        s.debugLog(err)
-                        if(s.isWin){
-                            exec('rd /s /q "' + e + '"',{detached: true},function(err){
-                                if(callback)callback(err)
-                            })
-                        }else{
-                            exec('rm -rf '+e,{detached: true},function(err){
-                                if(callback)callback(err)
-                            })
-                        }
+                if (!e) { return false; }
+                try{
+                    return await fs.promises.rm(e, { force: true })
+                }catch(err){
+                    s.debugLog(err)
+                    if(s.isWin){
+                        exec('rd /s /q "' + e + '"', { detached: true }, function (err) {
+                            if (callback) callback(err)
+                        })
+                    }else{
+                        exec('rm -rf ' + e, { detached: true }, function (err) {
+                            if (callback) callback(err)
+                        })
                     }
-                })
+                }
             break;
             case'deleteFolder':
                 if(!e){return false;}

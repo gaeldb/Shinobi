@@ -163,11 +163,11 @@ module.exports = function(s,config,lang,app,io){
                     limit: 1
                 },async function(){
                     s.setDiskUsedForGroup(e.ke,-(r.size / 1048576),'timelapseFrames')
-                    s.file('delete',e.fileLocation)
-                    const fileDirectory = getFileDirectory(folderPath);
-                    const folderIsEmpty = (await fs.promises.readdir(folderPath)).filter(file => file.indexOf('.jpg') > -1).length === 0;
+                    await s.file('delete', e.fileLocation);
+                    const fileDirectory = getFileDirectory(e.fileLocation);
+                    const folderIsEmpty = (await fs.promises.readdir(fileDirectory)).filter(file => file.indexOf('.jpg') > -1).length === 0;
                     if(folderIsEmpty){
-                        await fs.rm(folderPath, { recursive: true })
+                        await fs.rm(fileDirectory, { recursive: true })
                     }
                 })
             }else{
