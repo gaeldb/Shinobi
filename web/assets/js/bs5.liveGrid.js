@@ -963,6 +963,30 @@ function openAllLiveGridPlayers(){
         openLiveGrid()
     })
 }
+function addMarkAsEvent(monitorId){
+    runTestDetectionTrigger(monitorId,{
+        "name":"Marker",
+        "reason":"marker",
+        "matrices": [
+            {
+                x: 0,
+                y: 0,
+                width: 1,
+                height: 1,
+                tag: 'Marked',
+                confidence: 100,
+            }
+        ]
+    });
+}
+function addMarkAsEventToAllOpenMonitors(){
+    $.each(loadedMonitors,function(n,monitor){
+        var monitorId = monitor.mid
+        if(liveGridPlayingNow[monitorId]){
+            addMarkAsEvent(monitorId)
+        }
+    })
+}
 $(document).ready(function(e){
     liveGrid
     .on('dblclick','.stream-block',function(){
@@ -1085,6 +1109,11 @@ $(document).ready(function(e){
         var el = $(this)
         var monitorId = el.parents('[data-mid]').attr('data-mid')
         runTestDetectionTrigger(monitorId)
+    })
+    .on('click','.run-monitor-detection-trigger-marker',function(){
+        var el = $(this)
+        var monitorId = el.parents('[data-mid]').attr('data-mid')
+        addMarkAsEvent(monitorId)
     })
     .on('click','.run-monitor-detection-trigger-test-motion',function(){
         var el = $(this)

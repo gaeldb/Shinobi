@@ -7449,6 +7449,7 @@ module.exports = function(s,config,lang){
            streamBlockHudControlsHtml: `<span title="${lang['Currently viewing']}" class="label label-default">
                 <span class="viewers"></span>
            </span>
+           <a class="btn btn-sm badge btn-primary run-monitor-detection-trigger-marker">${lang['Add Marker']}</a>
            <a class="btn btn-sm badge btn-warning run-monitor-detection-trigger-test">${lang['Test Object Event']}</a>
            <a class="btn btn-sm badge btn-warning run-monitor-detection-trigger-test-motion">${lang['Test Motion Event']}</a>
            `,
