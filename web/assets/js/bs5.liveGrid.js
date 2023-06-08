@@ -1273,7 +1273,7 @@ $(document).ready(function(e){
                     }
                     playAudioAlert()
                     var monitorPop = monitorPops[monitorId]
-                    if($user.details.event_mon_pop === '1' && (!monitorPop || monitorPop.closed === true)){
+                    if(window.popLiveOnEvent && (!monitorPop || monitorPop.closed === true)){
                         popOutMonitor(monitorId)
                     }
                     // console.log({
@@ -1321,12 +1321,28 @@ $(document).ready(function(e){
             window.dontShowDetection = true
         }
     }
+    dashboardSwitchCallbacks.alertOnEvent = function(toggleState){
+        // audio_alert
+        if(toggleState !== 1){
+            window.audioAlertOnEvent = false
+        }else{
+            window.audioAlertOnEvent = true
+        }
+    }
+    dashboardSwitchCallbacks.popOnEvent = function(toggleState){
+        if($user.details.event_mon_pop === '1'){
+            window.popLiveOnEvent = true
+        }else if(toggleState !== 1){
+            window.popLiveOnEvent = false
+        }else{
+            window.popLiveOnEvent = true
+        }
+    }
     dashboardSwitchCallbacks.monitorMuteAudio = function(toggleState){
         var monitorMutes = dashboardOptions().monitorMutes || {}
         $('.monitor_item video').each(function(n,vidEl){
             var el = $(this)
             var monitorId = el.parents('[data-mid]').attr('data-mid')
-            console.log(monitorId,monitorMutes[monitorId])
             if(toggleState === 1){
                 vidEl.muted = true
             }else{

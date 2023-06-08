@@ -230,6 +230,9 @@ function toggleSubStream(monitorId,callback){
 }
 function playAudioAlert(){
     var fileName = $user.details.audio_alert
+    if(window.audioAlertOnEvent && !fileName){
+        fileName = `alert.mp3`
+    }
     if(fileName && window.soundAlarmed !== true){
         window.soundAlarmed = true
         var audio = new Audio(`libs/audio/${fileName}`)

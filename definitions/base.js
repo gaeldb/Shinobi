@@ -4822,8 +4822,6 @@ module.exports = function(s,config,lang){
                      "name": "detail=audio_note",
                      "field": lang["Notification Sound"],
                      "description": lang["fieldTextAudioNote"],
-                     "default": "",
-                     "example": "",
                      "fieldType": "select",
                      "possible": s.listOfAudioFiles
                  },
@@ -4831,8 +4829,6 @@ module.exports = function(s,config,lang){
                      "name": "detail=audio_alert",
                      "field": lang["Alert Sound"],
                      "description": lang["fieldTextAudioAlert"],
-                     "default": "",
-                     "example": "",
                      "fieldType": "select",
                      "possible": s.listOfAudioFiles
                  },
@@ -4841,15 +4837,12 @@ module.exports = function(s,config,lang){
                      "field": lang["Alert Sound Delay"],
                      "description": lang["fieldTextAudioDelay"],
                      "default": "1",
-                     "example": "",
-                     "possible": ""
                  },
                  {
                      "name": "detail=event_mon_pop",
                      "field": lang["Popout Monitor on Event"],
                      "description": lang["fieldTextEventMonPop"],
                      "default": "en_CA",
-                     "example": "",
                      "fieldType": "select",
                      "possible": [
                         {
@@ -7688,6 +7681,18 @@ module.exports = function(s,config,lang){
                                   label: lang[`Hide Detection on Stream`],
                                   class: 'cursor-pointer',
                                   attributes: 'shinobi-switch="dontShowDetection" ui-change-target=".dot" on-class="dot-green" off-class="dot-grey"',
+                                  color: 'grey',
+                              },
+                              {
+                                  label: lang[`Alert on Event`],
+                                  class: 'cursor-pointer',
+                                  attributes: 'shinobi-switch="alertOnEvent" ui-change-target=".dot" on-class="dot-green" off-class="dot-grey"',
+                                  color: 'grey',
+                              },
+                              {
+                                  label: lang[`Popout on Event`],
+                                  class: 'cursor-pointer',
+                                  attributes: 'shinobi-switch="popOnEvent" ui-change-target=".dot" on-class="dot-green" off-class="dot-grey"',
                                   color: 'grey',
                               },
                           ]
