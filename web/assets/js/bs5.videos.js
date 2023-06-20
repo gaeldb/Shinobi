@@ -125,11 +125,11 @@ function getFrameOnVideoRow(percentageInward, video) {
         };
     }
 
-    var closestFrame = frames.reduce(function(prev, curr) {
+    var closestFrame = frames.length > 0 ? frames.reduce(function(prev, curr) {
         var prevDiff = Math.abs(timeAdded - new Date(prev.time));
         var currDiff = Math.abs(timeAdded - new Date(curr.time));
         return (prevDiff < currDiff) ? prev : curr;
-    });
+    }) : null;
 
     return {
         timeInward: timeInward,
