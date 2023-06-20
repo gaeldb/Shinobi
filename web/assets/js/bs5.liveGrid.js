@@ -1000,15 +1000,14 @@ $(document).ready(function(e){
     .on('click','.launch-live-grid-monitor',function(){
         var monitorId = $(this).parents('[data-mid]').attr('data-mid')
         if(isMobile){
-            createLivePlayerTab(loadedMonitors[monitorId])
-        }else{
-            mainSocket.f({
-                f: 'monitor',
-                ff: 'watch_on',
-                id: monitorId
-            })
-            openLiveGrid()
+            closeAllLiveGridPlayers()
         }
+        mainSocket.f({
+            f: 'monitor',
+            ff: 'watch_on',
+            id: monitorId
+        })
+        openLiveGrid()
     })
     .on('click','.monitor-live-group-open',function(){
         var monitorIds = $(this).attr('monitor-ids').split(',')
