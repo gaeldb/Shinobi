@@ -748,6 +748,8 @@ module.exports = (s,config,lang) => {
         })
     }
     function monitorIdle(e){
+        const monitorId = e.mid || e.id
+        const groupKey = e.ke
         s.tx({f:'monitor_idle',mid:monitorId,ke:groupKey,time:s.formattedTime()},'GRP_'+groupKey);
         s.userLog(e,{type:lang['Monitor Idling'],msg:lang.MonitorIdlingText});
         s.sendMonitorStatus({
