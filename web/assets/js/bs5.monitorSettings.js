@@ -758,10 +758,6 @@ monitorEditorWindow.on('change','[detail="auto_host"]',function(e){
     }
 })
 editorForm.submit(function(e){
-    function setSubmitButton(text,icon,toggle){
-        var submitButtons = editorForm.find('[type="submit"]').prop('disabled',toggle)
-        submitButtons.html(`<i class="fa fa-${icon}"></i> ${text}`)
-    }
     e.preventDefault();
     var validation = getMonitorEditFormFields()
     if(!validation.ok){
@@ -770,7 +766,7 @@ editorForm.submit(function(e){
         new PNotify({title:'Configuration Invalid',text:errorsFound.join('<br>'),type:'error'});
     }
     var monitorConfig = validation.monitorConfig
-    setSubmitButton(lang[`Please Wait...`], `spinner fa-pulse`, true)
+    setSubmitButton(editorForm, lang[`Please Wait...`], `spinner fa-pulse`, true)
     $.post(getApiPrefix()+'/configureMonitor/'+$user.ke+'/'+monitorConfig.mid,{data:JSON.stringify(monitorConfig)},function(d){
         if(d.ok === false){
             new PNotify({
@@ -780,7 +776,7 @@ editorForm.submit(function(e){
             })
         }
         debugLog(d)
-        setSubmitButton(lang.Save, `check`, false)
+        setSubmitButton(editorForm, lang.Save, `check`, false)
     })
     //
     if(copySettingsSelector.val() === '1'){

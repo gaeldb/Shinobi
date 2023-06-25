@@ -1017,6 +1017,10 @@ function onDashboardReadyExecute(theAction){
 function popImage(imageSrc){
     $('body').append(`<div class="popped-image"><img src="${imageSrc}"></div>`)
 }
+function setSubmitButton(editorForm,text,icon,toggle){
+    var submitButtons = editorForm.find('[type="submit"]').prop('disabled',toggle)
+    submitButtons.html(`<i class="fa fa-${icon}"></i> ${text}`)
+}
 $(document).ready(function(){
     onInitWebsocket(function(){
         loadMonitorsIntoMemory(function(data){

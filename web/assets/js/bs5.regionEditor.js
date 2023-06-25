@@ -113,13 +113,19 @@ $(document).ready(function(e){
         });
         monitorConfig.details.cords = JSON.stringify(regionCoordinates)
         monitorConfig.details = JSON.stringify(monitorConfig.details)
+        setSubmitButton(regionEditorForm, lang[`Please Wait...`], `spinner fa-pulse`, true)
         $.post(getApiPrefix(`configureMonitor`)+ '/' + monitorId,{
             data: JSON.stringify(monitorConfig)
         },function(d){
-            debugLog(d)
-            if(d.ok){
-
+            if(d.ok === false){
+                new PNotify({
+                    title: lang['Action Failed'],
+                    text: d.msg,
+                    type: 'danger'
+                })
             }
+            debugLog(d)
+            setSubmitButton(regionEditorForm, lang.Save, `check`, false)
         })
     }
     var initiateRegionList = function(presetVal){
