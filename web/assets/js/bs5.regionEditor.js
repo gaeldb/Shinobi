@@ -148,7 +148,7 @@ $(document).ready(function(e){
     }
     function setGridDisplayBasedOnFields(){
         var isOn = accuracyModeToggle.val() === '1'
-        var tileSize = tileSizeField.val()
+        var tileSize = tileSizeField.val() || 20
         displayGridOverCanvas(isOn,tileSize)
     }
     function initLiveStream(monitorId){
