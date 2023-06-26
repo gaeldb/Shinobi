@@ -38,7 +38,7 @@ module.exports = (s,config,lang) => {
     async function saveImageFromEvent(options,frameBuffer){
         const monitorId = options.mid || options.id
         const groupKey = options.ke
-        if(imageSaveEventLock[groupKey + monitorId])return;
+        if(!frameBuffer || imageSaveEventLock[groupKey + monitorId])return;
         const eventTime = options.time
         const objectsFound = options.matrices
         const monitorConfig = Object.assign({id: monitorId},s.group[groupKey].rawMonitorConfigurations[monitorId])
