@@ -143,13 +143,14 @@ $(document).ready(function(){
     var drawMonitor = function(preloadedData){
         var MonitorSettings = definitions['Monitor Settings']
         var html = ''
+        var monitorId = preloadedData ? preloadedData.mid : ''
         Object.keys(MonitorSettings.blocks).forEach(function(blockKey){
             var block = MonitorSettings.blocks[blockKey]
             html += drawBlock(block,preloadedData)
         })
         var monitorSelect = `<select class="form-select state-monitor-row-select mb-2">`
         $.each(loadedMonitors,function(n,monitor){
-            monitorSelect += `<option value="${monitor.mid}">${monitor.name} (${monitor.mid})</option>`
+            monitorSelect += `<option ${monitorId === monitor.mid ? 'selected' : ''} value="${monitor.mid}">${monitor.name} (${monitor.mid})</option>`
         })
         monitorSelect += `</select>`
         var fullHtml = `<div class="form-group state-monitor-row">
