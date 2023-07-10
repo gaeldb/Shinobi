@@ -1,0 +1,23 @@
+<main class="page-tab pt-3" id="tab-monitorMap">
+   <form class="dark row">
+       <%
+         var drawBlock
+         var buildOptions
+       %>
+       <%
+         include fieldBuilders.ejs
+       %>
+       <%
+           var pageName = 'Monitor Map';
+           Object.keys(define[pageName].blocks).forEach(function(blockKey){
+               var pageLayout = define[pageName].blocks[blockKey]
+               drawBlock(pageLayout)
+           })
+       %>
+
+   </form>
+   <link rel="stylesheet" href="<%-window.libURL%>assets/css/bs5.monitorMap.css" />
+   <script src="<%-window.libURL%>assets/js/bs5.monitorMap.utils.js"></script>
+   <script src="<%-window.libURL%>assets/js/bs5.monitorMap.js"></script>
+   <script src="<%-window.libURL%>assets/js/bs5.monitorSettings.monitorMap.js"></script>
+</main>

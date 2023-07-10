@@ -82,6 +82,7 @@ module.exports = function(s,config,lang,io){
             'home/fileBin',
             'home/videosTable',
             'home/studio',
+            'home/monitorMap',
             'confirm',
             'home/help',
         ]

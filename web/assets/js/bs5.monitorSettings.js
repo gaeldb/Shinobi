@@ -1,4 +1,8 @@
 var monitorEditorSelectedMonitor = null
+onMonitorSettingsLoadedExtensions = []
+function onMonitorSettingsLoaded(theAction){
+    onMonitorSettingsLoadedExtensions.push(theAction)
+}
 $(document).ready(function(e){
 
 //Monitor Editor
@@ -434,7 +438,8 @@ window.getMonitorEditFormFields = function(){
     }
     if(monitorConfig.name == ''){errorsFound.push('Monitor Name cannot be blank')}
     //edit details
-    monitorConfig.details = safeJsonParse(monitorConfig.details)
+    monitorConfig.details = getDetailValues(editorForm)
+    // monitorConfig.details = safeJsonParse(monitorConfig.details)
     monitorConfig.details.substream = getSubStreamChannelFields()
     monitorConfig.details.input_map_choices = monitorSectionInputMapsave()
     // TODO : Input Maps and Stream Channels (does old way at the moment)
@@ -463,12 +468,10 @@ function getAdditionalStreamChannelFields(tempID,channelId){
     var fieldInfo = monitorSettingsAdditionalStreamChannelFieldHtml.replaceAll('$[TEMP_ID]',tempID).replaceAll('$[NUMBER]',channelId)
     return fieldInfo
 }
-
 addOnTabOpen('monitorSettings', function () {
     setFieldVisibility()
     drawMonitorSettingsSubMenu()
 })
-
 addOnTabReopen('monitorSettings', function () {
     setFieldVisibility()
     drawMonitorSettingsSubMenu()
@@ -688,6 +691,9 @@ function importIntoMonitorEditor(options){
     monitorsForCopy.find('optgroup').html(tmp)
     setFieldVisibility()
     drawMonitorSettingsSubMenu()
+    onMonitorSettingsLoadedExtensions.forEach(function(theAction){
+        theAction(monitorConfig)
+    })
 }
 //parse "Automatic" field in "Input" Section
 monitorEditorWindow.on('change','.auto_host_fill input,.auto_host_fill select',function(e){
@@ -1014,9 +1020,9 @@ editorForm.find('[name="type"]').change(function(e){
     var el = $(this);
     if(el.val()==='h264')editorForm.find('[name="protocol"]').val('rtsp').change()
 })
-editorForm.find('[detail]').change(function(){
-    onDetailFieldChange(this)
-})
+// editorForm.find('[detail]').change(function(){
+//     onDetailFieldChange(this)
+// })
 editorForm.on('change','[selector]',function(){
     var el = $(this);
     onSelectorChange(el,editorForm)

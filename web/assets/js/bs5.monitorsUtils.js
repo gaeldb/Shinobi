@@ -289,6 +289,12 @@ function buildStreamUrl(monitorId){
     return streamURL
 }
 
+function buildEmbedUrl(monitor){
+    var monitorId = monitor.mid;
+    var streamURL = `${getApiPrefix(`embed`)}/${monitorId}/fullscreen|jquery|gui|relative?host=${location.pathname}`
+    return streamURL;
+}
+
 function getDbColumnsForMonitor(monitor){
     var acceptedFields = [
         'mid',
