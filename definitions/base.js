@@ -140,7 +140,34 @@ module.exports = function(s,config,lang){
                             "value": "1"
                          }
                      ]
-                  }
+                 },
+                 {
+                    "name": "detail=geolocation",
+                    "field": lang["Geolocation"],
+                    "example": "49.2578298,-123.2634732",
+                    "description": lang["fieldTextGeolocation"],
+                 },
+                 {
+                     "id": "monitor-settings-monitor-map-container",
+                     "style": "position: relative",
+                     "fieldType": "div",
+                     divContent: `
+                     <div id="monitor-settings-geolocation-options" class="p-2" style="background: rgba(0,0,0,0.4);position: absolute; top: 0; right: 0; border-radius: 0 0 0 15px; z-index: 405;">
+                         <label for="direction">${lang.Direction} <span class="badge" map-option-value="direction"></span></label>
+                         <div class="slider-container">
+                             <input type="range" map-option="direction" class="slider" min="0" max="360" value="90">
+                         </div>
+                         <label for="fov">${lang['Field of View']} <span class="badge"><span map-option-value="fov"></span>°</span></label>
+                         <div class="slider-container">
+                             <input type="range" map-option="fov" class="slider" min="0" max="180" value="60">
+                         </div>
+                         <label for="range">${lang.Range} <span class="badge"><span map-option-value="range"></span> km</span></label>
+                         <div class="slider-container">
+                             <input type="range" map-option="range" class="slider" min="0" max="10" value="1" step="0.1">
+                         </div>
+                     </div>
+                     <div id="monitor-settings-monitor-map" style="width: 100%;height: 300px;border-radius:15px;"></div>`,
+                 },
                 ]
              },
              "Connection": {
@@ -7718,7 +7745,7 @@ module.exports = function(s,config,lang){
                           ]
                       },
                       {
-                          icon: 'map-marker',
+                          icon: 'barcode',
                           label: `${lang['Power Viewer']}`,
                           pageOpen: 'powerVideo',
                       },
@@ -7740,6 +7767,11 @@ module.exports = function(s,config,lang){
                                   color: 'grey',
                               },
                           ]
+                      },
+                      {
+                          icon: 'map-marker',
+                          label: `${lang['Monitor Map']}`,
+                          pageOpen: 'monitorMap',
                       },
                       {
                           icon: 'file-o',
@@ -8877,146 +8909,130 @@ module.exports = function(s,config,lang){
                 "box-wrapper-class": "row",
                 "info": [
                     {
-                        title: "New to Shinobi?",
+                        title: lang["New to Shinobi?"],
                         info: `Try reading over some of these links to get yourself started.`,
                         buttons: [
                             {
                                 icon: 'newspaper-o',
                                 color: 'default',
-                                text: 'After Installation Guides',
-                                href: 'https://shinobi.video/docs/configure',
-                                class: ''
+                                text: lang.afterInstallationGuides,
+                                href: 'https://shinobi.video/docs/configure'
                             },
                             {
                                 icon: 'plus',
                                 color: 'default',
-                                text: 'Adding an H.264 Camera',
-                                href: 'https://shinobi.video/docs/configure#content-adding-an-h264h265-camera',
-                                class: ''
+                                text: lang.addingAnH264Camera,
+                                href: 'https://shinobi.video/docs/configure#content-adding-an-h264h265-camera'
                             },
                             {
                                 icon: 'plus',
                                 color: 'default',
-                                text: 'Adding an MJPEG Camera',
-                                href: 'https://shinobi.video/articles/2018-09-19-how-to-add-an-mjpeg-camera',
-                                class: ''
+                                text: lang.addingAnMJPEGCamera,
+                                href: 'https://shinobi.video/articles/2018-09-19-how-to-add-an-mjpeg-camera'
                             },
                             {
                                 icon: 'gears',
                                 color: 'default',
-                                text: 'RTSP Camera Optimization',
-                                href: 'https://shinobi.video/articles/2017-07-29-how-i-optimized-my-rtsp-camera',
-                                class: ''
+                                text: lang.rtspCameraOptimization,
+                                href: 'https://shinobi.video/articles/2017-07-29-how-i-optimized-my-rtsp-camera'
                             },
                             {
                                 icon: 'comments-o',
                                 color: 'info',
-                                text: 'Community Chat',
-                                href: 'https://discord.gg/ehRd8Zz',
-                                class: ''
+                                text: lang.communityChat,
+                                href: 'https://discord.gg/ehRd8Zz'
                             },
                             {
                                 icon: 'reddit',
                                 color: 'info',
-                                text: 'Forum on Reddit',
-                                href: 'https://www.reddit.com/r/ShinobiCCTV',
-                                class: ''
+                                text: lang.forumOnReddit,
+                                href: 'https://www.reddit.com/r/ShinobiCCTV'
                             },
                             {
                                 icon: 'file-o',
                                 color: 'primary',
-                                text: 'Documentation',
-                                href: 'http://shinobi.video/docs',
-                                class: ''
+                                text: lang.Documentation,
+                                href: 'http://shinobi.video/docs'
                             }
                         ]
                     },
                     {
                         bigIcon: "smile-o",
-                        title: "It's a proven fact",
-                        info: `Generosity makes you a happier person, please consider supporting the development.`,
+                        title: lang.itsAProvenFact,
+                        info: lang.generosityHappierPerson,
                         buttons: [
                             {
                                 icon: 'share-square-o',
                                 color: 'default',
-                                text: 'ShinobiShop Subscriptions',
-                                href: 'https://licenses.shinobi.video/subscribe',
-                                class: ''
+                                text: lang['ShinobiShop Subscriptions'],
+                                href: 'https://licenses.shinobi.video/subscribe'
                             },
                             {
                                 icon: 'paypal',
                                 color: 'default',
-                                text: 'Donate by PayPal',
-                                href: 'https://www.paypal.me/ShinobiCCTV',
-                                class: ''
+                                text: lang['Donate by PayPal'],
+                                href: 'https://www.paypal.me/ShinobiCCTV'
                             },
                             {
                                 icon: 'bank',
                                 color: 'default',
                                 text: 'University of Zurich (UZH)',
-                                href: 'https://www.zora.uzh.ch/id/eprint/139275/',
-                                class: ''
+                                href: 'https://www.zora.uzh.ch/id/eprint/139275/'
                             },
                         ]
                     },
                     {
-                        title: "Shinobi Mobile",
-                        info: `Your subscription key can unlock features for <a href="https://cdn.shinobi.video/installers/ShinobiMobile/" target="_blank"><b>Shinobi Mobile</b></a> running on iOS and Android today!`,
+                        title: lang["Shinobi Mobile"],
+                        info: lang.yourSubscriptionText,
                         buttons: [
                             {
                                 icon: 'star',
                                 color: 'success',
-                                text: 'Join Public Beta',
-                                href: 'https://shinobi.video/mobile',
-                                class: ''
+                                text: lang['Get the Mobile App'],
+                                href: 'https://shinobi.video/mobile'
                             },
                             {
                                 icon: 'comments-o',
                                 color: 'primary',
-                                text: '<b>#mobile-client</b> Chat',
-                                href: 'https://discord.gg/ehRd8Zz',
-                                class: ''
+                                text: lang['#mobile-client Chat'],
+                                href: 'https://discord.gg/ehRd8Zz'
                             },
                         ]
                     },
                     {
-                        title: "Support the Development",
-                        info: `Subscribe to any of the following to boost development! Once subscribed put your Subscription ID in at the Super user panel, then restart Shinobi to Activate your installation, thanks! <i class="fa fa-smile-o"></i>`,
+                        title: lang.activateShinobi,
+                        info: lang.howToActivate,
                         buttons: [
                             {
                                 icon: 'share-square-o',
                                 color: 'default',
                                 text: 'Shinobi Mobile License ($5/m)',
                                 href: 'https://licenses.shinobi.video/subscribe?planSubscribe=plan_G31AZ9mknNCa6z',
-                                class: ''
                             },
                             {
                                 icon: 'share-square-o',
                                 color: 'default',
                                 text: 'Tiny Support Subscription ($10/m)',
                                 href: 'https://licenses.shinobi.video/subscribe?planSubscribe=plan_G42jNgIqXaWmIC',
-                                class: ''
                             },
                             {
                                 icon: 'share-square-o',
                                 color: 'default',
-                                text: 'Shinobi Pro License ($75/m)',
+                                text: '100 Camera License ($75/m)',
                                 href: 'https://licenses.shinobi.video/subscribe?planSubscribe=plan_G3LGdNwA8lSmQy',
-                                class: ''
                             },
                         ]
                     },
                     {
-                        title: "Donations, One-Time Boost",
-                        info: `Sometimes a subscription isn't practical for people. In which case you may show support through a PayPal donation. And as a thank you for doing so your <b>PayPal Transaction ID</b> can be used as a <code>subscriptionId</code> in your Shinobi configuration file. <br><br>Each 5 USD/EUR or 7 CAD will provide one month of activated usage. <i>Meaning, a $20 USD donation today makes this popup go away (or activates the mobile app) for 4 months.</i>`,
+                        title: lang['Donations, One-Time Boost'],
+                        info: lang.donationOneTimeText,
                         width: 12,
                         buttons: [
                             {
                                 icon: 'paypal',
                                 color: 'default',
-                                text: 'Donate by PayPal',
-                                href: 'https://www.paypal.me/ShinobiCCTV',
-                                class: ''
+                                text: lang['Donate by PayPal'],
+                                href: 'https://www.paypal.me/ShinobiCCTV'
                             },
                         ]
                     },
@@ -9051,5 +9067,22 @@ module.exports = function(s,config,lang){
             },
         }
     },
+    "Monitor Map": {
+         "section": "Monitor Map",
+         "blocks": {
+             "Search Settings": {
+                "name": lang["Monitor Map"],
+                "color": "blue",
+                "noHeader": true,
+                "noDefaultSectionClasses": true,
+                "info": [
+                    {
+                        "fieldType": "div",
+                        "id": "monitor-map-canvas",
+                    }
+               ]
+           },
+        }
+      },
   })
 }
