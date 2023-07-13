@@ -68,7 +68,6 @@ $(document).ready(function(){
                 point.fov = fov
                 point.range = range
                 point.coords = [lat, lng]
-                console.log(point)
                 points.push(point)
             }else{
                 n += 0.0001105;
