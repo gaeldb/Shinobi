@@ -64,7 +64,7 @@ fi
 
 echo "========================================================="
 
-if ! [ -x "$(command -v mariadb)" ]; then
+if ! [ -x "$(command -v mysql)" ]; then
     echo "Installing MariaDB repository..."
 	#Add the MariaDB repository to yum
 	sudo curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | sudo bash -s -- --skip-maxscale
