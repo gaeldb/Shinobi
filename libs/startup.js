@@ -48,10 +48,10 @@ module.exports = function(s,config,lang,io){
         }
         var loadedAccounts = []
         var foundMonitors = []
-        var loadMonitors = function(callback){
-            s.beforeMonitorsLoadedOnStartupExtensions.forEach(function(extender){
-                extender()
-            })
+        var loadMonitors = async function(callback){
+            for (let i = 0; i < s.beforeMonitorsLoadedOnStartupExtensions.length; i++) {
+                await s.beforeMonitorsLoadedOnStartupExtensions[i]()
+            }
             s.systemLog(lang.startUpText4)
             //preliminary monitor start
             s.knexQuery({

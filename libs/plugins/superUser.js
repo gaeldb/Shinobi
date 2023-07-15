@@ -574,7 +574,7 @@ module.exports = async (s,config,lang,app,io,currentUse) => {
             s.closeJsonResponse(res,{ok: true, readme: readme})
         },res,req)
     })
-    s.onProcessReady(async () => {
+    s.beforeMonitorsLoadedOnStartup(async () => {
         // Initialize Modules on Start
         await initializeAllModules();
     })
