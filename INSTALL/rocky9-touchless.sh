@@ -64,7 +64,7 @@ fi
 
 echo "========================================================="
 
-if ! [ -x "$(command -v mysql)" ]; then
+if ! [ -x "$(command -v mariadb)" ]; then
     echo "Installing MariaDB repository..."
 	#Add the MariaDB repository to yum
 	sudo curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | sudo bash -s -- --skip-maxscale
@@ -73,6 +73,7 @@ if ! [ -x "$(command -v mysql)" ]; then
     #Start mysql and enable on boot
     sudo systemctl start mariadb
     sudo systemctl enable mariadb
+	ln -s /usr/bin/mariadb /usr/bin/mysql
 fi
 
 echo "========================================================="
