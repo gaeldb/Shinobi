@@ -476,25 +476,6 @@ module.exports = function(s,config,lang){
                        ]
                     },
                     {
-                       "name": "detail=onvif_non_standard",
-                       "field": lang['Non-Standard ONVIF'],
-                       "description": lang["fieldTextOnvifNonStandard"],
-                       "default": "0",
-                       "example": "",
-                       "form-group-class": "h_onvif_input h_onvif_1",
-                       "fieldType": "select",
-                       "possible": [
-                           {
-                              "name": lang.No,
-                              "value": "0"
-                           },
-                           {
-                              "name": lang.Yes,
-                              "value": "1"
-                           }
-                       ]
-                    },
-                    {
                         hidden: true,
                        "name": "detail=onvif_port",
                        "field": lang['ONVIF Port'],
@@ -3795,12 +3776,32 @@ module.exports = function(s,config,lang){
                         ]
                     },
                     {
+                       "name": "detail=onvif_non_standard",
+                       "field": lang['ONVIF Home Control'],
+                       "description": lang.fieldTextOnvifHomeControl,
+                       "default": "0",
+                       "form-group-class": "h_control_call_input h_control_call_ONVIF",
+                       "fieldType": "select",
+                       "possible": [
+                           {
+                              "name": lang.usingPreset1,
+                              "value": "0"
+                           },
+                           {
+                              "name": lang.usingPreset1HikvisionClone,
+                              "value": "1"
+                           },
+                           {
+                              "name": lang.usingHomePreset,
+                              "value": "2"
+                           }
+                       ]
+                    },
+                    {
                         isAdvanced: true,
                        "name": "detail=control_digest_auth",
                        "field": lang['Digest Authentication'],
-                       "description": "",
                        "default": "0",
-                       "example": "",
                        "fieldType": "select",
                        "form-group-class": "h_control_call_input h_control_call_GET h_control_call_PUT h_control_call_POST",
                        "possible": [
@@ -3811,6 +3812,27 @@ module.exports = function(s,config,lang){
                           {
                              "name": lang.Yes,
                              "value": "1"
+                          }
+                       ]
+                    },
+                    {
+                        isAdvanced: true,
+                       "name": "detail=control_axis_lock",
+                       "field": lang['Pan/Tilt Only'],
+                       "default": "",
+                       "fieldType": "select",
+                       "possible": [
+                          {
+                             "name": lang['Pan and Tilt'],
+                             "value": ""
+                          },
+                          {
+                             "name": lang['Pan Only'],
+                             "value": "1"
+                          },
+                          {
+                             "name": lang['Tilt Only'],
+                             "value": "2"
                           }
                        ]
                     },
