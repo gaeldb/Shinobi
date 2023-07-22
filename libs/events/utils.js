@@ -546,8 +546,12 @@ module.exports = (s,config,lang) => {
             clearTimeout(activeMonitor.eventBasedRecording.timeout)
             activeMonitor.eventBasedRecording.timeout = setTimeout(function(){
                 activeMonitor.eventBasedRecording.allowEnd = true
-                activeMonitor.eventBasedRecording.process.stdin.setEncoding('utf8')
-                activeMonitor.eventBasedRecording.process.stdin.write('q')
+                try{
+                    activeMonitor.eventBasedRecording.process.stdin.setEncoding('utf8')
+                    activeMonitor.eventBasedRecording.process.stdin.write('q')
+                }catch(err){
+                    s.debugLog(err)
+                }
                 activeMonitor.eventBasedRecording.process.kill('SIGINT')
                 delete(activeMonitor.eventBasedRecording.timeout)
             },detector_timeout * 1000 * 60)
