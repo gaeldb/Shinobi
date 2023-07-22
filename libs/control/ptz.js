@@ -130,21 +130,17 @@ module.exports = function(s,config,lang){
             })
             device = activeMonitor.onvifConnection
         }
-        function returnResponse(){
-            return new Promise((resolve,reject) => {
-                controlOptions.ProfileToken = device.current_profile.token
-                s.runOnvifMethod({
-                    auth: {
-                        ke: options.ke,
-                        id: options.id,
-                        action: 'continuousMove',
-                        service: 'ptz',
-                    },
-                    options: controlOptions,
-                },resolve)
-            })
-        }
-        return await returnResponse();
+        controlOptions.ProfileToken = device.current_profile.token
+        const actionResponse = await s.runOnvifMethod({
+            auth: {
+                ke: options.ke,
+                id: options.id,
+                action: 'continuousMove',
+                service: 'ptz',
+            },
+            options: controlOptions,
+        });
+        return actionResponse;
     }
     function stopMoveOnvif(options){
         return new Promise((resolve,reject) => {
@@ -208,16 +204,16 @@ module.exports = function(s,config,lang){
                         id: options.id,
                     },(endData) => {
                         moveLock[options.ke + options.id] = false
-                        resolve({ type: lang['Moving to Home Preset'], response: endData })
+                        resolve({ type: lang['Moving to Home Preset'], msg: endData })
                     })
                 break;
                 case'stopMove':
-                    resolve({ type: lang['Control Trigger Ended'] })
                     stopMoveOnvif({
                         ke: options.ke,
                         id: options.id,
                     }).then((response) => {
                         moveLock[options.ke + options.id] = false
+                        resolve({ type: lang['Control Trigger Ended'], msg: response })
                     })
                 break;
                 default:
@@ -227,7 +223,7 @@ module.exports = function(s,config,lang){
                             if(!moveResponse.ok){
                                 s.debugLog('ONVIF Move Error',moveResponse)
                             }
-                            resolve(moveResponse)
+                            resolve({ type: lang['Control Triggered'], msg: moveResponse })
                         })
                     }catch(err){
                         console.log(err)
@@ -485,7 +481,10 @@ module.exports = function(s,config,lang){
                 id: event.id,
                 ke: event.ke
             },(msg) => {
-                s.userLog(event,msg)
+                s.userLog(event,{
+                    type: lang['Control'],
+                    msg: msg
+                });
                 // console.log(msg)
                 moveToHomePositionTimeout(event)
             })

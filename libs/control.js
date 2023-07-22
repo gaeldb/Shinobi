@@ -23,7 +23,10 @@ module.exports = function(s,config,lang,app,io){
             break;
             case'control':
                 ptzControl(data,function(msg){
-                    s.userLog(data,msg);
+                    s.userLog(data,{
+                        type: lang['Control'],
+                        msg: msg
+                    });
                     connection.emit('f',{
                         f: 'control',
                         response: msg
