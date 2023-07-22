@@ -1,7 +1,4 @@
 const async = require("async");
-const {
-    stringToSqlTime,
-} = require('../common.js')
 module.exports = function(s,config){
     const isMySQL = config.databaseType === 'mysql';
     const runQuery = async.queue(function(data, callback) {
@@ -9,6 +6,10 @@ module.exports = function(s,config){
         .raw(data.query,data.values)
         .asCallback(callback)
     }, 4);
+    function stringToSqlTime(value){
+        newValue = new Date(value.replace('T',' '))
+        return newValue
+    }
     const mergeQueryValues = function(query,values){
         if(!values){values=[]}
         var valuesNotFunction = true;
