@@ -130,17 +130,29 @@ module.exports = function(s,config,lang){
             })
             device = activeMonitor.onvifConnection
         }
-        controlOptions.ProfileToken = device.current_profile.token
-        const actionResponse = await s.runOnvifMethod({
-            auth: {
-                ke: options.ke,
-                id: options.id,
-                action: 'continuousMove',
-                service: 'ptz',
-            },
-            options: controlOptions,
-        });
-        return actionResponse;
+        function returnResponse(){
+            return new Promise((resolve,reject) => {
+                if(
+                    !device ||
+                    !device.current_profile ||
+                    !device.current_profile.token
+                ){
+                    resolve({ok: false, msg: lang.ONVIFEventsNotAvailableText1})
+                    return
+                }
+                controlOptions.ProfileToken = device.current_profile.token
+                s.runOnvifMethod({
+                    auth: {
+                        ke: options.ke,
+                        id: options.id,
+                        action: 'continuousMove',
+                        service: 'ptz',
+                    },
+                    options: controlOptions,
+                },resolve)
+            })
+        }
+        return await returnResponse();
     }
     function stopMoveOnvif(options){
         return new Promise((resolve,reject) => {
