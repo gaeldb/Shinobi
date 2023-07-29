@@ -10,6 +10,13 @@ module.exports = function(s,config,lang,getSnapshot){
     const {
         getEventBasedRecordingUponCompletion,
     } = require('../events/utils.js')(s,config,lang)
+    const {
+        getStreamDirectory
+    } = require('../monitor/utils.js')(s,config,lang)
+    const {
+        ffprobe
+    } = require('../ffmpeg/utils.js')(s,config,lang)
+
     //telegram bot
     if(config.telegramBot === true){
         const TelegramBot = require('node-telegram-bot-api');
@@ -28,7 +35,19 @@ module.exports = function(s,config,lang,getSnapshot){
                             files.forEach(async (file) => {
                                 switch(file.type){
                                     case'video':
-                                        await bot.sendVideo(chatId, file.attachment)
+                                        const videoFileInfo = (await ffprobe(file.attachment,file.attachment)).result
+                                        const duration = Math.floor(videoFileInfo.streams[0].duration)
+                                        const width = videoFileInfo.streams[0].width
+                                        const height = videoFileInfo.streams[0].height
+
+                                        const options = {
+                                            thumb: file.thumb,
+                                            width: width,
+                                            height: height,
+                                            duration: duration,
+                                            supports_streaming: true
+                                        }
+                                        await bot.sendVideo(chatId, file.attachment, options)
                                     break;
                                     case'photo':
                                         await bot.sendPhoto(chatId, file.attachment)
@@ -98,13 +117,16 @@ module.exports = function(s,config,lang,getSnapshot){
                             videoName = siftedVideoFileFromRam.filename
                         }
                         if(videoPath){
+                            const thumbFile = getStreamDirectory(d) + 'thumb.jpg';
+                            fs.writeFileSync(thumbFile, d.screenshotBuffer)
                             sendMessage({
                                 title: videoName,
                             },[
                                 {
                                     type: 'video',
                                     attachment: videoPath,
-                                    name: videoName
+                                    name: videoName,
+                                    thumb: thumbFile
                                 }
                             ],d.ke)
                         }
