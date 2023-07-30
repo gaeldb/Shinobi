@@ -21,53 +21,75 @@ module.exports = function(s,config,lang,getSnapshot){
     if(config.telegramBot === true){
         const TelegramBot = require('node-telegram-bot-api');
         try{
-            const sendMessage = async function(sendBody,files,groupKey){
+            const sendMessage = async function(sendBody,attachments,groupKey){
                 var bot = s.group[groupKey].telegramBot
                 if(!bot){
                     s.userLog({ke:groupKey,mid:'$USER'},{type:lang.NotifyErrorText,msg:lang.DiscordNotEnabledText})
                     return
                 }
-                const chatId = s.group[groupKey].init.telegrambot_channel
-                if(bot && bot.sendMessage){
-                    try{
-                        await bot.sendMessage(chatId, `${sendBody.title}${sendBody.description ? '\n' + sendBody.description : ''}`)
-                        if(files){
-                            files.forEach(async (file) => {
-                                switch(file.type){
-                                    case'video':
-                                        const videoFileInfo = (await ffprobe(file.attachment,file.attachment)).result
-                                        const duration = Math.floor(videoFileInfo.streams[0].duration)
-                                        const width = videoFileInfo.streams[0].width
-                                        const height = videoFileInfo.streams[0].height
 
-                                        const options = {
-                                            thumb: file.thumb,
-                                            width: width,
-                                            height: height,
-                                            duration: duration,
-                                            supports_streaming: true
-                                        }
-                                        await bot.sendVideo(chatId, file.attachment, options)
-                                    break;
-                                    case'photo':
-                                        await bot.sendPhoto(chatId, file.attachment)
-                                    break;
-                                }
-                            })
+                const sendMessageToChat = async function(chatId, files) {
+                    if(bot && bot.sendMessage){
+                        try{
+                            await bot.sendMessage(chatId, `${sendBody.title}${sendBody.description ? '\n' + sendBody.description : ''}`)
+                            if(files){
+                                await Promise.all(files.map(async (file) => {
+                                    switch(file.type){
+                                        case'video':
+                                            if(file.hasOwnProperty("file_id") === false) {
+                                                const videoFileInfo = (await ffprobe(file.attachment,file.attachment)).result
+                                                const duration = Math.floor(videoFileInfo.streams[0].duration)
+                                                const width = videoFileInfo.streams[0].width
+                                                const height = videoFileInfo.streams[0].height
+
+                                                const options = {
+                                                    thumb: file.thumb,
+                                                    width: width,
+                                                    height: height,
+                                                    duration: duration,
+                                                    supports_streaming: true
+                                                }
+                                                file.file_id = (await bot.sendVideo(chatId, file.attachment, options)).video.file_id
+                                                delete file.attachment
+                                            } else {
+                                                await bot.sendVideo(chatId, file.file_id)
+                                            }
+                                            break;
+                                        case'photo':
+                                            if(file.hasOwnProperty("file_id") === false) {
+                                                file.file_id = (await bot.sendPhoto(chatId, file.attachment)).photo[0].file_id
+                                                delete file.attachment
+                                            } else {
+                                                await bot.sendPhoto(chatId, file.file_id)
+                                            }
+                                            break;
+                                    }
+                                    return file
+                                }))
+                            }
+                            return files
+                        }catch(err){
+                            s.debugLog('Telegram Error',err)
+                            s.userLog({ke:groupKey,mid:'$USER'},{type:lang.NotifyErrorText,msg:err})
                         }
-                    }catch(err){
-                        s.debugLog('Telegram Error',err)
-                        s.userLog({ke:groupKey,mid:'$USER'},{type:lang.NotifyErrorText,msg:err})
+                    }else{
+                        s.userLog({
+                            ke: groupKey,
+                            mid: '$USER'
+                        },{
+                            type: lang.NotifyErrorText,
+                            msg: lang["Check the Recipient ID"]
+                        })
                     }
-                }else{
-                    s.userLog({
-                        ke: groupKey,
-                        mid: '$USER'
-                    },{
-                        type: lang.NotifyErrorText,
-                        msg: lang["Check the Recipient ID"]
-                    })
                 }
+
+                const chatIds = s.group[groupKey].init.telegrambot_channel.split(",")
+                const resolvedFiles = await sendMessageToChat(chatIds[0], attachments)
+
+                chatIds.forEach((chatId, index) => {
+                    if(index < 1) return
+                    sendMessageToChat(chatId, resolvedFiles)
+                });
             }
             const onEventTriggerBeforeFilterForTelegram = function(d,filter){
                 filter.telegram = false
