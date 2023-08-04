@@ -627,6 +627,15 @@ function setVideoStatus(video,toStatus){
         }
     })
 }
+function getVideoInfoFromEl(_this){
+    var el = $(_this).parents('[data-mid]')
+    var monitorId = el.attr('data-mid')
+    var videoTime = el.attr('data-time')
+    return {
+        monitorId,
+        videoTime,
+    }
+}
 onWebSocketEvent(function(d){
     switch(d.f){
         case'video_edit':case'video_archive':
@@ -653,10 +662,11 @@ $(document).ready(function(){
     $('body')
     .on('click','.open-video',function(e){
         e.preventDefault()
-        var el = $(this).parents('[data-mid]')
-        var monitorId = el.attr('data-mid')
-        var videoTime = el.attr('data-time')
-        var video = loadedVideosInMemory[`${monitorId}${videoTime}${undefined}`]
+        var {
+            monitorId,
+            videoTime,
+            video,
+        } = getVideoInfoFromEl(this)
         createVideoPlayerTab(video)
         setVideoStatus(video)
         return false;

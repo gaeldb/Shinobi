@@ -34,6 +34,7 @@ $(document).ready(function(){
     var timeStripAutoScrollPositionStart = null;
     var timeStripAutoScrollPositionEnd = null;
     var timeStripAutoScrollAmount = null;
+    var timeStripItemIncrement = 0;
     var loadedVideosOnTimeStrip = []
     var loadedVideosOnCanvas = {}
     var loadedVideoElsOnCanvas = {}
@@ -137,7 +138,7 @@ $(document).ready(function(){
             var videos = await getVideosInGaps(gaps,timeStripSelectedMonitors)
             videos = addVideoBeforeAndAfter(videos)
             loadedVideosOnTimeStrip.push(...videos)
-            if(currentVideosLength !== loadedVideosOnTimeStrip.length)resetTimelineItems(loadedVideosOnTimeStrip);
+            if(currentVideosLength !== loadedVideosOnTimeStrip.length)addTimelineItems(loadedVideosOnTimeStrip);
             setLoadingMask(false)
         }
         return loadedVideosOnTimeStrip
@@ -162,7 +163,7 @@ $(document).ready(function(){
         var preBufferHtml = ''
         $.each(loadedMonitors,function(monitorId,monitor){
             var itemColor = timeStripItemColors[monitorId];
-            html += `<div class="timeline-video col-${timelineGridSizing} p-0 m-0 no-video" data-mid="${monitorId}" data-ke="${monitor.ke}" style="background-color:${itemColor}"></div>`
+            html += `<div class="timeline-video open-video col-${timelineGridSizing} p-0 m-0 no-video" data-mid="${monitorId}" data-ke="${monitor.ke}" style="background-color:${itemColor}"></div>`
             preBufferHtml += `<div class="timeline-video-buffer" data-mid="${monitorId}" data-ke="${monitor.ke}"></div>`
         })
         timeStripVideoCanvas.html(html)
@@ -180,12 +181,11 @@ $(document).ready(function(){
         }
     }
     function formatVideosForTimeline(videos){
-        var i = 0;
         var formattedVideos = (videos || []).map((item) => {
             var blockColor = timeStripItemColors[item.mid];
-            ++i;
+            ++timeStripItemIncrement;
             return {
-                id: i,
+                id: timeStripItemIncrement,
                 content: ``,
                 style: `background-color: ${blockColor};border-color: ${blockColor}`,
                 start: item.time,
@@ -211,6 +211,10 @@ $(document).ready(function(){
         timeStripVisItems.clear();
         timeStripVisItems.add(newVideos);
     }
+    function addTimelineItems(videos){
+        var newVideos = formatVideosForTimeline(videos)
+        timeStripVisItems.add(newVideos);
+    }
     async function resetTimeline(clickTime){
         await getAndDrawVideosToTimeline(clickTime,true)
         setTickDate(clickTime)
@@ -219,6 +223,7 @@ $(document).ready(function(){
         setHollowClickQueue()
     }
     function createTimeline(){
+        timeStripItemIncrement = 0;
         var timeChangingTimeout = null
         var dateNow = new Date()
         var hour = 1000 * 60 * 60
@@ -725,7 +730,9 @@ $(document).ready(function(){
     })
     timeStripVideoCanvas.on('dblclick','.timeline-video',function(){
         var monitorId = $(this).attr('data-mid')
-        openVideosTableView(monitorId)
+        var video = loadedVideosOnCanvas[monitorId];
+        createVideoPlayerTab(video)
+        setVideoStatus(video)
     })
     addOnTabOpen('timeline', async function () {
         setColorReferences()
