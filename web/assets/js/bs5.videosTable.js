@@ -38,10 +38,10 @@ $(document).ready(function(e){
         })
     }
     window.openVideosTableView = function(monitorId){
-        openTab(`videosTableView`,{})
         drawMonitorListToSelector(monitorsList,null,null,true)
         monitorsList.val(monitorId)
         drawVideosTableViewElements()
+        openTab(`videosTableView`,{})
     }
     loadDateRangePicker(dateSelector,{
         onChange: function(start, end, label) {
@@ -245,7 +245,7 @@ $(document).ready(function(e){
     .on('click','.open-videosTable',function(e){
         e.preventDefault()
         var monitorId = getRowsMonitorId(this)
-        openVideosTableView()
+        openVideosTableView(monitorId)
         return false;
     });
     sideLinkListBox

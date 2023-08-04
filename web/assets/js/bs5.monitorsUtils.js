@@ -1004,7 +1004,7 @@ function buildMiniMonitorCardBody(monitorAlreadyAdded,monitorConfigPartial,addit
             <div class="card-body p-2">
                 <div>${infoHtml}</div>
             </div>
-            <div class="card-footer text-center">
+            <div class="card-footer text-center" data-mid="${monitorId}">
                 <a class="btn btn-sm btn-block btn-${monitorAlreadyAdded ? doOpenVideosInsteadOfDelete ? 'primary open-videosTable' : 'danger delete-monitor' : 'success add-monitor'}">${monitorAlreadyAdded ? doOpenVideosInsteadOfDelete ? lang['Videos'] : lang['Delete Camera'] : lang['Add Camera']}</a>
             </div>
         </div>
