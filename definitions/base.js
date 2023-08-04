@@ -7760,6 +7760,11 @@ module.exports = function(s,config,lang){
                           addUl: true,
                       },
                       {
+                          icon: 'map-marker',
+                          label: `${lang['Monitor Map']}`,
+                          pageOpen: 'monitorMap',
+                      },
+                      {
                           icon: 'film',
                           label: `${lang['Videos']}`,
                           pageOpen: 'videosTableView',
@@ -7796,11 +7801,6 @@ module.exports = function(s,config,lang){
                                   color: 'grey',
                               },
                           ]
-                      },
-                      {
-                          icon: 'map-marker',
-                          label: `${lang['Monitor Map']}`,
-                          pageOpen: 'monitorMap',
                       },
                       {
                           icon: 'file-o',
