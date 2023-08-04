@@ -158,13 +158,11 @@ module.exports = (s, shinobiConfig, lang, app, io) => {
         videoItems.forEach(v => {
             const imagesOfVideo = imageItems.filter(i => i.time >= v.time && i.time <= v.end);
 
-            if (imagesOfVideo.length > 0) {
-                const chosenImage = imagesOfVideo[0];
-                
-                v.time = getISODateTime(v.time);
-                v.filename = chosenImage.filename;
+            v.time = getISODateTime(v.time);
+            v.end = getISODateTime(v.end);
 
-                delete v.end;
+            if (imagesOfVideo.length > 0) {
+                v.filename = imagesOfVideo[0].filename;
             }
         }); 
 

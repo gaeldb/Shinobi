@@ -408,7 +408,7 @@ function loadEventsData(videoEvents){
         loadedEventsInMemory[`${anEvent.mid}${anEvent.time}`] = anEvent
     })
 }
-function getVideos(options,callback){
+function getVideos(options,callback,noEvents){
     return new Promise((resolve,reject) => {
         options = options ? options : {}
         var searchQuery = options.searchQuery
@@ -444,7 +444,7 @@ function getVideos(options,callback){
                 })
             })
             $.getJSON(`${getApiPrefix(`timelapse`)}${monitorId ? `/${monitorId}` : ''}?${requestQueries.concat([`noLimit=1`]).join('&')}`,function(timelapseFrames){
-                $.getJSON(`${getApiPrefix(`events`)}${monitorId ? `/${monitorId}` : ''}?${requestQueries.concat([`limit=${eventLimit}`]).join('&')}`,function(eventData){
+                function completeRequest(eventData){
                     var theEvents = eventData.events || eventData;
                     var newVideos = applyDataListToVideos(videos,theEvents)
                     newVideos = applyTimelapseFramesListToVideos(newVideos,timelapseFrames.frames || timelapseFrames,'timelapseFrames',true).map((video) => {
@@ -455,7 +455,14 @@ function getVideos(options,callback){
                     loadVideosData(newVideos)
                     if(callback)callback({videos: newVideos, frames: timelapseFrames});
                     resolve({videos: newVideos, frames: timelapseFrames})
-                })
+                }
+                if(noEvents){
+                    completeRequest([])
+                }else{
+                    $.getJSON(`${getApiPrefix(`events`)}${monitorId ? `/${monitorId}` : ''}?${requestQueries.concat([`limit=${eventLimit}`]).join('&')}`,function(eventData){
+                        completeRequest(eventData)
+                    })
+                }
             })
         })
     })
