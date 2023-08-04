@@ -161,8 +161,7 @@ $(document).ready(function(){
         var html = ''
         var preBufferHtml = ''
         $.each(loadedMonitors,function(monitorId,monitor){
-            var itemColor = stringToColor(monitorId)
-            timeStripItemColors[monitorId] = itemColor
+            var itemColor = timeStripItemColors[monitorId];
             html += `<div class="timeline-video col-${timelineGridSizing} p-0 m-0 no-video" data-mid="${monitorId}" data-ke="${monitor.ke}" style="background-color:${itemColor}"></div>`
             preBufferHtml += `<div class="timeline-video-buffer" data-mid="${monitorId}" data-ke="${monitor.ke}"></div>`
         })
@@ -660,6 +659,12 @@ $(document).ready(function(){
         var html = buildSubMenuItems(allFound)
         sideMenuList.html(html)
     }
+    function setColorReferences(){
+        $.each(loadedMonitors,function(monitorId,monitor){
+            var itemColor = stringToColor(monitorId)
+            timeStripItemColors[monitorId] = itemColor
+        })
+    }
     sideMenuList.on('click','[timeline-menu-action]',function(){
         var el = $(this)
         var type = el.attr('timeline-menu-action')
@@ -723,8 +728,8 @@ $(document).ready(function(){
         openVideosTableView(monitorId)
     })
     addOnTabOpen('timeline', async function () {
-        createTimeline()
-        await resetTimeline(getTickDate())
+        setColorReferences()
+        refreshTimeline()
         drawFoundCamerasSubMenu()
     })
     addOnTabReopen('timeline', function () {
