@@ -987,6 +987,14 @@ function addMarkAsEventToAllOpenMonitors(){
         }
     })
 }
+function showHideSubstreamActiveIcon(monitorId, show){
+    try{
+        var liveBlock = liveGridElements[monitorId].monitorItem
+        liveBlock.find('.substream-is-on')[show ? 'show' : 'hide']()
+    }catch(err){
+
+    }
+}
 $(document).ready(function(e){
     liveGrid
     .on('dblclick','.stream-block',function(){
@@ -1193,6 +1201,7 @@ $(document).ready(function(e){
             break;
             case'substream_start':
                 loadedMonitors[d.mid].subStreamChannel = d.channel
+                showHideSubstreamActiveIcon(d.mid,true)
                 setTimeout(() => {
                     resetMonitorCanvas(d.mid,true,d.channel)
                 },3000)
@@ -1200,6 +1209,7 @@ $(document).ready(function(e){
             case'substream_end':
                 loadedMonitors[d.mid].subStreamChannel = null
                 resetMonitorCanvas(d.mid,true,null)
+                showHideSubstreamActiveIcon(d.mid,false)
             break;
             case'monitor_watch_on':
                 var monitorId = d.mid || d.id
@@ -1216,6 +1226,7 @@ $(document).ready(function(e){
                     drawLiveGridBlock(loadedMonitors[monitorId],subStreamChannel,monitorsPerRow,monitorHeight)
                     saveLiveGridBlockOpenState(monitorId,$user.ke,1)
                 }
+                showHideSubstreamActiveIcon(monitorId,!!subStreamChannel)
             break;
             case'mode_jpeg_off':
                 window.jpegModeOn = false
