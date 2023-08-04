@@ -440,3 +440,10 @@ ul.squeeze {
 .fixed-table-body {
     min-height: 400px;
 }
+
+
+.flex-direction-column {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}

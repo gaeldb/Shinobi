@@ -124,7 +124,7 @@ module.exports = function(s,config,lang){
             k.details = k.details && k.details instanceof Object ? k.details : {}
             var listOEvents = activeMonitor.detector_motion_count || []
             var listOTags = listOEvents.filter(row => row.details.reason === 'object').map(row => row.details.matrices.map(matrix => matrix.tag).join(',')).join(',').split(',')
-            if(listOTags && !k.objects)k.objects = [...new Set(listOTags)].join(',');
+            if(listOTags && !k.objects)k.objects = [...new Set(listOTags)].filter(item => !!item).join(',');
             k.filename = k.filename || k.file
             k.ext = k.ext || e.ext || k.filename.split('.')[1]
             k.stat = fs.statSync(k.dir+k.file)

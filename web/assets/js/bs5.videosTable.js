@@ -37,8 +37,11 @@ $(document).ready(function(e){
             imgBlock.find('img').attr('src',href)
         })
     }
-    function openVideosTableView(monitorId,startDate,endDate){
-        drawVideosTableViewElements(monitorId,startDate,endDate)
+    window.openVideosTableView = function(monitorId){
+        openTab(`videosTableView`,{})
+        drawMonitorListToSelector(monitorsList,null,null,true)
+        monitorsList.val(monitorId)
+        drawVideosTableViewElements()
     }
     loadDateRangePicker(dateSelector,{
         onChange: function(start, end, label) {
@@ -242,11 +245,7 @@ $(document).ready(function(e){
     .on('click','.open-videosTable',function(e){
         e.preventDefault()
         var monitorId = getRowsMonitorId(this)
-        openTab(`videosTableView`,{},null,null,null,() => {
-            drawMonitorListToSelector(monitorsList,null,null,true)
-            monitorsList.val(monitorId)
-            drawVideosTableViewElements()
-        })
+        openVideosTableView()
         return false;
     });
     sideLinkListBox

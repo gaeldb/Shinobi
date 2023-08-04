@@ -83,6 +83,7 @@ module.exports = function(s,config,lang,io){
             'home/videosTable',
             'home/studio',
             'home/monitorMap',
+            'home/timeline',
             'confirm',
             'home/help',
         ]

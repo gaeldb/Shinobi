@@ -351,7 +351,7 @@ module.exports = (s,config,lang) => {
     function bindTagLegendForMonitors(groupKey){
         const newTagLegend = {}
         const theGroup = s.group[groupKey]
-        const monitorIds = Object.keys(theGroup.rawMonitorConfigurations)
+        const monitorIds = Object.keys(theGroup.rawMonitorConfigurations || {})
         monitorIds.forEach((monitorId) => {
             const monitorConfig = theGroup.rawMonitorConfigurations[monitorId]
             const theTags = (monitorConfig.tags || '').split(',')
