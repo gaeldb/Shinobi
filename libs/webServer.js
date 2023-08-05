@@ -72,7 +72,7 @@ module.exports = function(s,config,lang,io){
             'home/timelapseViewer',
             'home/eventFilters',
             'home/cameraProbe',
-            'home/powerVideo',
+            // 'home/powerVideo',
             'home/onvifScanner',
             'home/onvifDeviceManager',
             'home/configFinder',
@@ -87,6 +87,9 @@ module.exports = function(s,config,lang,io){
             'confirm',
             'home/help',
         ]
+        if(config.powerVideo === true && (config.webBlocksPreloaded.indexOf('home/powerVideo') === -1)){
+            config.webBlocksPreloaded.push('home/powerVideo')
+        }
     }
     //SSL options
     var wellKnownDirectory = s.mainDirectory + '/web/.well-known'
