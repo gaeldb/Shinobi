@@ -631,9 +631,11 @@ function getVideoInfoFromEl(_this){
     var el = $(_this).parents('[data-mid]')
     var monitorId = el.attr('data-mid')
     var videoTime = el.attr('data-time')
+    var video = loadedVideosInMemory[`${monitorId}${videoTime}${undefined}`]
     return {
         monitorId,
         videoTime,
+        video,
     }
 }
 onWebSocketEvent(function(d){
@@ -662,11 +664,12 @@ $(document).ready(function(){
     $('body')
     .on('click','.open-video',function(e){
         e.preventDefault()
+        var _this = this;
         var {
             monitorId,
             videoTime,
             video,
-        } = getVideoInfoFromEl(this)
+        } = getVideoInfoFromEl(_this)
         createVideoPlayerTab(video)
         setVideoStatus(video)
         return false;
