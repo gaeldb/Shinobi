@@ -95,21 +95,21 @@ function getDayOfWeek(date) {
 }
 function stringToColor(str) {
     let blueColors = [
-        '#0000FF', // Blue
-        '#1E90FF', // Dodger Blue
-        '#4169E1', // Royal Blue
-        '#4682B4', // Steel Blue
-        '#6495ED', // Cornflower Blue
-        '#6A5ACD', // Slate Blue
-        '#7B68EE', // Medium Slate Blue
-        '#87CEEB', // Sky Blue
-        '#87CEFA', // Light Sky Blue
-        '#8A2BE2', // Blue Violet
-        '#0000CD', // Medium Blue
         '#00BFFF', // Deep Sky Blue
+        '#1E90FF', // Dodger Blue
         '#00F5FF', // Turquoise Blue
-        '#4B0082', // Indigo
-        '#483D8B'  // Dark Slate Blue
+        '#00D7FF', // Electric Blue
+        '#00C2FF', // Bright Cerulean
+        '#00A9FF', // Vivid Sky Blue
+        '#0099FF', // Blue Ribbon
+        '#007FFF', // Azure Radiance
+        '#0066FF', // Blue Dianne
+        '#0055FF', // Electric Ultramarine
+        '#0044FF', // Rich Electric Blue
+        '#0033FF', // Medium Electric Blue
+        '#0022FF', // Bright Blue
+        '#0011FF', // Vivid Blue
+        '#0000FF'  // Pure Blue
     ];
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
