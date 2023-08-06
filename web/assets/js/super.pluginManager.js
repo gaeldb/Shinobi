@@ -79,11 +79,12 @@ $(document).ready(function(){
                         </div>
                     </div>`)
             var newBlock = $(`.card[package-name="${module.name}"]`)
-            loadedBlocks[module.name] = {
+            loadedBlocks[module.name] = Object.assign({
                 block: newBlock,
                 stdout: newBlock.find('.install-output-stdout'),
                 stderr: newBlock.find('.install-output-stderr'),
-            }
+            },module)
+            loadedModules[module.name] = module;
         }
     }
     var downloadModule = function(url,packageRoot,callback){
