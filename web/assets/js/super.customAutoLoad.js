@@ -1,8 +1,30 @@
 $(document).ready(function(){
     var loadedModules = {}
     var listElement = $('#customAutoLoadList')
+    var quickSelectEl = $('#moduleQuickSelect')
+    var downloadForm = $('#downloadNewModule')
     var getModules = function(callback) {
         $.get(superApiPrefix + $user.sessionKey + '/package/list',callback)
+    }
+    function getDownloadableModules(callback) {
+        return new Promise((resolve,reject) => {
+            const pluginListUrl = `https://gitlab.com/api/v4/projects/Shinobi-Systems%2FcustomAutoLoad-samples/repository/tree?path=samples`
+            const filePrefix = `https://gitlab.com/Shinobi-Systems/customAutoLoad-samples/-/`
+            $.getJSON(pluginListUrl,function(data){
+                var html = ''
+                data.forEach(item => {
+                    let downloadLink;
+                    if (item.type === 'blob') {
+                        downloadLink = `${filePrefix}raw/main/samples/${item.name}`;
+                        return;
+                    } else if (item.type === 'tree') {
+                        downloadLink = `${filePrefix}archive/master/customautoload-samples-master.zip,${item.path}`;
+                    }
+                    html += `<option value="${downloadLink}">${item.name}</option>`
+                });
+                quickSelectEl.html(html);
+            })
+        })
     }
     var loadedBlocks = {}
     var drawModuleBlock = function(module){
@@ -12,9 +34,9 @@ $(document).ready(function(){
             existingElement.find('.title').text(humanName)
             existingElement.find('[calm-action="status"]').text(module.properties.disabled ? lang.Enable : lang.Disable)
         }else{
-            listElement.append(`
+            listElement.prepend(`
                 <div class="col-md-12">
-                    <div class="card bg-dark" package-name="${module.name}">
+                    <div class="card bg-dark mb-3" package-name="${module.name}">
                         <div class="card-body">
                             <div><h4 class="title mt-0">${humanName}</h4></div>
                             <div class="pb-2"><b>${lang['Time Created']} :</b> ${module.created}</div>
@@ -30,19 +52,20 @@ $(document).ready(function(){
                             </div>
                             <div class="pl-2 pr-2">
                                 <div class="install-output row">
-                                    <div class="col-md-6 pr-2"><pre class="install-output-stdout"></pre></div>
-                                    <div class="col-md-6 pl-2"><pre class="install-output-stderr"></pre></div>
+                                    <div class="col-md-6 pr-2 mb-2"><pre class="install-output-stdout text-white mb-0"></pre></div>
+                                    <div class="col-md-6 pl-2 mb-2"><pre class="install-output-stderr text-white mb-0"></pre></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>`)
             var newBlock = $(`.card[package-name="${module.name}"]`)
-            loadedBlocks[module.name] = {
+            loadedBlocks[module.name] = Object.assign({
                 block: newBlock,
                 stdout: newBlock.find('.install-output-stdout'),
                 stderr: newBlock.find('.install-output-stderr'),
-            }
+            },module)
+            loadedModules[module.name] = module;
         }
     }
     var downloadModule = function(url,packageRoot,callback){
@@ -129,7 +152,7 @@ $(document).ready(function(){
             break;
         }
     })
-    $('#downloadNewModule').submit(function(e){
+    downloadForm.submit(function(e){
         e.preventDefault();
         var el = $(this)
         var form = el.serializeObject()
@@ -141,6 +164,16 @@ $(document).ready(function(){
             }
         })
         return false
+    })
+    $('#moduleQuickSelectExec').click(function(){
+        var currentVal = quickSelectEl.val()
+        var valParts = currentVal.split(',')
+        var packageUrl = `${valParts[0]}`
+        var packageRoot = valParts[1]
+        downloadForm.find(`[name="downloadUrl"]`).val(packageUrl)
+        downloadForm.find(`[name="packageRoot"]`).val(packageRoot)
+        downloadForm.find(`[name="downloadUrl"]`).val(packageUrl)
+        downloadForm.submit()
     })
     setTimeout(function(){
         getModules(function(data){
@@ -172,4 +205,5 @@ $(document).ready(function(){
             break;
         }
     })
+    getDownloadableModules()
 })
