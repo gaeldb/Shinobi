@@ -57,12 +57,13 @@ ul:not(.compressed-monitor-icons) .monitor-icon img{
     right: 5px;
 }
 
-#createdTabLinks .nav-item:not(:last-child){
+#createdTabLinks .nav-link:not(:last-child){
     margin-bottom: 0.5rem;
 }
 
 #createdTabLinks .side-menu-link:not(.active){
     border: 1px solid rgb(31 128 249 / 20%);
+    background: #2d3f55;
 }
 
 .sidebar {

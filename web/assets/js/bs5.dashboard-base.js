@@ -77,7 +77,7 @@ function base64ArrayBuffer(arrayBuffer) {
 }
 function timeAgo(date) {
     const now = new Date();
-    const secondsPast = (now.getTime() - date.getTime()) / 1000;
+    const secondsPast = (now.getTime() - (new Date(date)).getTime()) / 1000;
     if(secondsPast < 60) {
         return parseInt(secondsPast) + ' seconds ago';
     }

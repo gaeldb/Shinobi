@@ -45,6 +45,7 @@
         </div>
         <div id="side-menu-collapse-point" class="collapse show home-collapse">
               <ul id="pageTabLinks" class="nav flex-column nav-pills">
+                  <div id="createdTabLinks" class="pb-3 px-3 hidden-empty"></div>
                   <div class="pb-2 px-3" id="home-collapse">
                       <% menuInfo.links.forEach((item) => {
                             if(!item.eval || eval(item.eval)){
@@ -69,7 +70,6 @@
                           <% } %>
                       <% }) %>
                   </div>
-                  <div id="createdTabLinks" class="pb-3 px-3 hidden-empty"></div>
               </ul>
           </div>
           <% drawBlock(define.SideMenu.blocks.SideMenuAfterList) %>

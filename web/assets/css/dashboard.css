@@ -296,22 +296,6 @@ body {
     background-size: cover;
 }
 
-/*  */
-.side-menu-link {
-    position: relative;
-}
-.side-menu-link .delete-tab {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-}
-.side-menu-link .delete-tab:hover {
-    text-shadow: 0 0 15px #333;
-    color: #eee;
-}
-
-/*  */
-
 ul.squeeze {
     flex-direction: row!important;
     align-items: center;

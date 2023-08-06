@@ -7,7 +7,7 @@ $(document).ready(function(){
         var newTabId = getVideoPlayerTabId(video)
         var humanStartTime = formattedTime(video.time,true)
         var humanEndTime = formattedTime(video.end,true)
-        var tabLabel = `<b>${lang['Video']}</b> : ${loadedMonitors[video.mid] ? loadedMonitors[video.mid].name : lang['Monitor or Key does not exist.']} : ${formattedTime(video.time,true)}`
+        var tabLabel = `<b>${lang['Video']}</b> : ${loadedMonitors[video.mid] ? loadedMonitors[video.mid].name : lang['Monitor or Key does not exist.']} : <span title="${formattedTime(video.time)}">${timeAgo(video.time)}</span>`
         var videoUrl = getLocation() + video.href
         var hasRows = video.events && video.events.length > 0
         var loadedEvents = {}

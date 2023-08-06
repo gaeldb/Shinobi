@@ -7,10 +7,22 @@ var sideMenuCollapsePoint = $('#side-menu-collapse-point')
 var floatingHideButton = $('#floating-hide-button')
 var floatingBackButton = $('#floating-back-button')
 function buildTabHtml(tabName,tabLabel,tabIcon){
-    return `<li class="nav-item">
-        <a class="nav-link side-menu-link" page-open="${tabName}">
-            <i class="fa fa-${tabIcon ? tabIcon : 'file-o'}"></i> &nbsp; ${tabLabel} <span class="delete-tab align-text-bottom"><i class="fa fa-times"></i></span>
-        </a>
+    return `<li class="nav-link side-menu-link cursor-pointer" page-open="${tabName}">
+        <div class="d-flex flex-row">
+            <div class="d-flex pr-2">
+                <span>
+                    <i class="fa fa-${tabIcon ? tabIcon : 'file-o'}"></i>
+                </span>
+            </div>
+            <div class="flex-grow-1 pr-2">
+                ${tabLabel}
+            </div>
+            <div class="d-flex">
+                <span class="delete-tab">
+                    <i class="fa fa-times-circle-o"></i>
+                </span>
+            </div>
+        </div>
       </li>`
 }
 function drawMonitorIconToMenu(item){
