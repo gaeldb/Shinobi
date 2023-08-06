@@ -47,19 +47,24 @@ $(document).ready(function(){
                       <div class="row">
                       <div class="col-md-6">
                               <div class="row">
-                                  <div class="col-md-6">
-                                      <b class="flex-grow-1">${lang.Started}</b>
+                                  <div class="col-md-4">
+                                      <div class="flex-grow-1"><b>${lang.Started}</b> ${timeAgo(video.time)}</div>
                                       <div class="video-time">${humanStartTime}</div>
                                   </div>
-                                  <div class="col-md-6">
-                                      <b class="flex-grow-1">${lang.Ended}</b>
+                                  <div class="col-md-4">
+                                      <div class="flex-grow-1"><b>${lang.Ended}</b> ${timeAgo(video.end)}</div>
                                       <div class="video-end">${humanEndTime}</div>
+                                  </div>
+                                  <div class="col-md-4">
+                                      <div class="flex-grow-1"><b>${lang['Objects Found']}</b></div>
+                                      <div>${video.objects}</div>
                                   </div>
                               </div>
                               <div class="d-block pt-4">
                                   <div class="btn-group btn-group-justified">
                                         <a class="btn btn-sm btn-success" download href="${videoUrl}"><i class="fa fa-download"></i> ${lang.Download}</a>
                                         ${permissionCheck('video_delete',video.mid) ? `<a class="btn btn-sm btn-danger delete-video"><i class="fa fa-trash-o"></i> ${lang.Delete}</a>` : ''}
+                                        ${permissionCheck('video_delete',video.mid) ? `<a class="btn btn-sm btn-${video.archive === 1 ? `success status-archived` : `default`} archive-video" title="${lang.Archive}"><i class="fa fa-${video.archive === 1 ? `lock` : `unlock-alt`}"></i> ${lang.Archive}</a>` : ''}
                                         <div class="dropdown d-inline-block">
                                             <a class="btn btn-sm btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
                                               <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
