@@ -89,11 +89,6 @@ module.exports = function(s,config,lang,io){
         ]
         if(config.powerVideo === true && (config.webBlocksPreloaded.indexOf('home/powerVideo') === -1)){
             config.webBlocksPreloaded.push('home/powerVideo')
-            s.definitions.SideMenu.blocks.Container1.links.push({
-                icon: 'barcode',
-                label: `${lang['Power Viewer']}`,
-                pageOpen: 'powerVideo',
-            })
         }
     }
     //SSL options
