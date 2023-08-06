@@ -7778,11 +7778,6 @@ module.exports = function(s,config,lang){
                               },
                           ]
                       },
-                      // {
-                      //     icon: 'barcode',
-                      //     label: `${lang['Power Viewer']}`,
-                      //     pageOpen: 'powerVideo',
-                      // },
                       {
                           icon: 'calendar',
                           label: `${lang['Calendar']}`,
