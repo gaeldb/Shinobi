@@ -316,6 +316,13 @@ $(document).ready(function(){
         var end = new Date(stripTime.end.getTime() + timeToAdd)
         setTimestripDate(start,end)
     }
+    function scrollTimelineToTime(tickTime) {
+        var stripTime = getTimestripDate();
+        var halfRange = (stripTime.end.getTime() - stripTime.start.getTime()) / 2;
+        var start = new Date(tickTime.getTime() - halfRange);
+        var end = new Date(tickTime.getTime() + halfRange);
+        setTimestripDate(start, end);
+    }
     function setTickDate(newDate){
         if(isPlaying){
             if(newDate >= timeStripAutoScrollPositionEnd){
@@ -383,6 +390,9 @@ $(document).ready(function(){
         }
         container.empty()
         timeStripAutoGridResize()
+        if(isPlaying && hasNoCanvasVideos()){
+            jumpToNextVideo()
+        }
     }
     function setVideoInCanvas(newVideo){
         var monitorId = newVideo.mid
@@ -406,6 +416,9 @@ $(document).ready(function(){
             // playVideo(videoEl)
             // pauseVideo(videoEl)
         })
+    }
+    function hasNoCanvasVideos(){
+        return getLoadedVideosOnCanvas().length === 0;
     }
     function queueNextVideo(video){
         if(!video)return;
@@ -582,11 +595,19 @@ $(document).ready(function(){
         await resetTimeline(newTime)
         checkScroll(tickTime)
     }
-    function checkScroll(tickTime){
+    function checkScroll(tickTime,scrollToTick){
         if(tickTime <= timeStripAutoScrollPositionStart){
-            scrollTimeline(-timeStripAutoScrollAmount)
+            if(scrollToTick){
+                scrollTimelineToTime(tickTime)
+            }else{
+                scrollTimeline(-timeStripAutoScrollAmount)
+            }
         }else if(tickTime >= timeStripAutoScrollPositionEnd){
-            scrollTimeline(timeStripAutoScrollAmount)
+            if(scrollToTick){
+                scrollTimelineToTime(tickTime)
+            }else{
+                scrollTimeline(timeStripAutoScrollAmount)
+            }
         }
     }
     function adjustTimelineSpeed(newSpeed){
@@ -717,7 +738,7 @@ $(document).ready(function(){
         timeStripActionWithPausePlay().then(async (timeChanging) => {
             if(!timeChanging){
                 await resetTimeline(clickTime)
-                checkScroll(clickTime)
+                checkScroll(clickTime, true)
             }
         })
     }
