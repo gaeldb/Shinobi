@@ -222,6 +222,18 @@ $(document).ready(function(){
         setTimeOfCanvasVideos(clickTime)
         setHollowClickQueue()
     }
+    function timeStripActionWithPausePlay(restartPlaySpeed){
+        return new Promise((resolve,reject) => {
+            var currentlyPlaying = !!isPlaying;
+            timeStripPlay(true)
+            resolve(timeChanging)
+            if(currentlyPlaying){
+                setTimeout(() => {
+                    timeStripPlay()
+                },restartPlaySpeed || 500)
+            }
+        })
+    }
     function createTimeline(){
         timeStripItemIncrement = 0;
         var timeChangingTimeout = null
@@ -243,17 +255,12 @@ $(document).ready(function(){
         // make tick
         timeStripVisTick = timeStripVis.addCustomTime(dateNow, `${lang.Time}`);
         timeStripVis.on('click', async function(properties) {
-            var currentlyPlaying = !!isPlaying;
-            timeStripPlay(true)
-            if(!timeChanging){
-                var clickTime = properties.time;
-                await resetTimeline(clickTime)
-            }
-            if(currentlyPlaying){
-                setTimeout(() => {
-                    timeStripPlay()
-                },500)
-            }
+            var clickTime = properties.time;
+            timeStripActionWithPausePlay().then((timeChanging) => {
+                if(!timeChanging){
+                    resetTimeline(clickTime)
+                }
+            })
         });
         timeStripVis.on('rangechange', function(properties){
             timeChanging = true
@@ -290,11 +297,11 @@ $(document).ready(function(){
         if(difference <= 60){
             return 0.1
         }else if(difference > minute && difference <= hour){
-            return 0.3
+            return 0.1
         }else if(difference > hour && difference < day){
-            return 0.6
+            return 0.3
         }else if(difference >= day){
-            return 10
+            return 0.9
         }
     }
     function scrollTimeline(addHours){
@@ -573,6 +580,9 @@ $(document).ready(function(){
         }
         newTime = new Date(newTime)
         await resetTimeline(newTime)
+        checkScroll(tickTime)
+    }
+    function checkScroll(tickTime){
         if(tickTime <= timeStripAutoScrollPositionStart){
             scrollTimeline(-timeStripAutoScrollAmount)
         }else if(tickTime >= timeStripAutoScrollPositionEnd){
@@ -670,6 +680,57 @@ $(document).ready(function(){
             timeStripItemColors[monitorId] = itemColor
         })
     }
+    function findEndingLatestInCanvas(){
+        var foundVideo = {time: 0};
+        $.each(loadedVideosOnCanvas,function(monitorId,video){
+            if(!video)return;
+            var videoTime = new Date(video.time).getTime()
+            if(new Date(foundVideo.time).getTime() < videoTime){
+                foundVideo = video;
+            }
+        })
+        if(!foundVideo.mid)return null;
+        return foundVideo
+    }
+    function findCurrentVideoIndex(video){
+        var currentVideoIndex = loadedVideosOnTimeStrip.findIndex((item) => {
+            return video.mid === item.mid && video.time == item.time
+        });
+        return currentVideoIndex
+    }
+    function findNextVideo(){
+        var tickTime = getTickDate()
+        let closestObject = [...loadedVideosOnTimeStrip]
+          .sort((a, b) => new Date(a.time) - new Date(b.time))
+          .find(obj => new Date(obj.time) > tickTime);
+        return closestObject;
+    }
+    function findPreviousVideo(){
+        var tickTime = getTickDate()
+        let closestObject = [...loadedVideosOnTimeStrip]
+         .sort((a, b) => new Date(b.time) - new Date(a.time))
+         .find(obj => new Date(obj.time) < tickTime);
+        return closestObject;
+    }
+    async function jumpToVideo(video){
+        var clickTime = new Date(video.time)
+        timeStripActionWithPausePlay().then(async (timeChanging) => {
+            if(!timeChanging){
+                await resetTimeline(clickTime)
+                checkScroll(clickTime)
+            }
+        })
+    }
+    async function jumpToNextVideo(){
+        var video = findNextVideo()
+        if(!video)return console.log('No More!')
+        await jumpToVideo(video)
+    }
+    async function jumpToPreviousVideo(){
+        var video = findPreviousVideo()
+        if(!video)return console.log('No More!')
+        await jumpToVideo(video)
+    }
     sideMenuList.on('click','[timeline-menu-action]',function(){
         var el = $(this)
         var type = el.attr('timeline-menu-action')
@@ -704,6 +765,12 @@ $(document).ready(function(){
             break;
             case'jumpRight':
                 jumpTimeline(5000,'right')
+            break;
+            case'jumpNext':
+                jumpToNextVideo()
+            break;
+            case'jumpPrev':
+                jumpToPreviousVideo()
             break;
             case'speed':
                 var speed = parseInt(el.attr('speed'))

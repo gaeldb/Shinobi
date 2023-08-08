@@ -33,7 +33,7 @@ module.exports = function(s,config,lang){
       try {
         detector.listen((motion) => {
           if (motion) {
-            // onvifEventLog(`ONVIF Event Detected!`)
+            onvifEventLog(`ONVIF Event Detected!`)
             triggerEvent({
                 f: 'trigger',
                 id: monitorId,
@@ -49,16 +49,17 @@ module.exports = function(s,config,lang){
                     // imgWidth: img.width,
                 }
             })
-          // } else {
-              // onvifEventLog(`ONVIF Event Stopped`)
+          } else {
+              onvifEventLog(`ONVIF Event Stopped`)
           }
         });
       } catch(e) {
+          console.error(e)
           onvifEventLog(`ONVIF Event Error`,e)
       }
       return detector
     }
-    function initializeOnvifEvents(monitorConfig){
+    async function initializeOnvifEvents(monitorConfig){
         const monitorMode = monitorConfig.mode
         const groupKey = monitorConfig.ke
         const monitorId = monitorConfig.mid
@@ -74,13 +75,19 @@ module.exports = function(s,config,lang){
                 onvifEventControllers[onvifIdKey].close()
                 s.debugLog('ONVIF Event Module Warning : This could cause a memory leak?')
             }catch(err){
-                s.debugLog('ONVIF Event Module Error', err);
+                s.debugLog('ONVIF Event Module Error', err.stack);
             }
-            delete(onvifEventControllers[onvifIdKey])
-            if(monitorMode !== 'stop'){
-                startMotion(onvifId,monitorConfig).then((detector) => {
+            try{
+                delete(onvifEventControllers[onvifIdKey])
+                s.debugLog('Can ',monitorConfig.name, 'read ONVIF Events?',monitorMode !== 'stop')
+                if(monitorMode !== 'stop'){
+                    s.debugLog('Starting ONVIF Event Reader on ',monitorConfig.name)
+                    const detector = await startMotion(onvifId,monitorConfig)
                     onvifEventControllers[onvifIdKey] = detector;
-                })
+                }
+            }catch(err){
+                console.error(err)
+                s.debugLog('ONVIF Event Module Start Error', err.stack);
             }
         }
     }

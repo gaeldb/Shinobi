@@ -9139,9 +9139,11 @@ module.exports = function(s,config,lang){
                           "divContent": `
                           <div class="text-center">
                               <div class="btn-group">
+                                  <a class="btn btn-sm btn-default" timeline-action="jumpPrev" title="${lang.jumptoPreviousVideo}"><i class="fa fa-angle-double-left"></i></a>
                                   <a class="btn btn-sm btn-default" timeline-action="jumpLeft" title="${lang.jumpFiveSeconds}"><i class="fa fa-arrow-circle-left"></i></a>
                                   <a class="btn btn-sm btn-primary" timeline-action="playpause" title="${lang.Play}/${lang.Pause}"><i class="fa fa-play-circle-o"></i></a>
                                   <a class="btn btn-sm btn-default" timeline-action="jumpRight" title="${lang.jumpFiveSeconds}"><i class="fa fa-arrow-circle-right"></i></a>
+                                  <a class="btn btn-sm btn-default" timeline-action="jumpNext" title="${lang.jumptoNextVideo}"><i class="fa fa-angle-double-right"></i></a>
                               </div>
                               <div class="btn-group">
                                   <a class="btn btn-sm btn-default btn-success" timeline-action="speed" speed="1" title="${lang.Speed} x1">x1</a>

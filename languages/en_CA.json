@@ -1022,6 +1022,8 @@
    "activationRequired": "Activation Required",
    "autoResizeGrid": "Auto Resize Grid",
    "jumpFiveSeconds": "Jump 5 Seconds",
+   "jumptoNextVideo": "Jump to Next Video",
+   "jumptoPreviousVideo": "Jump to Previous Video",
    "featureRequiresActivationText": "The feature you are trying to use requires that your installation be activated. Please see the Help tab for more information.",
    "FileNotExistText": "Cannot save non existant file. Something went wrong.",
    "CameraNotRecordingText": "Settings may be incompatible. Check encoders. Restarting...",
