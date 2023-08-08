@@ -1,25 +1,25 @@
 $(document).ready(function () {
   var schema = {
-    "title": "Main Configuration",
+    "title": lang["Main Configuration"],
     "type": "object",
     "properties": {
       "debugLog": {
-        "title": "Enable Debug Log",
+        "title": lang["Enable Debug Log"],
         "type": "boolean",
         "default": false
       },
       "subscriptionId": {
-        "title": "Fill in subscription ID",
+        "title": lang["Fill in subscription ID"],
         "type": "string",
         "default": null
       },
       "port": {
-        "title": "Server port",
+        "title": lang["Server port"],
         "type": "integer",
         "default": 8080
       },
       "passwordType": {
-        "title": "Password type",
+        "title": lang["Password type"],
         "type": "string",
         "enum": [
           "sha256",
@@ -31,12 +31,12 @@ $(document).ready(function () {
       "addStorage": {
         "type": "array",
         "format": "table",
-        "title": "Additional Storage",
-        "description": "Separate storage locations that can be set for different monitors.",
+        "title": lang["Additional Storage"],
+        "description": lang["AdditionalStorageDes"],
         "uniqueItems": true,
         "items": {
           "type": "object",
-          "title": "Storage Array",
+          "title": lang["Storage Array"],
           "properties": {
             "name": {
               "type": "string",
@@ -57,21 +57,24 @@ $(document).ready(function () {
       "plugins": {
         "type": "array",
         "format": "table",
-        "title": "Plugins",
-        "descripton": "Elaborate Plugin connection settings.",
+        "title": lang["Plugins"],
+        "descripton": lang["PluginsDes"],
         "uniqueItems": true,
         "items": {
           "type": "object",
-          "title": "Plugin",
+          "title": lang["Plugin"],
           "properties": {
             "plug": {
+              "title": lang["Plug"],
               "type": "string",
               "default": "pluginName"
             },
             "key": {
+              "title": lang["Key"],
               "type": "string"
             },
             "mode": {
+              "title": lang["Mode"],
               "type": "string",
               "enum": [
                 "host",
@@ -80,21 +83,25 @@ $(document).ready(function () {
               "default": "client"
             },
             "https": {
+              "title": lang["Https"],
               "type": "boolean",
               "descripton": "Only for Host mode.",
               "default": false
             },
             "host": {
+              "title": lang["Host"],
               "type": "string",
               "descripton": "Only for Host mode.",
               "default": "localhost"
             },
             "port": {
+              "title": lang["Port"],
               "type": "integer",
               "descripton": "Only for Host mode.",
               "default": 8082
             },
             "type": {
+              "title": lang["Type"],
               "type": "string",
               "default": "detector"
             }
@@ -104,8 +111,8 @@ $(document).ready(function () {
       "pluginKeys": {
         "type": "object",
         "format": "table",
-        "title": "Plugin Keys",
-        "description": "Quick client connection setup for plugins. Just add the plugin key to make it ready for incoming connections.",
+        "title": lang["Plugin Keys"],
+        "description": lang["PluginKeysDes"],
         "uniqueItems": true,
         "items": {
           "type": "object",
@@ -116,29 +123,31 @@ $(document).ready(function () {
       "db": {
         "type": "object",
         "format": "table",
-        "title": "Database Options",
-        "description": "Credentials to connect to where detailed information is stored.",
+        "title": lang["Database Options"],
+        "description": lang["DatabaseOptionDes"],
         "properties": {
           "host": {
-            "title": "Hostname / IP",
+            "title": lang["Hostname / IP"],
             "type": "string",
             "default": "127.0.0.1"
           },
           "user": {
-            "title": "Username",
+            "title": lang["User"],
             "type": "string",
             "default": "majesticflame"
           },
           "password": {
-            "title": "Password",
+            "title": lang["Password"],
             "type": "string",
             "default": ""
           },
           "database": {
+            "title": lang["Database"],
             "type": "string",
             "default": "ccio"
           },
           "port": {
+            "title": lang["Port"],
             "type": "integer",
             "default": 3306
           }
@@ -154,24 +163,27 @@ $(document).ready(function () {
       "cron": {
         "type": "object",
         "format": "table",
-        "title": "CRON Options",
+        "title": lang["CRON Options"],
         "properties": {
           "key": {
             "type": "string",
           },
           "deleteOld": {
+            "title": lang["deleteOld"],
             "type": "boolean",
-            "description": "cron will delete videos older than Max Number of Days per account.",
+            "description": lang["deleteOldDes"],
             "default": true
           },
           "deleteNoVideo": {
+            "title": lang["deleteNoVideo"],
             "type": "boolean",
-            "description": "cron will delete SQL rows that it thinks have no video files.",
+            "description": lang["deleteNoVideoDes"],
             "default": true
           },
           "deleteOverMax": {
+            "title": lang["deleteOverMax"],
             "type": "boolean",
-            "description": "cron will delete files that are over the set maximum storage per account.",
+            "description": lang["deleteOverMaxDes"],
             "default": true
           },
         }
@@ -179,85 +191,105 @@ $(document).ready(function () {
       "mail": {
         "type": "object",
         "format": "table",
-        "title": "Email Options",
+        "title": lang["Email Options"],
         "properties": {
           "service": {
+            "title": lang["service"],
             "type": "string",
           },
           "host": {
+            "title": lang["Host"],
             "type": "string",
           },
           "auth": {
+            "title": lang["auth"],
             "type": "object",
             "properties": {
               "user": {
+                "title": lang["User"],
                 "type": "string",
               },
               "pass": {
+                "title": lang["Password"],
                 "type": "string",
               },
             },
           },
           "secure": {
+            "title": lang["secure"],
             "type": "boolean",
             "default": false
           },
           "ignoreTLS": {
+            "title": lang["ignoreTLS"],
             "type": "boolean",
           },
           "requireTLS": {
+            "title": lang["requireTLS"],
             "type": "boolean",
           },
           "port": {
+            "title": lang["Port"],
             "type": "integer",
           }
         }
       },
       "detectorMergePamRegionTriggers": {
+        "title": lang["detectorMergePamRegionTriggers"],
         "type": "boolean",
         "default": true
       },
       "doSnapshot": {
+        "title": lang["doSnapshot"],
         "type": "boolean",
         "default": true
       },
       "discordBot": {
+        "title": lang["discordBot"],
         "type": "boolean",
         "default": false
       },
       "dropInEventServer": {
+        "title": lang["dropInEventServer"],
         "type": "boolean",
         "default": false
       },
       "ftpServer": {
+        "title": lang["ftpServer"],
         "type": "boolean",
         "default": false
       },
       "oldPowerVideo": {
+        "title": lang["oldPowerVideo"],
         "type": "boolean",
         "default": false
       },
       "wallClockTimestampAsDefault": {
+        "title": lang["wallClockTimestampAsDefault"],
         "type": "boolean",
         "default": true
       },
       "defaultMjpeg": {
+        "title": lang["defaultMjpeg"],
         "type": "string",
       },
       "streamDir": {
+        "title": lang["streamDir"],
         "type": "string",
       },
       "videosDir": {
+        "title": lang["videosDir"],
         "type": "string",
       },
       "windowsTempDir": {
+        "title": lang["windowsTempDir"],
         "type": "string",
       },
       "enableFaceManager": {
         "type": "boolean",
         "default": false,
-        "title": "Enable Face Manager",
-        "description": "Enable / Disable face manager for face recognition plugins in the dashboard."
+        "title": lang["Enable Face Manager"],
+        "description": lang["enableFaceManagerDes"]
       }
     }
   };
