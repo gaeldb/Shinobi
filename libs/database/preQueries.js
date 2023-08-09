@@ -6,6 +6,16 @@ module.exports = function(s,config){
         isMySQL,
     } = require('./utils.js')(s,config)
     s.preQueries = async function(){
+        await createTable('Logs',[
+            isMySQL ? {name: 'utf8', type: 'charset'} : null,
+            isMySQL ? {name: 'utf8_general_ci', type: 'collate'} : null,
+            {name: 'ke', length: 50, type: 'string'},
+            {name: 'mid', length: 100, type: 'string'},
+            {name: 'info', type: 'text'},
+            {name: 'time', type: 'timestamp', defaultTo: currentTimestamp()},
+            // KEY `logs_index` (`ke`,`mid`,`time`)
+            {name: ['ke', 'mid', 'time'], type: 'index', length: 'logs_index'},
+        ]);
         await createTable('Users',[
             isMySQL ? {name: 'utf8', type: 'charset'} : null,
             isMySQL ? {name: 'utf8_general_ci', type: 'collate'} : null,
@@ -129,16 +139,6 @@ module.exports = function(s,config){
             {name: 'time', type: 'timestamp', defaultTo: currentTimestamp()},
             {name: 'size', type: 'bigint'},
             {name: 'details', type: 'text'},
-        ]);
-        await createTable('Logs',[
-            isMySQL ? {name: 'utf8', type: 'charset'} : null,
-            isMySQL ? {name: 'utf8_general_ci', type: 'collate'} : null,
-            {name: 'ke', length: 50, type: 'string'},
-            {name: 'mid', length: 100, type: 'string'},
-            {name: 'info', type: 'text'},
-            {name: 'time', type: 'timestamp', defaultTo: currentTimestamp()},
-            // KEY `logs_index` (`ke`,`mid`,`time`)
-            {name: ['ke', 'mid', 'time'], type: 'index', length: 'logs_index'},
         ]);
         await createTable('Monitors',[
             isMySQL ? {name: 'utf8', type: 'charset'} : null,
