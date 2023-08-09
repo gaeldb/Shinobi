@@ -879,6 +879,10 @@ module.exports = function(s,config,lang){
                                     "value": "h264_nvenc"
                                  },
                                  {
+                                    "name": "H.264 NVENC Jetson (NVIDIA HW Accel NVMPI)",
+                                    "value": "h264_nvmpi"
+                                 },
+                                 {
                                     "name": "H.265 NVENC (NVIDIA HW Accel)",
                                     "value": "hevc_nvenc"
                                  },
@@ -1657,6 +1661,10 @@ module.exports = function(s,config,lang){
                                             "value": "h264_nvenc"
                                          },
                                          {
+                                            "name": "H.264 NVENC Jetson (NVIDIA HW Accel NVMPI)",
+                                            "value": "h264_nvmpi"
+                                         },
+                                         {
                                             "name": "H.265 NVENC (NVIDIA HW Accel)",
                                             "value": "hevc_nvenc"
                                          },
@@ -2044,6 +2052,10 @@ module.exports = function(s,config,lang){
                                  {
                                     "name": "H.264 NVENC (NVIDIA HW Accel)",
                                     "value": "h264_nvenc"
+                                 },
+                                 {
+                                    "name": "H.264 NVENC Jetson (NVIDIA HW Accel NVMPI)",
+                                    "value": "h264_nvmpi"
                                  },
                                  {
                                     "name": "H.265 NVENC (NVIDIA HW Accel)",
@@ -7263,6 +7275,10 @@ module.exports = function(s,config,lang){
                                    {
                                       "name": "H.264 NVENC (NVIDIA HW Accel)",
                                       "value": "h264_nvenc"
+                                   },
+                                   {
+                                      "name": "H.264 NVENC Jetson (NVIDIA HW Accel NVMPI)",
+                                      "value": "h264_nvmpi"
                                    },
                                    {
                                       "name": "H.265 NVENC (NVIDIA HW Accel)",
