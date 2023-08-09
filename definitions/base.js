@@ -24,7 +24,7 @@ module.exports = function(s,config,lang){
           "blocks": {
               "Page Control": {
                  name: lang.Monitor,
-                 headerTitle: `<div id="tab-monitorSettings-title">Monitor Settings : <span>Add New</span></div>`,
+                 headerTitle: `<div id="tab-monitorSettings-title">${lang['Monitor Settings']} : <span>Add New</span></div>`,
                 "color": "blue",
                  isSection: false,
                 "info": [
@@ -6491,7 +6491,7 @@ module.exports = function(s,config,lang){
                 "info": [
                     {
                       "name": "actions=halt",
-                      "field": "Drop Event",
+                      "field": lang["Drop Event"],
                       "fieldType": "select",
                       "form-group-class": "actions-row",
                       "description": lang["fieldTextActionsHalt"],
@@ -6528,7 +6528,7 @@ module.exports = function(s,config,lang){
                     },
                     {
                        "name": "actions=indifference",
-                       "field": "Modify Indifference",
+                       "field": lang["Modify Indifference"],
                        "description": lang["fieldTextActionsIndifference"],
                        "form-group-class": "actions-row",
                     },
@@ -6553,7 +6553,7 @@ module.exports = function(s,config,lang){
                     },
                    {
                       "name": "actions=command",
-                      "field": "Detector Command",
+                      "field": lang["Detector Command"],
                       "fieldType": "select",
                       "form-group-class": "actions-row",
                       "description": lang["fieldTextActionsCommand"],
@@ -6573,7 +6573,7 @@ module.exports = function(s,config,lang){
                    },
                    {
                       "name": "actions=record",
-                      "field": "Use Record Method",
+                      "field": lang["Use Record Method"],
                       "fieldType": "select",
                       "description": lang["fieldTextActionsRecord"],
                       "default": "",
