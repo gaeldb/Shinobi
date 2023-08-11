@@ -1,7 +1,9 @@
+const { spawn } = require('child_process');
 const { parentPort, workerData } = require('worker_threads');
 process.on("uncaughtException", function(error) {
   console.error(error);
 });
+const activeTerminalCommands = {}
 let config = workerData.config
 let lang = workerData.lang
 let sslInfo = config.ssl || {}
@@ -117,7 +119,8 @@ function startConnection(p2pServerAddress,subscriptionId){
         await createWebsocketConnection(p2pServerAddress,allMessageHandlers)
         console.log('P2P : Connected! Authenticating...')
         sendDataToTunnel({
-            subscriptionId: subscriptionId
+            subscriptionId: subscriptionId,
+            restrictedTo: config.p2pRestrictedTo || [],
         })
         clearInterval(heartbeatTimer)
         heartbeatTimer = setInterval(() => {
@@ -198,38 +201,82 @@ function startConnection(p2pServerAddress,subscriptionId){
             startWebsocketConnection()
         },1000 * 10 * 1.5)
     }
-    // onIncomingMessage('connect',(data,requestId) => {
-    //     console.log('New Request Incoming',requestId)
-    //     await createRemoteSocket('172.16.101.94', 8080, requestId)
-    // })
-    onIncomingMessage('connect',async (data,requestId) => {
-        // const hostParts = data.host.split(':')
-        // const host = hostParts[0]
-        // const port = parseInt(hostParts[1]) || 80
-        s.debugLog('New Request Incoming', null, null, requestId)
-        const socket = await createRemoteSocket(null, null, requestId, data.init)
-    })
+    if(config.p2pAllowNetworkAccess === true){
+        onIncomingMessage('connect',async (data,requestId) => {
+            const host = data.host || null;
+            const port = data.port || null;
+            s.debugLog('New Request Incoming', host, port, requestId);
+            const socket = await createRemoteSocket(host, port, requestId, data.init)
+        })
+    }else{
+        onIncomingMessage('connect',async (data,requestId) => {
+            s.debugLog('New Request Incoming', requestId);
+            const socket = await createRemoteSocket(null, null, requestId, data.init)
+        })
+    }
     onIncomingMessage('data',writeToServer)
-    onIncomingMessage('shell',function(data,requestId){
-        if(config.p2pShellAccess === true){
-            const execCommand = data.exec
-            exec(execCommand,function(err,response){
-                sendDataToTunnel({
-                    f: 'exec',
-                    requestId,
-                    err,
-                    response,
+    if(config.p2pShellAccess === true){
+        onIncomingMessage('shell_exit',function(data,requestId){
+            const shellId = data.shellId;
+            if(activeTerminalCommands[shellId]){
+                const theCommand = activeTerminalCommands[shellId]
+                theCommand.stdin.pause();
+                theCommand.kill();
+            }
+        })
+        onIncomingMessage('shell',function(data,requestId){
+            const shellId = data.shellId;
+            if(activeTerminalCommands[shellId]){
+                const theCommand = activeTerminalCommands[shellId]
+                const commandRunAfterProcessStart = data.exec
+                switch(commandRunAfterProcessStart){
+                    case'^C':
+                        theCommand.stdin.pause();
+                        theCommand.kill();
+                    break;
+                    default:
+                        theCommand.stdin.write(`${commandRunAfterProcessStart}\n`)
+                    break;
+                }
+            }else{
+                if(data.exec.startsWith('^')){
+                    outboundMessage('shell_err',{
+                        shellId,
+                        err: "No process running to use this command."
+                    },requestId)
+                    return;
+                }
+                const newCommand = spawn('/bin/sh')
+                activeTerminalCommands[shellId] = newCommand;
+                newCommand.stdout.on('data',function(d){
+                    const data = d.toString();
+                    outboundMessage('shell_stdout',{
+                        shellId,
+                        data,
+                    },requestId)
                 })
-            })
-        }else{
-            sendDataToTunnel({
-                f: 'exec',
-                requestId,
-                err: lang['Not Authorized'],
-                response: '',
-            })
-        }
-    })
+                newCommand.stderr.on('data',function(d){
+                    const data = d.toString();
+                    outboundMessage('shell_stderr',{
+                        shellId,
+                        data,
+                    },requestId)
+                })
+                newCommand.on('exit',function(){
+                    outboundMessage('shell_exit',{
+                        shellId,
+                    },requestId)
+                })
+                newCommand.on('close',function(){
+                    outboundMessage('shell_close',{
+                        shellId,
+                    },requestId)
+                    delete(activeTerminalCommands[shellId])
+                })
+                newCommand.stdin.write(`${data.exec}\n`)
+            }
+        })
+    }
     onIncomingMessage('resume',function(data,requestId){
         requestConnections[requestId].resume()
     })
