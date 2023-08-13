@@ -638,6 +638,26 @@ function getVideoInfoFromEl(_this){
         video,
     }
 }
+function getDisplayDimensions(videoElement) {
+  var actualVideoWidth = videoElement.videoWidth;
+  var actualVideoHeight = videoElement.videoHeight;
+  var elementWidth = videoElement.offsetWidth;
+  var elementHeight = videoElement.offsetHeight;
+  var actualVideoAspect = actualVideoWidth / actualVideoHeight;
+  var elementAspect = elementWidth / elementHeight;
+  var displayWidth, displayHeight;
+  if (actualVideoAspect > elementAspect) {
+    displayWidth = elementWidth;
+    displayHeight = elementWidth / actualVideoAspect;
+  } else {
+    displayHeight = elementHeight;
+    displayWidth = elementHeight * actualVideoAspect;
+  }
+  return {
+    videoWidth: displayWidth,
+    videoHeight: displayHeight,
+  };
+}
 onWebSocketEvent(function(d){
     switch(d.f){
         case'video_edit':case'video_archive':

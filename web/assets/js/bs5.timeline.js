@@ -42,6 +42,7 @@ $(document).ready(function(){
     var loadedVideoElsOnCanvasNextVideoTimeout = {}
     var loadedVideoEndingTimeouts = {}
     var playUntilVideoEnd = false
+    var dontShowDetectionOnTimeline = false
     var isPlaying = false
     var earliestStart = null
     var latestEnd = null
@@ -100,6 +101,7 @@ $(document).ready(function(){
     async function getVideosInGaps(gaps,monitorIds){
         var searchQuery = timeStripObjectSearchInput.val()
         var videos = []
+        var eventLimit = Object.values(loadedMonitors).length * 300
         async function loopOnGaps(monitorId){
             for (let i = 0; i < gaps.length; i++) {
                 var range = gaps[i]
@@ -107,10 +109,11 @@ $(document).ready(function(){
                     monitorId,
                     startDate: range[0],
                     endDate: range[1],
+                    eventLimit,
                     searchQuery,
                     // archived: false,
                     // customVideoSet: wantCloudVideo ? 'cloudVideos' : null,
-                },null,true)).videos);
+                },null,dontShowDetectionOnTimeline)).videos);
             }
         }
         if(monitorIds && monitorIds.length > 0){
@@ -165,7 +168,10 @@ $(document).ready(function(){
         var preBufferHtml = ''
         $.each(loadedMonitors,function(monitorId,monitor){
             var itemColor = timeStripItemColors[monitorId];
-            html += `<div class="timeline-video open-video col-${timelineGridSizing} p-0 m-0 no-video" data-mid="${monitorId}" data-ke="${monitor.ke}" style="background-color:${itemColor}"></div>`
+            html += `<div class="timeline-video open-video col-${timelineGridSizing} p-0 m-0 no-video" data-mid="${monitorId}" data-ke="${monitor.ke}" style="background-color:${itemColor}">
+                <div class="film"></div>
+                <div class="event-objects"></div>
+            </div>`
             preBufferHtml += `<div class="timeline-video-buffer" data-mid="${monitorId}" data-ke="${monitor.ke}"></div>`
         })
         timeStripVideoCanvas.html(html)
@@ -368,8 +374,14 @@ $(document).ready(function(){
     function getVideoContainerInCanvas(video){
         return timeStripVideoCanvas.find(`[data-mid="${video.mid}"][data-ke="${video.ke}"]`)
     }
+    function getVideoFilmInCanvas(video){
+        return getVideoContainerInCanvas(video).find('.film')
+    }
     function getVideoElInCanvas(video){
         return getVideoContainerInCanvas(video).find('video')[0]
+    }
+    function getObjectContainerInCanvas(video){
+        return getVideoContainerInCanvas(video).find('.event-objects')
     }
     function getVideoContainerPreBufferEl(video){
         return timeStripPreBuffers.find(`[data-mid="${video.mid}"][data-ke="${video.ke}"]`)
@@ -387,7 +399,7 @@ $(document).ready(function(){
         loadedVideosOnCanvas[monitorId] = null
         loadedVideoElsOnCanvas[monitorId] = null
         clearTimeout(loadedVideoEndingTimeouts[monitorId])
-        var container = getVideoContainerInCanvas(oldVideo).addClass('no-video')
+        var container = getVideoContainerInCanvas(oldVideo).addClass('no-video').find('.film')
         var videoEl = container.find('video')
         videoEl.attr('src','')
         try{
@@ -405,11 +417,17 @@ $(document).ready(function(){
     }
     function setVideoInCanvas(newVideo){
         var monitorId = newVideo.mid
-        getVideoContainerInCanvas(newVideo).removeClass('no-video').html(`<video muted src="${newVideo.href}"></video>`)
+        var container = getVideoContainerInCanvas(newVideo)
+        .removeClass('no-video').find('.film').html(`<video muted src="${newVideo.href}"></video>`)
         var vidEl = getVideoElInCanvas(newVideo)
+        var objectContainer = getObjectContainerInCanvas(newVideo)
         vidEl.playbackRate = timelineSpeed
         if(isPlaying)playVideo(vidEl)
-        loadedVideoElsOnCanvas[monitorId] = vidEl
+        loadedVideoElsOnCanvas[monitorId] = {
+            vidEl,
+            container,
+            objectContainer,
+        }
         loadedVideosOnCanvas[monitorId] = newVideo
         timeStripPreBuffersEls[monitorId] = getVideoContainerPreBufferEl(newVideo)
         queueNextVideo(newVideo)
@@ -420,7 +438,7 @@ $(document).ready(function(){
             if(!video)return;
             var monitorId = video.mid
             var timeAfterStart = (newTime - new Date(video.time)) / 1000;
-            var videoEl = loadedVideoElsOnCanvas[monitorId]
+            var videoEl = loadedVideoElsOnCanvas[monitorId].vidEl
             videoEl.currentTime = timeAfterStart
             // playVideo(videoEl)
             // pauseVideo(videoEl)
@@ -429,13 +447,32 @@ $(document).ready(function(){
     function hasNoCanvasVideos(){
         return getLoadedVideosOnCanvas().length === 0;
     }
+    function prepareEventsList(events){
+        var newEvents = {}
+        events.forEach((item) => {
+            newEvents[new Date(item.time)] = item
+        })
+        return newEvents
+    }
+    function respaceObjectContainer(parentConatiner,objectContainer,videoWidth,videoHeight){
+        var parentWidth = parentConatiner.width()
+        var spaceWidth = (parentWidth - videoWidth) / 2
+        objectContainer.width(videoWidth).css('left',`${spaceWidth}px`)
+    }
     function queueNextVideo(video){
         if(!video)return;
         var monitorId = video.mid
-        var videoEl = loadedVideoElsOnCanvas[monitorId]
+        var onCanvas = loadedVideoElsOnCanvas[monitorId]
+        var videoEl = onCanvas.vidEl
         var videoAfter = video.videoAfter
         var endingTimeout = null;
         var alreadyDone = false;
+        var videoStartTime = (new Date(video.time).getTime() / 1000)
+        var container = onCanvas.container
+        var objectContainer = onCanvas.objectContainer
+        var videoHeight = 0
+        var videoWidth = 0
+        var videoEvents = prepareEventsList(video.events)
         function currentVideoIsOver(){
             if(alreadyDone)return;
             alreadyDone = true;
@@ -450,6 +487,19 @@ $(document).ready(function(){
                 },waitTimeTimeTillNext)
             // }else{
                 // console.log('End of Timeline for Monitor',loadedMonitors[monitorId].name)
+            }
+        }
+        function drawMatricesOnVideoTimeUpdate(){
+            var eventTime = new Date((videoStartTime + videoEl.currentTime) * 1000)
+            var theEvent = videoEvents[eventTime]
+            if(theEvent){
+                drawMatrices(theEvent,{
+                    theContainer: objectContainer,
+                    height: videoHeight,
+                    width: videoWidth,
+                })
+            }else{
+                objectContainer.find('.stream-detected-object').remove()
             }
         }
         videoEl.onerror = function(err){
@@ -469,8 +519,14 @@ $(document).ready(function(){
                     currentVideoIsOver()
                 },waitTimeTimeTillNext)
             }
+            drawMatricesOnVideoTimeUpdate()
         }
-
+        videoEl.oncanplay = function() {
+            var dims = getDisplayDimensions(videoEl);
+            videoWidth = dims.videoWidth
+            videoHeight = dims.videoHeight
+            respaceObjectContainer(container,objectContainer,videoWidth,videoHeight)
+        }
         // pre-buffer it
         timeStripPreBuffersEls[monitorId].html(videoAfter ? `<video preload="auto" muted src="${videoAfter.href}"></video>` : '')
     }
@@ -668,9 +724,22 @@ $(document).ready(function(){
             dashboardOptions('timeStripPlayUntilVideoEnd','1')
         }
     }
+    function timeStripDontShowDetectionToggle(){
+        var theButtons = timeStripControls.find('[timeline-action="dontShowDetection"]')
+        if(dontShowDetectionOnTimeline){
+            dontShowDetectionOnTimeline = false
+            theButtons.removeClass('btn-warning')
+            dashboardOptions('dontShowDetectionOnTimeline','2')
+        }else{
+            dontShowDetectionOnTimeline = true
+            theButtons.addClass('btn-warning')
+            dashboardOptions('dontShowDetectionOnTimeline','1')
+        }
+        refreshTimeline()
+    }
     function timeStripAutoGridResize(){
         if(!timeStripAutoGridSizer)return;
-        var numberOfBlocks = getLoadedVideosOnCanvas().length
+        var numberOfBlocks = timeStripVideoCanvas.find('.timeline-video:visible').length
         if(numberOfBlocks <= 1){
             adjustTimelineGridSize(`md-12`)
         }else if(numberOfBlocks >= 2 && numberOfBlocks < 5){
@@ -835,6 +904,9 @@ $(document).ready(function(){
             case'playUntilVideoEnd':
                 timeStripPlayUntilVideoEndToggle()
             break;
+            case'dontShowDetection':
+                timeStripDontShowDetectionToggle()
+            break;
         }
     })
     timeStripObjectSearchInput.change(function(){
@@ -891,5 +963,8 @@ $(document).ready(function(){
     }
     if(currentOptions.timeStripPlayUntilVideoEnd === '1'){
         timeStripPlayUntilVideoEndToggle()
+    }
+    if(currentOptions.dontShowDetectionOnTimeline === '1'){
+        timeStripDontShowDetectionToggle()
     }
 })

@@ -9179,12 +9179,13 @@ module.exports = function(s,config,lang){
                               <div class="btn-group">
                                   <a class="btn btn-sm btn-primary" timeline-action="autoGridSizer" title="${lang.autoResizeGrid}"><i class="fa fa-expand"></i></a>
                                   <a class="btn btn-sm btn-primary" timeline-action="playUntilVideoEnd" title="${lang.playUntilVideoEnd}"><i class="fa fa-step-forward"></i></a>
+                                  <a class="btn btn-sm btn-primary" timeline-action="dontShowDetection" title="${lang['Hide Detection on Stream']}"><i class="fa fa-grav"></i></a>
                               </div>
                               <div class="btn-group">
                                   <a class="btn btn-sm btn-success" timeline-action="downloadAll" title="${lang.Download}"><i class="fa fa-download"></i></a>
                               </div>
                               <div class="btn-group">
-                                  <a class="btn btn-sm btn-default" class_toggle="show-only-playing" data-target="#timeline-video-canvas" icon-toggle="fa-eye fa-eye-slash" icon-child="i" title="${lang['Show Only Playing']}"><i class="fa fa-eye"></i></a>
+                                  <a class="btn btn-sm btn-default" class_toggle="show-non-playing" data-target="#timeline-video-canvas" icon-toggle="fa-eye fa-eye-slash" icon-child="i" title="${lang['Show Only Playing']}"><i class="fa fa-eye-slash"></i></a>
                                   <a class="btn btn-sm btn-default" timeline-action="refresh" title="${lang.Refresh}"><i class="fa fa-refresh"></i></a>
                               </div>
                               <div class="btn-group">

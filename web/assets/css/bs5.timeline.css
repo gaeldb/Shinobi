@@ -14,6 +14,14 @@
 #tab-timeline .loading-mask  i {
 
 }
+#tab-timeline .event-objects {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left:0;
+    z-index: 10;
+}
 
 #timeline-video-canvas {
     background: rgba(0,0,0,0.9);
@@ -21,7 +29,8 @@
     overflow: auto;
     flex: 1;
 }
-#timeline-video-canvas video {
+#timeline-video-canvas video,
+#timeline-video-canvas .film {
     width: 100%;
     height: 100%;
 }
@@ -38,8 +47,14 @@
 #timeline-video-canvas .timeline-video:not(.no-video){
     background-color: #000!important;
 }
-#timeline-video-canvas.show-only-playing .timeline-video.no-video{
+#timeline-video-canvas .timeline-video.no-video{
     display: none;
+}
+#timeline-video-canvas.show-non-playing .timeline-video.no-video{
+    display: flex;
+}
+#timeline-video-canvas .timeline-video {
+    position: relative;
 }
 #timeline-info {
     background: #004e8e;
@@ -70,4 +85,43 @@
 #timeline-bottom-strip .vis-panel.vis-right,
 #timeline-bottom-strip .vis-panel.vis-top {
     border-color: rgb(31 128 249 / 40%)!important;
+}
+
+/* event object, detected */
+#tab-timeline .event-objects .tag {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background: red;
+    color: #fff;
+    font-family: monospace;
+    font-size: 80%;
+    border-radius: 5px 5px 0 0;
+    padding: 3px 5px;
+}
+
+#tab-timeline .event-objects .stream-detected-object {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 3px solid red;
+    background: transparent;
+    border-radius: 5px
+}
+
+#tab-timeline .event-objects .stream-detected-point {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 3px solid yellow;
+    background: transparent;
+    border-radius: 5px
+}
+
+#tab-timeline .event-objects .point {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 3px solid red;
+    border-radius: 50%
 }
