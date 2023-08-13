@@ -51,8 +51,8 @@ http://shinobi.video/why
 
 Moe Alam, Shinobi Systems
 
-Shinobi is developed by many contributors. Please have a look at the commits to see some of who they are :)
-https://gitlab.com/Shinobi-Systems/Shinobi/-/commits/dev
+Shinobi is developed by many contributors. See here 
+https://gitlab.com/Shinobi-Systems/Shinobi/-/graphs/dev
 
 ## Support the Development
 
