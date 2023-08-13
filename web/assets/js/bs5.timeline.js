@@ -12,6 +12,7 @@ $(document).ready(function(){
     var speedButtons = timeStripControls.find('[timeline-action="speed"]')
     var gridSizeButtons = timeStripControls.find('[timeline-action="gridSize"]')
     var autoGridSizerButtons = timeStripControls.find('[timeline-action="autoGridSizer"]')
+    var playUntilVideoEndButtons = timeStripControls.find('[timeline-action="playUntilVideoEnd"]')
     var currentTimeLabel = timeStripInfo.find('.current-time')
     var timelineActionButtons = timeStripControls.find('[timeline-action]')
     var timelineSpeed = 1;
@@ -40,6 +41,7 @@ $(document).ready(function(){
     var loadedVideoElsOnCanvas = {}
     var loadedVideoElsOnCanvasNextVideoTimeout = {}
     var loadedVideoEndingTimeouts = {}
+    var playUntilVideoEnd = false
     var isPlaying = false
     var earliestStart = null
     var latestEnd = null
@@ -375,6 +377,11 @@ $(document).ready(function(){
     function getWaitTimeUntilNextVideo(endTimeOfFirstVideo,startTimeOfNextVideo){
         return (new Date(startTimeOfNextVideo).getTime() - new Date(endTimeOfFirstVideo).getTime()) / timelineSpeed
     }
+    function jumpNextVideoIfEmptyCanvas(){
+        if(isPlaying && hasNoCanvasVideos()){
+            jumpToNextVideo()
+        }
+    }
     function clearVideoInCanvas(oldVideo){
         var monitorId = oldVideo.mid
         loadedVideosOnCanvas[monitorId] = null
@@ -390,8 +397,10 @@ $(document).ready(function(){
         }
         container.empty()
         timeStripAutoGridResize()
-        if(isPlaying && hasNoCanvasVideos()){
-            jumpToNextVideo()
+        if(playUntilVideoEnd){
+            timeStripPlay(true)
+        }else{
+            jumpNextVideoIfEmptyCanvas()
         }
     }
     function setVideoInCanvas(newVideo){
@@ -556,6 +565,7 @@ $(document).ready(function(){
                 setTimeLabel(newTime);
             }, 1000)
             setPlayToggleUI(`pause-circle-o`)
+            jumpNextVideoIfEmptyCanvas()
         }else{
             isPlaying = false
             pauseAllVideos()
@@ -645,6 +655,17 @@ $(document).ready(function(){
             autoGridSizerButtons.addClass('btn-success')
             timeStripAutoGridResize()
             dashboardOptions('timeStripAutoGridSizer','1')
+        }
+    }
+    function timeStripPlayUntilVideoEndToggle(){
+        if(playUntilVideoEnd){
+            playUntilVideoEnd = false
+            playUntilVideoEndButtons.removeClass('btn-success')
+            dashboardOptions('timeStripPlayUntilVideoEnd','2')
+        }else{
+            playUntilVideoEnd = true
+            playUntilVideoEndButtons.addClass('btn-success')
+            dashboardOptions('timeStripPlayUntilVideoEnd','1')
         }
     }
     function timeStripAutoGridResize(){
@@ -744,7 +765,7 @@ $(document).ready(function(){
     }
     async function jumpToNextVideo(){
         var video = findNextVideo()
-        if(!video)return console.log('No More!')
+        if(!video)timeStripPlay(true);
         await jumpToVideo(video)
     }
     async function jumpToPreviousVideo(){
@@ -811,6 +832,9 @@ $(document).ready(function(){
             case'autoGridSizer':
                 timeStripAutoGridSizerToggle()
             break;
+            case'playUntilVideoEnd':
+                timeStripPlayUntilVideoEndToggle()
+            break;
         }
     })
     timeStripObjectSearchInput.change(function(){
@@ -864,5 +888,8 @@ $(document).ready(function(){
     }
     if(!currentOptions.timeStripAutoGridSizer || currentOptions.timeStripAutoGridSizer === '1'){
         timeStripAutoGridSizerToggle()
+    }
+    if(currentOptions.timeStripPlayUntilVideoEnd === '1'){
+        timeStripPlayUntilVideoEndToggle()
     }
 })
