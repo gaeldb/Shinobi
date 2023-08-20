@@ -3,7 +3,7 @@ const { createWebSocketClient } = require('../basic/websocketTools.js')
 module.exports = function(s,config,lang,app,io){
     const { cameraDestroy } = require('../monitor/utils.js')(s,config,lang)
     var checkHwInterval = null;
-    function onDataFromMasterNode(d) {
+    async function onDataFromMasterNode(d) {
         switch(d.f){
             case'sqlCallback':
                 const callbackId = d.callbackId;
@@ -37,14 +37,18 @@ module.exports = function(s,config,lang,app,io){
             break;
             case'cameraStop'://stop camera
                 // s.group[d.d.ke].activeMonitors[d.d.mid].masterSaysToStop = true
-                s.camera('stop',d.d)
+                await s.camera('stop',d.d)
             break;
             case'cameraStart'://start or record camera
-                s.camera(d.mode,d.d)
-                let activeMonitor = s.group[d.d.ke].activeMonitors[d.d.mid]
-                // activeMonitor.masterSaysToStop = false
-                clearTimeout(activeMonitor.recordingChecker);
-                clearTimeout(activeMonitor.streamChecker);
+                try{
+                    await s.camera(d.mode,d.d)
+                    let activeMonitor = s.group[d.d.ke].activeMonitors[d.d.mid]
+                    // activeMonitor.masterSaysToStop = false
+                    clearTimeout(activeMonitor.recordingChecker);
+                    clearTimeout(activeMonitor.streamChecker);
+                }catch(err){
+                    s.debugLog(err)
+                }
             break;
         }
     }
