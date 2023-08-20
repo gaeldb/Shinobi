@@ -1667,7 +1667,7 @@
    "fieldTextDetailSubstreamOutputStreamAcodecAac": "Used for MP4 video.",
    "fieldTextDetailSubstreamOutputStreamAcodecAc3": "Used for MP4 video.",
    "fieldTextDetailSubstreamOutputStreamAcodecCopy": "Used for MP4 video. Has very low CPU usage but some audio codecs need custom flags like <code>-strict 2</code> for aac.",
-   "fieldTextDetailSubstreamOutputHlsTime": "How long each video segment should be, in minutes. Each segment will be drawn by the client through an m3u8 file. Shorter segments take less space.",
+   "fieldTextDetailSubstreamOutputHlsTime": "How long each video segment should be, in seconds. Each segment will be drawn by the client through an m3u8 file. Shorter segments take less space.",
    "fieldTextDetailSubstreamOutputHlsListSize": "The number of segments maximum before deleting old segments automatically.",
    "fieldTextDetailSubstreamOutputPresetStream": "Preset flag for certain video encoders. If you find your camera is crashing every few seconds : try leaving it blank.",
    "fieldTextDetailSubstreamOutputStreamQuality": "Low number means higher quality. Higher number means less quality.",
