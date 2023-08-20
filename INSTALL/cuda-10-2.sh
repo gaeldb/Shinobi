@@ -29,7 +29,7 @@ fi
 if [ -x "$(command -v yum)" ]; then
     sudo yum-config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/cuda-rhel7.repo
     sudo yum clean all
-    sudo yum -y install nvidia-driver-latest-dkms cuda
+    sudo yum -y install nvidia-driver-latest-dkms cuda-toolkit-10-2
     sudo yum -y install cuda-drivers
     wget https://cdn.shinobi.video/installers/libcudnn7-7.6.5.33-1.cuda10.2.x86_64.rpm -O cuda-dnn.rpm
     sudo yum -y localinstall cuda-dnn.rpm

@@ -29,7 +29,7 @@ if [ -x "$(command -v yum)" ]; then
     wget https://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/cuda-repo-rhel7-10.0.130-1.x86_64.rpm
     sudo rpm -i cuda-repo-rhel7-10.0.130-1.x86_64.rpm
     sudo yum clean all
-    sudo yum install cuda
+    sudo yum install cuda-toolkit-10-0 -y
     wget https://cdn.shinobi.video/installers/libcudnn7-7.6.5.32-1.cuda10.0.x86_64.rpm -O cuda-dnn.rpm
     sudo yum -y localinstall cuda-dnn.rpm
     wget https://cdn.shinobi.video/installers/libcudnn7-devel-7.6.5.32-1.cuda10.0.x86_64.rpm -O cuda-dnn-dev.rpm
