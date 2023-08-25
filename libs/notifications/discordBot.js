@@ -2,6 +2,7 @@ var fs = require("fs")
 var Discord = require("discord.js")
 module.exports = function(s,config,lang,getSnapshot){
     const {
+        getObjectTagNotifyText,
         getEventBasedRecordingUponCompletion,
     } = require('../events/utils.js')(s,config,lang)
     //discord bot
@@ -56,6 +57,8 @@ module.exports = function(s,config,lang,getSnapshot){
                 //discord bot
                 const isEnabled = filter.discord || monitorConfig.details.detector_discordbot === '1' || monitorConfig.details.notify_discord === '1'
                 if(s.group[d.ke].discordBot && isEnabled && !s.group[d.ke].activeMonitors[d.id].detector_discordbot){
+                    const monitorName = s.group[d.ke].rawMonitorConfigurations[d.id].name
+                    const notifyText = getObjectTagNotifyText(d)
                     var detector_discordbot_timeout
                     if(!monitorConfig.details.detector_discordbot_timeout||monitorConfig.details.detector_discordbot_timeout===''){
                         detector_discordbot_timeout = 1000 * 60 * 10;
@@ -70,11 +73,11 @@ module.exports = function(s,config,lang,getSnapshot){
                     if(d.screenshotBuffer){
                         sendMessage({
                             author: {
-                              name: s.group[d.ke].rawMonitorConfigurations[d.id].name,
+                              name: monitorName,
                               icon_url: config.iconURL
                             },
-                            title: lang.Event+' - '+d.screenshotName,
-                            description: lang.EventText1+' '+d.currentTimestamp,
+                            title: notifyText,
+                            description: notifyText+' '+d.currentTimestamp,
                             fields: [],
                             timestamp: d.currentTime,
                             footer: {
@@ -84,7 +87,7 @@ module.exports = function(s,config,lang,getSnapshot){
                         },[
                             {
                                 attachment: d.screenshotBuffer,
-                                name: d.screenshotName+'.jpg'
+                                name: notifyText + '.jpg'
                             }
                         ],d.ke)
                     }
@@ -106,20 +109,21 @@ module.exports = function(s,config,lang,getSnapshot){
                         if(videoPath){
                             sendMessage({
                                 author: {
-                                  name: s.group[d.ke].rawMonitorConfigurations[d.id].name,
+                                  name: monitorName,
                                   icon_url: config.iconURL
                                 },
-                                title: videoName,
+                                title: `${notifyText}`,
+                                description: notifyText,
                                 fields: [],
                                 timestamp: d.currentTime,
                                 footer: {
-                                  icon_url: config.iconURL,
-                                  text: "Shinobi Systems"
+                                    icon_url: config.iconURL,
+                                    text: "Shinobi Systems"
                                 }
                             },[
                                 {
                                     attachment: videoPath,
-                                    name: videoName
+                                    name: notifyText + '.mp4'
                                 }
                             ],d.ke)
                         }
