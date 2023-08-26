@@ -8,6 +8,7 @@ var fs = require("fs")
 // }
 module.exports = function(s,config,lang,getSnapshot){
     const {
+        getObjectTagNotifyText,
         getEventBasedRecordingUponCompletion,
     } = require('../events/utils.js')(s,config,lang)
     const {
@@ -99,6 +100,7 @@ module.exports = function(s,config,lang,getSnapshot){
                 // d = event object
                 //telegram bot
                 if(s.group[d.ke].telegramBot && (filter.telegram || monitorConfig.details.notify_telegram === '1') && !s.group[d.ke].activeMonitors[d.id].detector_telegrambot){
+                    const notifyText = getObjectTagNotifyText(d)
                     var detector_telegrambot_timeout
                     if(!monitorConfig.details.detector_telegrambot_timeout||monitorConfig.details.detector_telegrambot_timeout===''){
                         detector_telegrambot_timeout = 1000 * 60 * 10;
@@ -112,13 +114,13 @@ module.exports = function(s,config,lang,getSnapshot){
                     await getSnapshot(d,monitorConfig)
                     if(d.screenshotBuffer){
                         sendMessage({
-                            title: lang.Event+' - '+d.screenshotName,
+                            title: notifyText,
                             description: lang.EventText1+' '+d.currentTimestamp,
                         },[
                             {
                                 type: 'photo',
                                 attachment: d.screenshotBuffer,
-                                name: d.screenshotName+'.jpg'
+                                name: notifyText + '.jpg'
                             }
                         ],d.ke)
                     }
@@ -142,12 +144,12 @@ module.exports = function(s,config,lang,getSnapshot){
                             const thumbFile = getStreamDirectory(d) + 'thumb.jpg';
                             fs.writeFileSync(thumbFile, d.screenshotBuffer)
                             sendMessage({
-                                title: videoName,
+                                title: notifyText,
                             },[
                                 {
                                     type: 'video',
                                     attachment: videoPath,
-                                    name: videoName,
+                                    name: notifyText + '.mp4',
                                     thumb: thumbFile
                                 }
                             ],d.ke)

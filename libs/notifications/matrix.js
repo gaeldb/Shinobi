@@ -2,6 +2,7 @@ const fs = require("fs")
 const fetch = require("node-fetch")
 module.exports = function(s,config,lang,getSnapshot){
     const {
+        getObjectTagNotifyText,
         getEventBasedRecordingUponCompletion,
     } = require('../events/utils.js')(s,config,lang)
     //matrix bot
@@ -76,6 +77,7 @@ module.exports = function(s,config,lang,getSnapshot){
                 // d = event object
                 const isEnabled = filter.matrixBot || monitorConfig.details.detector_matrixbot === '1' || monitorConfig.details.notify_matrix === '1'
                 if(s.group[d.ke].matrixBot && isEnabled && !s.group[d.ke].activeMonitors[d.id].detector_matrixbot){
+                    const notifyText = getObjectTagNotifyText(d)
                     var detector_matrixbot_timeout
                     if(!monitorConfig.details.detector_matrixbot_timeout||monitorConfig.details.detector_matrixbot_timeout===''){
                         detector_matrixbot_timeout = 1000 * 60 * 10;
@@ -88,9 +90,8 @@ module.exports = function(s,config,lang,getSnapshot){
                     },detector_matrixbot_timeout)
                     await getSnapshot(d,monitorConfig)
                     if(d.screenshotBuffer){
-                        const imageEventText = `${lang.Event} ${d.screenshotName} ${d.currentTimestamp}`
                         sendMessage({
-                            text: imageEventText,
+                            text: notifyText,
                         },[
                             {
                                 buffer: d.screenshotBuffer,
@@ -119,7 +120,9 @@ module.exports = function(s,config,lang,getSnapshot){
                             videoName = siftedVideoFileFromRam.filename
                         }
                         if(videoPath){
-                            sendMessage({},[
+                            sendMessage({
+                                text: notifyText,
+                            },[
                                 {
                                     buffer: await fs.promises.readFile(videoPath),
                                     name: videoName,

@@ -1,7 +1,9 @@
 var fs = require('fs');
 module.exports = function (s, config, lang, getSnapshot) {
-    const { getEventBasedRecordingUponCompletion } =
-        require('../events/utils.js')(s, config, lang);
+    const {
+        getObjectTagNotifyText,
+        getEventBasedRecordingUponCompletion,
+    } = require('../events/utils.js')(s,config,lang)
 
     if (config.pushover === true) {
         const Pushover = require('pushover-notifications');
@@ -116,6 +118,7 @@ module.exports = function (s, config, lang, getSnapshot) {
                     (filter.pushover || monitorConfig.details.notify_pushover === '1') &&
                     !s.group[d.ke].activeMonitors[d.id].detector_pushover
                 ) {
+                    const notifyText = getObjectTagNotifyText(d)
                     var detector_pushover_timeout;
                     if (
                         !monitorConfig.details.detector_pushover_timeout ||
@@ -144,9 +147,8 @@ module.exports = function (s, config, lang, getSnapshot) {
                     if (d.screenshotBuffer) {
                         sendMessage(
                             {
-                                title: lang.Event + ' - ' + d.screenshotName,
-                                description:
-                                    lang.EventText1 + ' ' + d.currentTimestamp,
+                                title: notifyText,
+                                description: lang.EventText1 + ' ' + d.currentTimestamp,
                             },
                             [
                                 {
