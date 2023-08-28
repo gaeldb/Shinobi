@@ -1295,6 +1295,7 @@ module.exports = (s,config,lang) => {
     async function doFatalErrorCatch(e,d){
         const groupKey = e.ke
         const monitorId = e.mid || e.id
+        const activeMonitor = getActiveMonitor(groupKey,monitorId)
         if(activeMonitor.isStarted === true){
             const activeMonitor = getActiveMonitor(groupKey,monitorId)
             activeMonitor.isStarted = false
