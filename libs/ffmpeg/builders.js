@@ -549,7 +549,7 @@ module.exports = (s,config,lang) => {
                 }
             }
             if(videoExtIsMp4){
-                customRecordingFlags.push(`-segment_format_options movflags=faststart+frag_keyframe+empty_moov`)
+                customRecordingFlags.push(`-segment_format_options movflags=faststart`)
             }
             if(videoCodec === 'h264_vaapi'){
                 recordingFilters.push('format=nv12,hwupload')
