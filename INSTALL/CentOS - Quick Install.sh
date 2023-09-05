@@ -2,6 +2,7 @@
 
 #Identify version of CentOS
 version=$(rpm --eval %{centos_ver})
+DIR=$(dirname $0)
 
 #Set script to use dnf or yum
 if [ "$version" = 7 ]; then
@@ -85,7 +86,7 @@ echo "========================================================="
 #Check if Node.js is installed
 if ! [ -x "$(command -v node)" ]; then
     echo "Node.js not found, installing..."
-	sh nodejs-redhat.sh
+	sh $DIR/nodejs-redhat.sh
 else
     echo "Node.js is already installed..."
     echo "Version: $(node -v)"

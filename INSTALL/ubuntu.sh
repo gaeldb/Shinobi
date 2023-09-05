@@ -1,4 +1,5 @@
 #!/bin/bash
+DIR=$(dirname $0)
 echo "========================================================="
 echo "==!! Shinobi : The Open Source CCTV and NVR Solution !!=="
 echo "========================================================="
@@ -47,7 +48,7 @@ fi
 if ! [ -x "$(command -v node)" ]; then
     echo "============="
     echo "Shinobi - Installing Node.js"
-    sh nodejs-ubuntu.sh
+    sh $DIR/nodejs-ubuntu.sh
 else
     echo "Node.js Found..."
     echo "Version : $(node -v)"

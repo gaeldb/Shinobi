@@ -1,9 +1,10 @@
 #!/bin/bash
+DIR=$(dirname $0)
 echo "Shinobi - Do you want to Install Node.js?"
 echo "(y)es or (N)o"
 read -r nodejsinstall
 if [ "$nodejsinstall" = "y" ]; then
-    sh nodejs-ubuntu.sh
+    sh $DIR/nodejs-ubuntu.sh
 fi
 
 #Detect Ubuntu Version

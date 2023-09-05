@@ -1,4 +1,5 @@
 #!/bin/bash
+DIR=$(dirname $0)
 echo "========================================================="
 echo "==!! Shinobi : The Open Source CCTV and NVR Solution !!=="
 echo "========================================================="
@@ -55,7 +56,7 @@ if ! [ -x "$(command -v ifconfig)" ]; then
 fi
 echo "============="
 echo "Shinobi - Installing Node.js"
-sh nodejs-ubuntu.sh
+sh $DIR/nodejs-ubuntu.sh
 if ! [ -x "$(command -v npm)" ]; then
     sudo apt install npm -y
 fi
@@ -89,7 +90,6 @@ sqluser="root"
 sudo mysql -e "source sql/user.sql" || true
 echo "============="
 echo "Shinobi - Install NPM Libraries"
-sudo npm i npm -g
 sudo npm install --unsafe-perm
 # sudo npm audit fix --force
 echo "============="
