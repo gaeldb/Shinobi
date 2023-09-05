@@ -3,11 +3,7 @@ echo "Shinobi - Do you want to Install Node.js?"
 echo "(y)es or (N)o"
 read -r nodejsinstall
 if [ "$nodejsinstall" = "y" ]; then
-    wget https://deb.nodesource.com/setup_12.x
-    chmod +x setup_12.x
-    ./setup_12.x
-    sudo apt install nodejs -y
-    rm setup_12.x
+    sh nodejs-ubuntu.sh
 fi
 
 #Detect Ubuntu Version

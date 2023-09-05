@@ -44,8 +44,7 @@ echo "========================================================="
 #Check if Node.js is installed
 if ! [ -x "$(command -v node)" ]; then
     echo "Node.js not found, installing..."
-    sudo curl --silent --location https://rpm.nodesource.com/setup_16.x | sudo bash -
-	sudo yum install nodejs -y -q -e 0
+	sh nodejs-redhat.sh
 else
     echo "Node.js is already installed..."
     echo "Version: $(node -v)"
@@ -93,6 +92,7 @@ sudo npm install pm2@latest -g
 sudo chmod -R 755 .
 touch INSTALL/installed.txt
 dos2unix INSTALL/shinobi
+chmod +x INSTALL/shinobi
 ln -s INSTALL/shinobi /usr/bin/shinobi
 
 echo "========================================================="
