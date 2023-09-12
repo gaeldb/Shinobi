@@ -172,7 +172,7 @@ onWebSocketEvent(function (d){
             cpuIndicatorBar.css('width',cpuPercent)
             cpuIndicatorPercentText.html(cpuPercent)
             //ram
-            var ramPercent = d.ram.percent.toFixed(1) + '%'
+            var ramPercent = parseFloat(d.ram.percent).toFixed(1) + '%'
             ramIndicatorBar.css('width',ramPercent)
             ramIndicatorPercentText.html(ramPercent)
             ramIndicatorUsed.html(d.ram.used.toFixed(2))
