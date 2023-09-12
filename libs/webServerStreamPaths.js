@@ -159,7 +159,7 @@ module.exports = function(s,config,lang,app){
                     return;
                 }
                 s.checkChildProxy(req.params,function(){
-                    if(s.group[req.params.ke]&&s.group[req.params.ke].activeMonitors[req.params.id]){
+                    if(s.group[req.params.ke]&&s.group[req.params.ke].activeMonitors&&s.group[req.params.ke].activeMonitors[req.params.id]){
                         if(user.permissions.watch_stream==="0"||user.details.sub&&user.details.allmonitors!=='1'&&user.details.monitors.indexOf(req.params.id)===-1){
                             res.end(user.lang['Not Permitted'])
                             return
