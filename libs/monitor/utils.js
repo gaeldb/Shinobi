@@ -37,9 +37,6 @@ module.exports = (s,config,lang) => {
         selectNodeForOperation,
         bindMonitorToChildNode
     } = require('../childNode/utils.js')(s,config,lang)
-    const {
-        asyncSetTimeout,
-    } = require('../basic/utils.js')(process.cwd(),config)
     const isMasterNode = (
         (
             config.childNodes.enabled === true &&
@@ -769,7 +766,6 @@ module.exports = (s,config,lang) => {
             code: 4,
         });
         await s.camera('stop',e)
-        await asyncSetTimeout(2500)
         if(e.mode !== 'restart')await s.camera(`${e.mode}`,e);
     }
     function monitorAddViewer(e,cn){
@@ -899,7 +895,7 @@ module.exports = (s,config,lang) => {
             status: lang.Restarting,
             code: 4,
         })
-        await monitorRestart(monitorConfig)
+        await launchMonitorProcesses(monitorConfig)
         s.userLog({
             ke: groupKey,
             mid: monitorId,
