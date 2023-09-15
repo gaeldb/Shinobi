@@ -13,6 +13,8 @@ module.exports = function(s,config,lang){
     } = require('./basic/utils.js')(process.cwd(),config)
     const {
         splitForFFMPEG,
+        applyPartialToConfiguration,
+        getWarningChangesForMonitor,
     } = require('./ffmpeg/utils.js')(s,config,lang)
     const {
         processKill,
@@ -551,7 +553,6 @@ module.exports = function(s,config,lang){
             return
         }
         form.mid = form.mid.replace(/[^\w\s]/gi,'').replace(/ /g,'')
-        form = s.cleanMonitorObjectForDatabase(form)
         const selectResponse = await s.knexQueryPromise({
             action: "select",
             columns: "*",
@@ -570,6 +571,16 @@ module.exports = function(s,config,lang){
             ke: form.ke,
             mon: form
         }
+        // auto correct
+        const {
+            configPartial,
+            warnings,
+            probeResponse,
+            probeStreams,
+        } = await getWarningChangesForMonitor(form)
+        applyPartialToConfiguration(form,configPartial)
+        form = s.cleanMonitorObjectForDatabase(form)
+        //
         if(monitorExists){
             txData.new = false
             Object.keys(form).forEach(function(v){

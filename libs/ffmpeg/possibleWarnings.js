@@ -1,5 +1,6 @@
 module.exports = (monitor,probeResult,config,lang) => {
     const primaryVideoStream = probeResult.video[0]
+    const noPortOr554 = !monitor.port || monitor.port === 554
     return [
         {
             isTrue: monitor.details.stream_vcodec === 'copy' && primaryVideoStream.codec === 'hevc',
@@ -83,7 +84,7 @@ module.exports = (monitor,probeResult,config,lang) => {
         },
         {
             isTrue: (
-                !monitor.port &&
+                noPortOr554 &&
                 monitor.protocol === 'rtmp'
             ),
             title: lang['Automatic Field Fill'],
@@ -95,7 +96,7 @@ module.exports = (monitor,probeResult,config,lang) => {
         },
         {
             isTrue: (
-                !monitor.port &&
+                noPortOr554 &&
                 monitor.protocol === 'http'
             ),
             title: lang['Automatic Field Fill'],
@@ -107,7 +108,7 @@ module.exports = (monitor,probeResult,config,lang) => {
         },
         {
             isTrue: (
-                !monitor.port &&
+                noPortOr554 &&
                 (monitor.protocol === 'rtmps' ||
                 monitor.protocol === 'https')
             ),

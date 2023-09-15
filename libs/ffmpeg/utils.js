@@ -367,6 +367,18 @@ Run "npm install ffbinaries" to get this static FFmpeg downloader.`
         }
         return response
     }
+    async function getWarningChangesForMonitor(monitorConfig){
+        const probeResponse = await probeMonitor(monitorConfig,2000,true)
+        const probeStreams = getStreamInfoFromProbe(probeResponse.result)
+        const warnings = createWarningsForConfiguration(monitorConfig,probeStreams)
+        const configPartial = warnings.length > 0 ? buildMonitorConfigPartialFromWarnings(warnings) : {}
+        return {
+            configPartial,
+            warnings,
+            probeResponse,
+            probeStreams,
+        }
+    }
     return {
         ffprobe: runFFprobe,
         probeMonitor: probeMonitor,
@@ -386,5 +398,6 @@ Run "npm install ffbinaries" to get this static FFmpeg downloader.`
         checkStaticBuilds: checkStaticBuilds,
         checkVersion: checkVersion,
         checkHwAccelMethods: checkHwAccelMethods,
+        getWarningChangesForMonitor,
     }
 }
