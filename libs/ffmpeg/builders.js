@@ -548,7 +548,7 @@ module.exports = (s,config,lang) => {
                     recordingFilters.push(`fps=${videoFps}`)
                 }
             }
-            if(videoExtIsMp4){
+            if(videoExtIsMp4 && !config.noDefaultRecordingSegmentFormatOptions){
                 customRecordingFlags.push(`-segment_format_options movflags=faststart`)
             }
             if(videoCodec === 'h264_vaapi'){
