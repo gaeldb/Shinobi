@@ -836,10 +836,11 @@ module.exports = (s,config,lang) => {
     function getObjectTagsFromMatrices(d){
         if(d.details.reason === 'motion'){
             return [getTagWithIcon(lang.Motion)]
-        }else{
-            const matrices = d.details.matrices || []
+        }else if(d.details.matrices){
+            const matrices = d.details.matrices
             return [...new Set(matrices.map(matrix => getTagWithIcon(matrix.tag)))];
         }
+        return [getTagWithIcon(d.details.reason)]
     }
     function getObjectTagNotifyText(d){
         const monitorId = d.mid || d.id
