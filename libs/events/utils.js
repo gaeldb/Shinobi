@@ -837,7 +837,7 @@ module.exports = (s,config,lang) => {
         if(d.details.reason === 'motion'){
             return [getTagWithIcon(lang.Motion)]
         }else{
-            const matrices = d.details.matrices
+            const matrices = d.details.matrices || []
             return [...new Set(matrices.map(matrix => getTagWithIcon(matrix.tag)))];
         }
     }
