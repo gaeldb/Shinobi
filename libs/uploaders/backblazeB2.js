@@ -3,18 +3,19 @@ const { Readable } = require('stream');
 const B2 = require('backblaze-b2')
 module.exports = function(s,config,lang){
     //Backblaze B2
+    var serviceProvider = 'b2'
     var beforeAccountSaveForBackblazeB2 = function(d){
         //d = save event
         d.formDetails.b2_use_global=d.d.b2_use_global
         d.formDetails.use_bb_b2=d.d.use_bb_b2
     }
     var cloudDiskUseStartupForBackblazeB2 = function(group,userDetails){
-        group.cloudDiskUse['b2'].name = 'Backblaze B2'
-        group.cloudDiskUse['b2'].sizeLimitCheck = (userDetails.use_bb_b2_size_limit === '1')
+        group.cloudDiskUse[serviceProvider].name = 'Backblaze B2'
+        group.cloudDiskUse[serviceProvider].sizeLimitCheck = (userDetails.use_bb_b2_size_limit === '1')
         if(!userDetails.bb_b2_size_limit || userDetails.bb_b2_size_limit === ''){
-            group.cloudDiskUse['b2'].sizeLimit = 10000
+            group.cloudDiskUse[serviceProvider].sizeLimit = 10000
         }else{
-            group.cloudDiskUse['b2'].sizeLimit = parseFloat(userDetails.bb_b2_size_limit)
+            group.cloudDiskUse[serviceProvider].sizeLimit = parseFloat(userDetails.bb_b2_size_limit)
         }
     }
     var loadBackblazeB2ForUser = function(e){
@@ -83,7 +84,7 @@ module.exports = function(s,config,lang){
         }catch(err){
             var videoDetails = video.details
         }
-        if(video.type !== 'b2'){
+        if(video.type !== serviceProvider){
             callback()
             return
         }
@@ -128,30 +129,35 @@ module.exports = function(s,config,lang){
                     }).then(function(resp){
                         const uploadResponse = resp.data
                         if(theGroup.init.bb_b2_log === '1' && uploadResponse.fileId){
+                            const insertDetails = {
+                                bucketId : uploadResponse.bucketId,
+                                fileId : uploadResponse.fileId,
+                                fileName : uploadResponse.fileName
+                            }
+                            const insertQuery = {
+                                mid: e.mid,
+                                ke: e.ke,
+                                time: k.startTime,
+                                status: 1,
+                                type : serviceProvider,
+                                details: insertDetails,
+                                size: k.filesize,
+                                end: k.endTime,
+                                href: ''
+                            }
                             s.knexQuery({
                                 action: "insert",
                                 table: "Cloud Videos",
-                                insert: {
-                                    mid: e.mid,
-                                    ke: e.ke,
-                                    time: k.startTime,
-                                    status: 1,
-                                    type : 'b2',
-                                    details: s.s({
-                                        bucketId : uploadResponse.bucketId,
-                                        fileId : uploadResponse.fileId,
-                                        fileName : uploadResponse.fileName
-                                    }),
-                                    size: k.filesize,
-                                    end: k.endTime,
-                                    href: ''
-                                }
+                                insert: Object.assign({},insertQuery,{details: s.s(insertDetails)})
                             })
                             s.setCloudDiskUsedForGroup(e.ke,{
                                 amount : k.filesizeMB,
-                                storageType : 'b2'
+                                storageType : serviceProvider
                             })
-                            s.purgeCloudDiskForGroup(e,'b2')
+                            s.purgeCloudDiskForGroup(e,serviceProvider)
+                            s.onCloudVideoUploadedExtensions.forEach((extender) => {
+                                extender(insertQuery)
+                            })
                         }
                     }).catch(backblazeErr)
                 })
@@ -183,7 +189,7 @@ module.exports = function(s,config,lang){
     }
     //backblaze b2
     s.addCloudUploader({
-        name: 'b2',
+        name: serviceProvider,
         loadGroupAppExtender: loadBackblazeB2ForUser,
         unloadGroupAppExtender: unloadBackblazeB2ForUser,
         insertCompletedVideoExtender: uploadVideoToBackblazeB2,
