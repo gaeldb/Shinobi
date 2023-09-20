@@ -189,17 +189,28 @@ $(document).ready(function(){
         }
     }
     function formatVideosForTimeline(videos){
-        var formattedVideos = (videos || []).map((item) => {
-            var blockColor = timeStripItemColors[item.mid];
+        var formattedVideos = [];
+        (videos || []).forEach((video) => {
+            var blockColor = timeStripItemColors[video.mid];
             ++timeStripItemIncrement;
-            return {
+            formattedVideos.push({
                 id: timeStripItemIncrement,
                 content: ``,
                 style: `background-color: ${blockColor};border-color: ${blockColor}`,
-                start: item.time,
-                end: item.end,
+                start: video.time,
+                end: video.end,
                 group: 1
-            }
+            })
+            video.events.forEach((theEvent) => {
+                ++timeStripItemIncrement;
+                formattedVideos.push({
+                    id: timeStripItemIncrement,
+                    content: ``,
+                    style: `background-color: yellow;border-color: yellow`,
+                    start: theEvent.time,
+                    group: 1
+                })
+            })
         });
         return formattedVideos
     }
