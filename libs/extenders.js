@@ -25,6 +25,8 @@ module.exports = function(s,config){
     createExtension(`beforeAccountSave`)
     createExtension(`onTwoFactorAuthCodeNotification`)
     createExtension(`onStalePurgeLock`)
+    createExtension(`onVideoAccess`)
+    createExtension(`onLogout`)
     ////// EVENTS //////
     createExtension(`onEventTrigger`)
     createExtension(`onEventTriggerBeforeFilter`)

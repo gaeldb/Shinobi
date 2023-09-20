@@ -107,9 +107,18 @@ module.exports = function(s,config,lang,app,io){
     * API : Logout
     */
     app.get(config.webPaths.apiPrefix+':auth/logout/:ke/:id', function (req,res){
-        if(s.group[req.params.ke] && s.group[req.params.ke].users[req.params.auth] && s.group[req.params.ke].users[req.params.auth].details){
-            delete(s.api[req.params.auth]);
-            delete(s.group[req.params.ke].users[req.params.auth]);
+        const groupKey = req.params.ke
+        const userId = req.params.id
+        const authToken = req.params.auth
+        const user = s.group[groupKey] && s.group[groupKey].users[authToken] && s.group[groupKey].users[authToken].details ? s.group[groupKey].users[authToken] : null;
+        if(user){
+            const clientIp = s.getClientIp(req)
+            const user = s.group[groupKey].users[authToken]
+            s.onLogoutExtensions.forEach((extender) => {
+                extender(user,groupKey,userId,clientIp)
+            });
+            delete(s.api[authToken]);
+            delete(s.group[groupKey].users[authToken]);
             s.knexQuery({
                 action: "update",
                 table: "Users",
@@ -117,9 +126,9 @@ module.exports = function(s,config,lang,app,io){
                     auth: '',
                 },
                 where: [
-                    ['auth','=',req.params.auth],
-                    ['ke','=',req.params.ke],
-                    ['uid','=',req.params.id],
+                    ['auth','=',authToken],
+                    ['ke','=',groupKey],
+                    ['uid','=',userId],
                 ]
             })
             res.end(s.prettyPrint({ok:true,msg:'You have been logged out, session key is now inactive.'}))
@@ -1454,6 +1463,10 @@ module.exports = function(s,config,lang,app,io){
                         }else{
                             s.streamMp4FileOverHttp(filePath,req,res,!!req.query.pureStream)
                         }
+                        const clientIp = s.getClientIp(req)
+                        s.onVideoAccessExtensions.forEach((extender) => {
+                            extender(videoRow,user,groupKey,monitorId,clientIp)
+                        })
                     }else{
                         s.closeJsonResponse(res,{
                             ok: false,

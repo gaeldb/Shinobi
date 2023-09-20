@@ -18,6 +18,7 @@ module.exports = function(s,config,lang){
         deleteCloudTimelapseFrames,
         resetAllStorageCounters,
     } = require("./user/utils.js")(s,config,lang);
+    require("./user/logger.js")(s,config,lang)
     let purgeDiskGroup = () => {}
     const runQuery = async.queue(function(groupKey, callback) {
         purgeDiskGroup(groupKey,callback)
