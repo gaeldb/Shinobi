@@ -324,84 +324,124 @@ module.exports = function(s,config,lang){
               "description": "",
               "default": "",
               "example": "",
-              "possible":  [
-                   {
-                      "name": lang['No Region'],
-                      "value": ""
-                   },
-                   {
-                      "name": "US West 1",
-                      "value": "us-west-1"
-                   },
-                   {
-                      "name": "US West 2",
-                      "value": "us-west-2"
-                   },
-                   {
-                      "name": "US East 1",
-                      "value": "us-east-1"
-                   },
-                   {
-                      "name": "US East 2",
-                      "value": "us-east-2"
-                   },
-                   {
-                      "name": "Asia Pacific 1",
-                      "value": "ap-south-1"
-                   },
-                   {
-                      "name": "Asia Pacific 2",
-                      "value": "ap-northeast-2"
-                   },
-                   {
-                      "name": "Asia Pacific 3",
-                      "value": "ap-northeast-3"
-                   },
-                   {
-                      "name": "Asia Pacific 4",
-                      "value": "ap-southeast-1"
-                   },
-                   {
-                      "name": "Asia Pacific 5",
-                      "value": "ap-southeast-2"
-                   },
-                   {
-                      "name": "Asia Pacific 6",
-                      "value": "ap-northeast-1"
-                   },
-                   {
-                      "name": "Canada 1",
-                      "value": "ca-central-1"
-                   },
-                   {
-                      "name": "China 1",
-                      "value": "cn-north-1"
-                   },
-                   {
-                      "name": "China 1",
-                      "value": "cn-northwest-1"
-                   },
-                   {
-                      "name": "EU 1",
-                      "value": "eu-central-1"
-                   },
-                   {
-                      "name": "EU 2",
-                      "value": "eu-west-1"
-                   },
-                   {
-                      "name": "EU 3",
-                      "value": "eu-west-2"
-                   },
-                   {
-                      "name": "EU 4",
-                      "value": "eu-west-3"
-                   },
-                   {
-                      "name": "South America 1",
-                      "value": "sa-east-1"
-                   }
-              ]
+              "possible": [
+                    {
+                        "name": "US West (N. California)",
+                        "value": "us-west-1"
+                    },
+                    {
+                        "name": "US West (Oregon)",
+                        "value": "us-west-2"
+                    },
+                    {
+                        "name": "US East (Ohio)",
+                        "value": "us-east-2"
+                    },
+                    {
+                        "name": "US East (N. Virginia)",
+                        "value": "us-east-1"
+                    },
+                    {
+                        "name": "Canada (Central)",
+                        "value": "ca-central-1"
+                    },
+                    {
+                        "name": "South America (São Paulo)",
+                        "value": "sa-east-1"
+                    },
+                    {
+                        "name": "EU (Frankfurt)",
+                        "value": "eu-central-1"
+                    },
+                    {
+                        "name": "EU (Ireland)",
+                        "value": "eu-west-1"
+                    },
+                    {
+                        "name": "EU (London)",
+                        "value": "eu-west-2"
+                    },
+                    {
+                        "name": "EU (Paris)",
+                        "value": "eu-west-3"
+                    },
+                    {
+                        "name": "Europe (Milan)",
+                        "value": "eu-south-1"
+                    },
+                    {
+                        "name": "Europe (Spain)",
+                        "value": "eu-south-2"
+                    },
+                    {
+                        "name": "Europe (Zurich)",
+                        "value": "eu-central-2"
+                    },
+                    {
+                        "name": "Asia Pacific (Mumbai)",
+                        "value": "ap-south-1"
+                    },
+                    {
+                        "name": "Asia Pacific (Seoul)",
+                        "value": "ap-northeast-2"
+                    },
+                    {
+                        "name": "Asia Pacific (Osaka-Local)**",
+                        "value": "ap-northeast-3"
+                    },
+                    {
+                        "name": "Asia Pacific (Singapore)",
+                        "value": "ap-southeast-1"
+                    },
+                    {
+                        "name": "Asia Pacific (Sydney)",
+                        "value": "ap-southeast-2"
+                    },
+                    {
+                        "name": "Asia Pacific (Tokyo)",
+                        "value": "ap-northeast-1"
+                    },
+                    {
+                        "name": "Asia Pacific (Hong Kong)",
+                        "value": "ap-east-1"
+                    },
+                    {
+                        "name": "Asia Pacific (Hyderabad)",
+                        "value": "ap-south-2"
+                    },
+                    {
+                        "name": "Asia Pacific (Jakarta)",
+                        "value": "ap-southeast-3"
+                    },
+                    {
+                        "name": "Asia Pacific (Melbourne)",
+                        "value": "ap-southeast-4"
+                    },
+                    {
+                        "name": "China (Beijing)",
+                        "value": "cn-north-1"
+                    },
+                    {
+                        "name": "China (Ningxia)",
+                        "value": "cn-northwest-1"
+                    },
+                    {
+                        "name": "Africa (Cape Town)",
+                        "value": "af-south-1"
+                    },
+                    {
+                        "name": "Middle East (Bahrain)",
+                        "value": "me-south-1"
+                    },
+                    {
+                        "name": "Middle East (UAE)",
+                        "value": "me-central-1"
+                    },
+                    {
+                        "name": "il-central-1",
+                        "value": "il-central-1"
+                    }
+               ]
           },
           {
               "hidden": true,
