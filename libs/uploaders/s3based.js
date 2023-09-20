@@ -326,6 +326,10 @@ module.exports = function(s,config,lang){
               "example": "",
               "possible": [
                     {
+                       "name": lang['No Region'],
+                       "value": ""
+                    },
+                    {
                         "name": "US West (N. California)",
                         "value": "us-west-1"
                     },
