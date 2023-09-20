@@ -327,11 +327,13 @@ function compileConnectUrl(options){
 function jsonToHtmlBlock(target){
     var html = ''
     if(target instanceof Object){
+        var html = '<ul>'
         $.each(target,function(key,value){
-            html += `<div>
-                <b>${key}</b> : ${jsonToHtmlBlock(value)}
-            </div>`
+            html += `
+                <li><b>${key}</b> : ${jsonToHtmlBlock(value)}</li>
+            `
         })
+        html += '</ul>'
     }else{
         html += `<span>${target}</span>`
     }
@@ -836,7 +838,7 @@ function buildLogRow(v){
             <small class="${definitions.Theme.isDark ? 'text-white' : ''}">${humanMonitorName}${v.info && v.info.type ? v.info.type : v.mid}</small>
         </div>
         <div class="card-body">
-            <div>${jsonToHtmlBlock(v.info.msg)}</div>
+            <div class="msg-tree">${jsonToHtmlBlock(v.info.msg)}</div>
         </div>
         <div class="card-footer">
             <small class="text-muted">${formattedTime(v.time)}</small>

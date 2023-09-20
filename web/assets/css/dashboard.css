@@ -431,3 +431,8 @@ ul.squeeze {
     flex-direction: column;
     height: 100vh;
 }
+
+.log-item .msg-tree > ul {
+    list-style: none;
+    padding-left: 0;
+}
