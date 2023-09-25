@@ -1,5 +1,5 @@
-FROM node:18-bullseye-slim
-
+FROM arm64v8/node:18-bullseye-slim
+    
 ARG DEBIAN_FRONTEND=noninteractive \
     VAR_EXCLUDE_DB=false
 
@@ -31,6 +31,6 @@ VOLUME ["/config"]
 
 EXPOSE 8080 443 21 25
 
-ENTRYPOINT ["sh", "/home/Shinobi/Docker/init.sh"]
+ENTRYPOINT ["/home/Shinobi/Docker/init.sh"]
 
 CMD [ "pm2-docker", "/home/Shinobi/Docker/pm2.yml" ]
