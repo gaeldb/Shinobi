@@ -52,10 +52,10 @@ docker-latest-no-db-build:
   script:
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag="latest-no-db"
+        tag=":no-db"
         echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest-no-db'"
       else
-        tag="latest-no-db:$CI_COMMIT_REF_SLUG"
+        tag=":no-db-$CI_COMMIT_REF_SLUG"
         echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
       fi
     - docker build --pull --build-arg VAR_EXCLUDE_DB=true -t "$CI_REGISTRY_IMAGE${tag}" .
