@@ -28,16 +28,21 @@ docker-latest-build:
     - |
       export BRANCH_PREFIX="" ; 
       export NO_DB_SUFIX="" ;
-      
+      export BRANCH_SEP="" ;
+
       if [[ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]]; then
-        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}-" ;
+        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}" ;
       fi 
 
       if [[ "${INCLUDE_DB}" == "false" ]]; then
         export NO_DB_SUFIX="-no-db" ;
       fi
 
-      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}" ;
+      if [[ "${ARCH_TYPE}" != "" ]]; then
+        export BRANCH_SEP="-" ;
+      fi
+
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${BRANCH_SEP}${ARCH_TYPE}${NO_DB_SUFIX}" ;
       echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
 
     - docker build --pull --build-arg VAR_EXCLUDE_DB="${INCLUDE_DB}" -t "${IMAGE_NAME}" . -f "${DOCKER_FILE}"
@@ -68,16 +73,21 @@ docker-latest-no-db-build:
     - |
       export BRANCH_PREFIX="" ; 
       export NO_DB_SUFIX="" ;
-      
+      export BRANCH_SEP="" ;
+
       if [[ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]]; then
-        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}-" ;
+        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}" ;
       fi 
 
       if [[ "${INCLUDE_DB}" == "false" ]]; then
         export NO_DB_SUFIX="-no-db" ;
       fi
 
-      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}" ;
+      if [[ "${ARCH_TYPE}" != "" ]]; then
+        export BRANCH_SEP="-" ;
+      fi
+
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${BRANCH_SEP}${ARCH_TYPE}${NO_DB_SUFIX}" ;
       echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
 
     - docker build --pull --build-arg VAR_EXCLUDE_DB="${INCLUDE_DB}" -t "${IMAGE_NAME}" . -f "${DOCKER_FILE}"
@@ -108,16 +118,21 @@ docker-arm32v7-build:
     - |
       export BRANCH_PREFIX="" ; 
       export NO_DB_SUFIX="" ;
-      
+      export BRANCH_SEP="" ;
+
       if [[ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]]; then
-        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}-" ;
+        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}" ;
       fi 
 
       if [[ "${INCLUDE_DB}" == "false" ]]; then
         export NO_DB_SUFIX="-no-db" ;
       fi
 
-      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}" ;
+      if [[ "${ARCH_TYPE}" != "" ]]; then
+        export BRANCH_SEP="-" ;
+      fi
+
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${BRANCH_SEP}${ARCH_TYPE}${NO_DB_SUFIX}" ;
       echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
 
     - docker build --pull --build-arg VAR_EXCLUDE_DB="${INCLUDE_DB}" -t "${IMAGE_NAME}" . -f "${DOCKER_FILE}"
@@ -148,16 +163,21 @@ docker-arm32v7-no-db-build:
     - |
       export BRANCH_PREFIX="" ; 
       export NO_DB_SUFIX="" ;
-      
+      export BRANCH_SEP="" ;
+
       if [[ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]]; then
-        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}-" ;
+        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}" ;
       fi 
 
       if [[ "${INCLUDE_DB}" == "false" ]]; then
         export NO_DB_SUFIX="-no-db" ;
       fi
 
-      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}" ;
+      if [[ "${ARCH_TYPE}" != "" ]]; then
+        export BRANCH_SEP="-" ;
+      fi
+
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${BRANCH_SEP}${ARCH_TYPE}${NO_DB_SUFIX}" ;
       echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
 
     - docker build --pull --build-arg VAR_EXCLUDE_DB="${INCLUDE_DB}" -t "${IMAGE_NAME}" . -f "${DOCKER_FILE}"
@@ -188,16 +208,21 @@ docker-arm64v8-build:
     - |
       export BRANCH_PREFIX="" ; 
       export NO_DB_SUFIX="" ;
-      
+      export BRANCH_SEP="" ;
+
       if [[ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]]; then
-        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}-" ;
+        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}" ;
       fi 
 
       if [[ "${INCLUDE_DB}" == "false" ]]; then
         export NO_DB_SUFIX="-no-db" ;
       fi
 
-      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}" ;
+      if [[ "${ARCH_TYPE}" != "" ]]; then
+        export BRANCH_SEP="-" ;
+      fi
+
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${BRANCH_SEP}${ARCH_TYPE}${NO_DB_SUFIX}" ;
       echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
 
     - docker build --pull --build-arg VAR_EXCLUDE_DB="${INCLUDE_DB}" -t "${IMAGE_NAME}" . -f "${DOCKER_FILE}"
@@ -228,16 +253,21 @@ docker-arm64v8-no-db-build:
     - |
       export BRANCH_PREFIX="" ; 
       export NO_DB_SUFIX="" ;
-      
+      export BRANCH_SEP="" ;
+
       if [[ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]]; then
-        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}-" ;
+        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}" ;
       fi 
 
       if [[ "${INCLUDE_DB}" == "false" ]]; then
         export NO_DB_SUFIX="-no-db" ;
       fi
 
-      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}" ;
+      if [[ "${ARCH_TYPE}" != "" ]]; then
+        export BRANCH_SEP="-" ;
+      fi
+
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${BRANCH_SEP}${ARCH_TYPE}${NO_DB_SUFIX}" ;
       echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
 
     - docker build --pull --build-arg VAR_EXCLUDE_DB="${INCLUDE_DB}" -t "${IMAGE_NAME}" . -f "${DOCKER_FILE}"
@@ -269,16 +299,21 @@ docker-nvidia-build:
     - |
       export BRANCH_PREFIX="" ; 
       export NO_DB_SUFIX="" ;
-      
+      export BRANCH_SEP="" ;
+
       if [[ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]]; then
-        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}-" ;
+        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}" ;
       fi 
 
       if [[ "${INCLUDE_DB}" == "false" ]]; then
         export NO_DB_SUFIX="-no-db" ;
       fi
 
-      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}" ;
+      if [[ "${ARCH_TYPE}" != "" ]]; then
+        export BRANCH_SEP="-" ;
+      fi
+
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${BRANCH_SEP}${ARCH_TYPE}${NO_DB_SUFIX}" ;
       echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
 
     - docker build --pull --build-arg VAR_EXCLUDE_DB="${INCLUDE_DB}" -t "${IMAGE_NAME}" . -f "${DOCKER_FILE}"
@@ -309,16 +344,21 @@ docker-nvidia-no-db-build:
     - |
       export BRANCH_PREFIX="" ; 
       export NO_DB_SUFIX="" ;
-      
+      export BRANCH_SEP="" ;
+
       if [[ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]]; then
-        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}-" ;
+        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}" ;
       fi 
 
       if [[ "${INCLUDE_DB}" == "false" ]]; then
         export NO_DB_SUFIX="-no-db" ;
       fi
 
-      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}" ;
+      if [[ "${ARCH_TYPE}" != "" ]]; then
+        export BRANCH_SEP="-" ;
+      fi
+
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${BRANCH_SEP}${ARCH_TYPE}${NO_DB_SUFIX}" ;
       echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
 
     - docker build --pull --build-arg VAR_EXCLUDE_DB="${INCLUDE_DB}" -t "${IMAGE_NAME}" . -f "${DOCKER_FILE}"
