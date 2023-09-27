@@ -220,7 +220,7 @@ docker-nvidia-no-db-build:
   stage: build
   variables:
     ARCH_TYPE: "nvidia"
-    INCLUDE_DB: false
+    INCLUDE_DB: "false"
     DOCKER_FILE: "Dockerfile.nvidia"
   services:
     - docker:dind
