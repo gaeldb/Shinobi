@@ -52,10 +52,10 @@ docker-latest-no-db-build:
   script:
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag=":no-db"
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest-no-db'"
+        tag=":latest-no-db"
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = '${tag}'"
       else
-        tag=":no-db-$CI_COMMIT_REF_SLUG"
+        tag=":${CI_COMMIT_REF_SLUG}-no-db"
         echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
       fi
     - docker build --pull --build-arg VAR_EXCLUDE_DB=true -t "$CI_REGISTRY_IMAGE${tag}" .
@@ -82,9 +82,9 @@ docker-arm32v7-build:
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         tag=":arm32v7"
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'arm32v7'"
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = '${tag}'"
       else
-        tag=":arm32v7-$CI_COMMIT_REF_SLUG"
+        tag=":${CI_COMMIT_REF_SLUG}-arm32v7"
         echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
       fi
     - docker build --pull -t "$CI_REGISTRY_IMAGE${tag}" . -f Dockerfile.arm32v7
@@ -111,9 +111,9 @@ docker-arm32v7-no-db-build:
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         tag=":arm32v7-no-db"
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'arm32v7-no-db'"
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = '${tag}'"
       else
-        tag=":arm32v7-no-db-$CI_COMMIT_REF_SLUG"
+        tag=":${CI_COMMIT_REF_SLUG}-arm32v7-no-db"
         echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
       fi
     - docker build --pull --build-arg VAR_EXCLUDE_DB=true -t "$CI_REGISTRY_IMAGE${tag}" . -f Dockerfile.arm32v7
@@ -140,9 +140,9 @@ docker-arm64v8-build:
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         tag=":arm64v8"
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'arm64v8'"
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = '${tag}'"
       else
-        tag=":arm64v8-$CI_COMMIT_REF_SLUG"
+        tag=":${CI_COMMIT_REF_SLUG}-arm64v8"
         echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
       fi
     - docker build --pull -t "$CI_REGISTRY_IMAGE${tag}" . -f Dockerfile.arm64v8
@@ -169,9 +169,9 @@ docker-arm64v8-no-db-build:
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         tag=":arm64v8-no-db"
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'arm64v8-no-db'"
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = '${tag}'"
       else
-        tag=":arm64v8-no-db-$CI_COMMIT_REF_SLUG"
+        tag=":${CI_COMMIT_REF_SLUG}-arm64v8-no-db"
         echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
       fi
     - docker build --pull --build-arg VAR_EXCLUDE_DB=true -t "$CI_REGISTRY_IMAGE${tag}" . -f Dockerfile.arm64v8
@@ -199,9 +199,9 @@ docker-nvidia-build:
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         tag=":nvidia"
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'nvidia'"
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = '${tag}'"
       else
-        tag=":nvidia-$CI_COMMIT_REF_SLUG"
+        tag=":${CI_COMMIT_REF_SLUG}-nvidia"
         echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
       fi
     - docker build --pull -t "$CI_REGISTRY_IMAGE${tag}" . -f Dockerfile.nvidia
@@ -226,19 +226,35 @@ docker-nvidia-no-db-build:
   # All other branches are tagged with the escaped branch name (commit ref slug)
   script:
     - |
-      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag=":nvidia-no-db"
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'nvidia-no-db'"
-      else
-        tag=":nvidia-no-db-$CI_COMMIT_REF_SLUG"
-        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+      arch="nvidia"
+      branch=""
+      no_db=true
+      no_db_tag = ""
+      docker_file_ext=""
+
+      if [[ "${arch}" != "" ]]; then
+        docker_file_ext=".${arch}"
       fi
-    - docker build --pull --build-arg VAR_EXCLUDE_DB=true -t "$CI_REGISTRY_IMAGE${tag}" . -f Dockerfile.nvidia
-    - docker push "$CI_REGISTRY_IMAGE${tag}"
+
+      if [[ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]]; then
+        branch="${CI_COMMIT_REF_SLUG}-"
+      fi
+
+      if [[ "${no_db}" == "true" ]]; then
+        no_db_tag="-no-db"
+      fi
+
+      tag=":${branch}${arch}${no_db_tag}"
+      
+      image_tag="$CI_REGISTRY_IMAGE${tag}"
+      echo "Running on branch '${CI_COMMIT_BRANCH}', Tag: ${tag}, Image: ${image_tag}"
+
+    - docker build --pull --build-arg VAR_EXCLUDE_DB="${no_db}" -t "${image_tag}" . -f "Dockerfile${docker_file_ext}"
+    - docker push "${image_tag}"
   # Run this job in a branch where a Dockerfile exists
   rules:
-    - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
-      when: never
+    # - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
+    #  when: never
     - if: $CI_COMMIT_BRANCH
       exists:
         - Dockerfile.nvidia

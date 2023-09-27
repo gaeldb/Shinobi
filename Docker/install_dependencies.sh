@@ -44,7 +44,8 @@ apt install -y \
         sudo \
         xz-utils \
         ca-certificates \
-        gnupg
+        gnupg \
+        apt-utils
 
 if [ "$INSTALL_NODE" = "true" ] ; then set -ex; \
 	curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg ; \
