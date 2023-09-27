@@ -197,8 +197,8 @@ docker-arm64v8-build:
     - docker build --pull --build-arg VAR_EXCLUDE_DB="${EXCLUDE_DB}" -t "${IMAGE_NAME}" . -f "${DOCKER_FILE}"
     - docker push "${IMAGE_NAME}"
   rules:
-    - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
-      when: never
+    # - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
+    #  when: never
     - if: $CI_COMMIT_BRANCH
       exists:
         - $DOCKER_FILE
@@ -238,8 +238,8 @@ docker-arm64v8-no-db-build:
     - docker build --pull --build-arg VAR_EXCLUDE_DB="${EXCLUDE_DB}" -t "${IMAGE_NAME}" . -f "${DOCKER_FILE}"
     - docker push "${IMAGE_NAME}"
   rules:
-    - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
-      when: never
+    # - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
+    #  when: never
     - if: $CI_COMMIT_BRANCH
       exists:
         - $DOCKER_FILE
