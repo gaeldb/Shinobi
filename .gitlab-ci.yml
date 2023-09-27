@@ -226,28 +226,28 @@ docker-nvidia-no-db-build:
   # All other branches are tagged with the escaped branch name (commit ref slug)
   script:
     - |
-      arch="nvidia"
-      branch=""
-      no_db=true
-      no_db_tag = ""
-      docker_file_ext=""
+      arch="nvidia" ;
+      branch="" ; 
+      no_db=true ; 
+      no_db_tag = "" ;
+      docker_file_ext="" ;
 
       if [[ "${arch}" != "" ]]; then
         docker_file_ext=".${arch}"
-      fi
+      fi 
 
       if [[ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]]; then
         branch="${CI_COMMIT_REF_SLUG}-"
-      fi
+      fi 
 
       if [[ "${no_db}" == "true" ]]; then
         no_db_tag="-no-db"
       fi
 
-      tag=":${branch}${arch}${no_db_tag}"
+      tag=":${branch}${arch}${no_db_tag}" ;
       
-      image_tag="$CI_REGISTRY_IMAGE${tag}"
-      echo "Running on branch '${CI_COMMIT_BRANCH}', Tag: ${tag}, Image: ${image_tag}"
+      image_tag="$CI_REGISTRY_IMAGE${tag}" ;
+      echo "Running on branch '${CI_COMMIT_BRANCH}', Tag: ${tag}, Image: ${image_tag}" ;
 
     - docker build --pull --build-arg VAR_EXCLUDE_DB="${no_db}" -t "${image_tag}" . -f "Dockerfile${docker_file_ext}"
     - docker push "${image_tag}"
