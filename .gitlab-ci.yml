@@ -2,35 +2,24 @@ docker-latest-build:
   image: docker:latest
   stage: build
   variables:
-    ARCH_TYPE: ""
     EXCLUDE_DB: "false"
-    DOCKER_FILE: "Dockerfile"
+    BASE_IMAGE: "node:18-bullseye-slim"
   services:
     - docker:dind
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - |
-      export BRANCH_PREFIX="latest" ; 
-      export NO_DB_SUFIX="" ;
-      export BRANCH_SEP="" ;
+      BRANCH_PREFIX="$(if [ $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH ]; then echo ${CI_COMMIT_REF_SLUG} ; else echo 'latest'; fi)"
+      NO_DB_SUFIX="$(${EXCLUDE_DB} && echo '-no-db' || echo '')"
+      BASE_IMAGE_ARCH="$(echo ${BASE_IMAGE} | cut -d'/' -f1)"
+      BASE_IMAGE_TYPE="$(echo ${BASE_IMAGE} | cut -d'/' -f2)"
+      ARCH_TYPE="$(if [ $BASE_IMAGE_ARCH != $BASE_IMAGE_TYPE ]; then echo '-'${BASE_IMAGE_ARCH}; else echo ''; fi )"
 
-      if [[ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]]; then
-        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}" ;
-      fi 
-
-      if [[ "${EXCLUDE_DB}" == "true" ]]; then
-        export NO_DB_SUFIX="-no-db" ;
-      fi
-
-      if [[ "${ARCH_TYPE}" != "" ]]; then
-        export BRANCH_SEP="-" ;
-      fi
-
-      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${BRANCH_SEP}${ARCH_TYPE}${NO_DB_SUFIX}" ;
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}"
       echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
 
-    - docker build --pull --build-arg VAR_EXCLUDE_DB="${EXCLUDE_DB}" -t "${IMAGE_NAME}" . -f "${DOCKER_FILE}"
+    - docker build --pull --build-arg EXCLUDE_DB="${EXCLUDE_DB}" --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
     - docker push "${IMAGE_NAME}"
   rules:
     - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
@@ -43,285 +32,208 @@ docker-latest-no-db-build:
   image: docker:latest
   stage: build
   variables:
-    ARCH_TYPE: ""
     EXCLUDE_DB: "true"
-    DOCKER_FILE: "Dockerfile"
+    BASE_IMAGE: "node:18-bullseye-slim"
   services:
     - docker:dind
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - |
-      export BRANCH_PREFIX="latest" ; 
-      export NO_DB_SUFIX="" ;
-      export BRANCH_SEP="" ;
+      BRANCH_PREFIX="$(if [ $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH ]; then echo ${CI_COMMIT_REF_SLUG} ; else echo 'latest'; fi)"
+      NO_DB_SUFIX="$(${EXCLUDE_DB} && echo '-no-db' || echo '')"
+      BASE_IMAGE_ARCH="$(echo ${BASE_IMAGE} | cut -d'/' -f1)"
+      BASE_IMAGE_TYPE="$(echo ${BASE_IMAGE} | cut -d'/' -f2)"
+      ARCH_TYPE="$(if [ $BASE_IMAGE_ARCH != $BASE_IMAGE_TYPE ]; then echo '-'${BASE_IMAGE_ARCH}; else echo ''; fi )"
 
-      if [[ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]]; then
-        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}" ;
-      fi 
-
-      if [[ "${EXCLUDE_DB}" == "true" ]]; then
-        export NO_DB_SUFIX="-no-db" ;
-      fi
-
-      if [[ "${ARCH_TYPE}" != "" ]]; then
-        export BRANCH_SEP="-" ;
-      fi
-
-      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${BRANCH_SEP}${ARCH_TYPE}${NO_DB_SUFIX}" ;
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}"
       echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
 
-    - docker build --pull --build-arg VAR_EXCLUDE_DB="${EXCLUDE_DB}" -t "${IMAGE_NAME}" . -f "${DOCKER_FILE}"
+    - docker build --pull --build-arg EXCLUDE_DB="${EXCLUDE_DB}" --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
     - docker push "${IMAGE_NAME}"
   rules:
     - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
       when: never
     - if: $CI_COMMIT_BRANCH
       exists:
-        - $DOCKER_FILE
+        - Dockerfile
 
 docker-arm32v7-build:
   image: docker:latest
   stage: build
   variables:
-    ARCH_TYPE: "arm32v7"
     EXCLUDE_DB: "false"
-    DOCKER_FILE: "Dockerfile.arm32v7"
+    BASE_IMAGE: "arm32v7/node:18-bullseye-slim"
   services:
     - docker:dind
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - |
-      export BRANCH_PREFIX="latest" ; 
-      export NO_DB_SUFIX="" ;
-      export BRANCH_SEP="" ;
+      BRANCH_PREFIX="$(if [ $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH ]; then echo ${CI_COMMIT_REF_SLUG} ; else echo 'latest'; fi)"
+      NO_DB_SUFIX="$(${EXCLUDE_DB} && echo '-no-db' || echo '')"
+      BASE_IMAGE_ARCH="$(echo ${BASE_IMAGE} | cut -d'/' -f1)"
+      BASE_IMAGE_TYPE="$(echo ${BASE_IMAGE} | cut -d'/' -f2)"
+      ARCH_TYPE="$(if [ $BASE_IMAGE_ARCH != $BASE_IMAGE_TYPE ]; then echo '-'${BASE_IMAGE_ARCH}; else echo ''; fi )"
 
-      if [[ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]]; then
-        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}" ;
-      fi 
-
-      if [[ "${EXCLUDE_DB}" == "true" ]]; then
-        export NO_DB_SUFIX="-no-db" ;
-      fi
-
-      if [[ "${ARCH_TYPE}" != "" ]]; then
-        export BRANCH_SEP="-" ;
-      fi
-
-      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${BRANCH_SEP}${ARCH_TYPE}${NO_DB_SUFIX}" ;
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}"
       echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
 
-    - docker build --pull --build-arg VAR_EXCLUDE_DB="${EXCLUDE_DB}" -t "${IMAGE_NAME}" . -f "${DOCKER_FILE}"
+    - docker build --pull --build-arg EXCLUDE_DB="${EXCLUDE_DB}" --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
     - docker push "${IMAGE_NAME}"
   rules:
     - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
       when: never
     - if: $CI_COMMIT_BRANCH
       exists:
-        - $DOCKER_FILE
+        - Dockerfile
 
 docker-arm32v7-no-db-build:
   image: docker:latest
   stage: build
   variables:
-    ARCH_TYPE: "arm32v7"
     EXCLUDE_DB: "true"
-    DOCKER_FILE: "Dockerfile.arm32v7"
+    BASE_IMAGE: "arm32v7/node:18-bullseye-slim"
   services:
     - docker:dind
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - |
-      export BRANCH_PREFIX="latest" ; 
-      export NO_DB_SUFIX="" ;
-      export BRANCH_SEP="" ;
+      BRANCH_PREFIX="$(if [ $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH ]; then echo ${CI_COMMIT_REF_SLUG} ; else echo 'latest'; fi)"
+      NO_DB_SUFIX="$(${EXCLUDE_DB} && echo '-no-db' || echo '')"
+      BASE_IMAGE_ARCH="$(echo ${BASE_IMAGE} | cut -d'/' -f1)"
+      BASE_IMAGE_TYPE="$(echo ${BASE_IMAGE} | cut -d'/' -f2)"
+      ARCH_TYPE="$(if [ $BASE_IMAGE_ARCH != $BASE_IMAGE_TYPE ]; then echo '-'${BASE_IMAGE_ARCH}; else echo ''; fi )"
 
-      if [[ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]]; then
-        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}" ;
-      fi 
-
-      if [[ "${EXCLUDE_DB}" == "true" ]]; then
-        export NO_DB_SUFIX="-no-db" ;
-      fi
-
-      if [[ "${ARCH_TYPE}" != "" ]]; then
-        export BRANCH_SEP="-" ;
-      fi
-
-      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${BRANCH_SEP}${ARCH_TYPE}${NO_DB_SUFIX}" ;
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}"
       echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
 
-    - docker build --pull --build-arg VAR_EXCLUDE_DB="${EXCLUDE_DB}" -t "${IMAGE_NAME}" . -f "${DOCKER_FILE}"
+    - docker build --pull --build-arg EXCLUDE_DB="${EXCLUDE_DB}" --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
     - docker push "${IMAGE_NAME}"
   rules:
     - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
       when: never
     - if: $CI_COMMIT_BRANCH
       exists:
-        - $DOCKER_FILE
+        - Dockerfile
 
 docker-arm64v8-build:
   image: docker:latest
   stage: build
   variables:
-    ARCH_TYPE: "arm64v8"
     EXCLUDE_DB: "false"
-    DOCKER_FILE: "Dockerfile.arm64v8"
+    BASE_IMAGE: "arm64v8/node:18-bullseye-slim"
   services:
     - docker:dind
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - |
-      export BRANCH_PREFIX="latest" ; 
-      export NO_DB_SUFIX="" ;
-      export BRANCH_SEP="" ;
+      BRANCH_PREFIX="$(if [ $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH ]; then echo ${CI_COMMIT_REF_SLUG} ; else echo 'latest'; fi)"
+      NO_DB_SUFIX="$(${EXCLUDE_DB} && echo '-no-db' || echo '')"
+      BASE_IMAGE_ARCH="$(echo ${BASE_IMAGE} | cut -d'/' -f1)"
+      BASE_IMAGE_TYPE="$(echo ${BASE_IMAGE} | cut -d'/' -f2)"
+      ARCH_TYPE="$(if [ $BASE_IMAGE_ARCH != $BASE_IMAGE_TYPE ]; then echo '-'${BASE_IMAGE_ARCH}; else echo ''; fi )"
 
-      if [[ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]]; then
-        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}" ;
-      fi 
-
-      if [[ "${EXCLUDE_DB}" == "true" ]]; then
-        export NO_DB_SUFIX="-no-db" ;
-      fi
-
-      if [[ "${ARCH_TYPE}" != "" ]]; then
-        export BRANCH_SEP="-" ;
-      fi
-
-      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${BRANCH_SEP}${ARCH_TYPE}${NO_DB_SUFIX}" ;
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}"
       echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
 
-    - docker build --pull --build-arg VAR_EXCLUDE_DB="${EXCLUDE_DB}" -t "${IMAGE_NAME}" . -f "${DOCKER_FILE}"
+    - docker build --pull --build-arg EXCLUDE_DB="${EXCLUDE_DB}" --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
     - docker push "${IMAGE_NAME}"
   rules:
     - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
       when: never
     - if: $CI_COMMIT_BRANCH
       exists:
-        - $DOCKER_FILE
+        - Dockerfile
 
 docker-arm64v8-no-db-build:
   image: docker:latest
   stage: build
   variables:
-    ARCH_TYPE: "arm64v8"
     EXCLUDE_DB: "true"
-    DOCKER_FILE: "Dockerfile.arm64v8"
+    BASE_IMAGE: "arm64v8/node:18-bullseye-slim"
   services:
     - docker:dind
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - |
-      export BRANCH_PREFIX="latest" ; 
-      export NO_DB_SUFIX="" ;
-      export BRANCH_SEP="" ;
+      BRANCH_PREFIX="$(if [ $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH ]; then echo ${CI_COMMIT_REF_SLUG} ; else echo 'latest'; fi)"
+      NO_DB_SUFIX="$(${EXCLUDE_DB} && echo '-no-db' || echo '')"
+      BASE_IMAGE_ARCH="$(echo ${BASE_IMAGE} | cut -d'/' -f1)"
+      BASE_IMAGE_TYPE="$(echo ${BASE_IMAGE} | cut -d'/' -f2)"
+      ARCH_TYPE="$(if [ $BASE_IMAGE_ARCH != $BASE_IMAGE_TYPE ]; then echo '-'${BASE_IMAGE_ARCH}; else echo ''; fi )"
 
-      if [[ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]]; then
-        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}" ;
-      fi 
-
-      if [[ "${EXCLUDE_DB}" == "true" ]]; then
-        export NO_DB_SUFIX="-no-db" ;
-      fi
-
-      if [[ "${ARCH_TYPE}" != "" ]]; then
-        export BRANCH_SEP="-" ;
-      fi
-
-      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${BRANCH_SEP}${ARCH_TYPE}${NO_DB_SUFIX}" ;
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}"
       echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
 
-    - docker build --pull --build-arg VAR_EXCLUDE_DB="${EXCLUDE_DB}" -t "${IMAGE_NAME}" . -f "${DOCKER_FILE}"
+    - docker build --pull --build-arg EXCLUDE_DB="${EXCLUDE_DB}" --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
     - docker push "${IMAGE_NAME}"
   rules:
     - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
       when: never
     - if: $CI_COMMIT_BRANCH
       exists:
-        - $DOCKER_FILE
+        - Dockerfile
 
 docker-nvidia-build:
   image: docker:latest
   stage: build
   variables:
-    ARCH_TYPE: "nvidia"
     EXCLUDE_DB: "false"
-    DOCKER_FILE: "Dockerfile.nvidia"
+    BASE_IMAGE: "nvidia/cuda:11.7.1-cudnn8-runtime-ubuntu22.04"
   services:
     - docker:dind
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - |
-      export BRANCH_PREFIX="latest" ; 
-      export NO_DB_SUFIX="" ;
-      export BRANCH_SEP="" ;
+      BRANCH_PREFIX="$(if [ $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH ]; then echo ${CI_COMMIT_REF_SLUG} ; else echo 'latest'; fi)"
+      NO_DB_SUFIX="$(${EXCLUDE_DB} && echo '-no-db' || echo '')"
+      BASE_IMAGE_ARCH="$(echo ${BASE_IMAGE} | cut -d'/' -f1)"
+      BASE_IMAGE_TYPE="$(echo ${BASE_IMAGE} | cut -d'/' -f2)"
+      ARCH_TYPE="$(if [ $BASE_IMAGE_ARCH != $BASE_IMAGE_TYPE ]; then echo '-'${BASE_IMAGE_ARCH}; else echo ''; fi )"
 
-      if [[ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]]; then
-        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}" ;
-      fi 
-
-      if [[ "${EXCLUDE_DB}" == "true" ]]; then
-        export NO_DB_SUFIX="-no-db" ;
-      fi
-
-      if [[ "${ARCH_TYPE}" != "" ]]; then
-        export BRANCH_SEP="-" ;
-      fi
-
-      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${BRANCH_SEP}${ARCH_TYPE}${NO_DB_SUFIX}" ;
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}"
       echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
 
-    - docker build --pull --build-arg VAR_EXCLUDE_DB="${EXCLUDE_DB}" -t "${IMAGE_NAME}" . -f "${DOCKER_FILE}"
+    - docker build --pull --build-arg EXCLUDE_DB="${EXCLUDE_DB}" --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
     - docker push "${IMAGE_NAME}"
   rules:
     - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
       when: never
     - if: $CI_COMMIT_BRANCH
       exists:
-        - $DOCKER_FILE
+        - Dockerfile
 
 docker-nvidia-no-db-build:
   image: docker:latest
   stage: build
   variables:
-    ARCH_TYPE: "nvidia"
     EXCLUDE_DB: "true"
-    DOCKER_FILE: "Dockerfile.nvidia"
+    BASE_IMAGE: "nvidia/cuda:11.7.1-cudnn8-runtime-ubuntu22.04"
   services:
     - docker:dind
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - |
-      export BRANCH_PREFIX="latest" ; 
-      export NO_DB_SUFIX="" ;
-      export BRANCH_SEP="" ;
+      BRANCH_PREFIX="$(if [ $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH ]; then echo ${CI_COMMIT_REF_SLUG} ; else echo 'latest'; fi)"
+      NO_DB_SUFIX="$(${EXCLUDE_DB} && echo '-no-db' || echo '')"
+      BASE_IMAGE_ARCH="$(echo ${BASE_IMAGE} | cut -d'/' -f1)"
+      BASE_IMAGE_TYPE="$(echo ${BASE_IMAGE} | cut -d'/' -f2)"
+      ARCH_TYPE="$(if [ $BASE_IMAGE_ARCH != $BASE_IMAGE_TYPE ]; then echo '-'${BASE_IMAGE_ARCH}; else echo ''; fi )"
 
-      if [[ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]]; then
-        export BRANCH_PREFIX="${CI_COMMIT_REF_SLUG}" ;
-      fi 
-
-      if [[ "${EXCLUDE_DB}" == "true" ]]; then
-        export NO_DB_SUFIX="-no-db" ;
-      fi
-
-      if [[ "${ARCH_TYPE}" != "" ]]; then
-        export BRANCH_SEP="-" ;
-      fi
-
-      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${BRANCH_SEP}${ARCH_TYPE}${NO_DB_SUFIX}" ;
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}"
       echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
 
-    - docker build --pull --build-arg VAR_EXCLUDE_DB="${EXCLUDE_DB}" -t "${IMAGE_NAME}" . -f "${DOCKER_FILE}"
+    - docker build --pull --build-arg EXCLUDE_DB="${EXCLUDE_DB}" --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
     - docker push "${IMAGE_NAME}"
   rules:
     - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
       when: never
     - if: $CI_COMMIT_BRANCH
       exists:
-        - $DOCKER_FILE
+        - Dockerfile

@@ -1,7 +1,8 @@
-FROM node:18-bullseye-slim
-
+ARG BASE_IMAGE=node:18-bullseye-slim
+FROM ${BASE_IMAGE}
+    
 ARG DEBIAN_FRONTEND=noninteractive \
-    VAR_EXCLUDE_DB=false
+    EXCLUDE_DB=false
 
 ENV DB_USER=majesticflame \
     DB_PASSWORD='' \
@@ -18,12 +19,50 @@ ENV DB_USER=majesticflame \
     SSL_ORGANIZATION='Shinobi Systems' \
     SSL_ORGANIZATION_UNIT='IT Department' \
     SSL_COMMON_NAME='nvr.ninja' \
-    DB_DISABLE_INCLUDED=$VAR_EXCLUDE_DB
+    DB_DISABLE_INCLUDED=$EXCLUDE_DB
 
 WORKDIR /home/Shinobi
 COPY . ./
 
-RUN sh /home/Shinobi/Docker/install_dependencies.sh
+RUN apt-get update -y
+RUN apt-get upgrade -y
+
+RUN apt-get install -y \
+        wget \
+        curl \
+        net-tools \
+        software-properties-common \
+        build-essential \
+        git \
+        python3 \
+        sudo \
+        pkg-config \
+        apt-utils \
+        yasm \
+        bzip2 \
+        coreutils \
+        procps \
+        gnutls-bin \
+        nasm \
+        tar \
+        make \
+        g++ \
+        gcc \
+        tar \
+        xz-utils
+
+RUN sh /home/Shinobi/Docker/install_ffmpeg.sh
+RUN sh /home/Shinobi/Docker/install_mariadb.sh
+RUN sh /home/Shinobi/Docker/install_nodejs.sh
+
+RUN chmod 777 /home/Shinobi
+RUN chmod -R 777 /home/Shinobi/plugins
+RUN chmod -f +x /home/Shinobi/Docker/init.sh
+
+RUN sed -i -e 's/\r//g' /home/Shinobi/Docker/init.sh
+
+RUN apt-get update -y --fix-missing
+RUN apt-get upgrade -y
 
 VOLUME ["/home/Shinobi/videos"]
 VOLUME ["/home/Shinobi/libs/customAutoLoad"]
@@ -31,6 +70,6 @@ VOLUME ["/config"]
 
 EXPOSE 8080 443 21 25
 
-ENTRYPOINT ["sh", "/home/Shinobi/Docker/init.sh"]
+ENTRYPOINT ["/home/Shinobi/Docker/init.sh"]
 
 CMD [ "pm2-docker", "/home/Shinobi/Docker/pm2.yml" ]
