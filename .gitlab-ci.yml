@@ -26,7 +26,7 @@ docker-latest-build:
     #  when: never
     - if: $CI_COMMIT_BRANCH
       exists:
-        - $DOCKER_FILE
+        - Dockerfile
 
 docker-latest-no-db-build:
   image: docker:latest
