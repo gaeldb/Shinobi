@@ -22,8 +22,8 @@ docker-latest-build:
     - docker build --pull --build-arg EXCLUDE_DB="${EXCLUDE_DB}" --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
     - docker push "${IMAGE_NAME}"
   rules:
-    #- if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
-    #  when: never
+    - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
+      when: never
     - if: $CI_COMMIT_BRANCH
       exists:
         - Dockerfile
@@ -52,8 +52,8 @@ docker-latest-no-db-build:
     - docker build --pull --build-arg EXCLUDE_DB="${EXCLUDE_DB}" --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
     - docker push "${IMAGE_NAME}"
   rules:
-    - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
-      when: never
+    #- if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
+    #  when: never
     - if: $CI_COMMIT_BRANCH
       exists:
         - Dockerfile
