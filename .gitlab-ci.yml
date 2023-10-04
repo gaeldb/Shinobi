@@ -1,37 +1,56 @@
-# This file is a template, and might need editing before it works on your project.
-# To contribute improvements to CI/CD templates, please follow the Development guide at:
-# https://docs.gitlab.com/ee/development/cicd/templates.html
-# This specific template is located at:
-# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Docker.gitlab-ci.yml
-
-# Build a Docker image with CI/CD and push to the GitLab registry.
-# Docker-in-Docker documentation: https://docs.gitlab.com/ee/ci/docker/using_docker_build.html
-#
-# This template uses one generic job with conditional builds
-# for the default branch and all other (MR) branches.
-
 docker-latest-build:
-  # Use the official docker image.
   image: docker:latest
   stage: build
+  variables:
+    EXCLUDE_DB: "false"
+    BASE_IMAGE: "node:18-bullseye-slim"
   services:
     - docker:dind
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-  # Default branch leaves tag empty (= latest tag)
-  # All other branches are tagged with the escaped branch name (commit ref slug)
   script:
     - |
-      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag=""
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest'"
-      else
-        tag=":$CI_COMMIT_REF_SLUG"
-        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
-      fi
-    - docker build --pull -t "$CI_REGISTRY_IMAGE${tag}" .
-    - docker push "$CI_REGISTRY_IMAGE${tag}"
-  # Run this job in a branch where a Dockerfile exists
+      BRANCH_PREFIX="$(if [ $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH ]; then echo ${CI_COMMIT_REF_SLUG} ; else echo 'latest'; fi)"
+      NO_DB_SUFIX="$(${EXCLUDE_DB} && echo '-no-db' || echo '')"
+      BASE_IMAGE_ARCH="$(echo ${BASE_IMAGE} | cut -d'/' -f1)"
+      BASE_IMAGE_TYPE="$(echo ${BASE_IMAGE} | cut -d'/' -f2)"
+      ARCH_TYPE="$(if [ $BASE_IMAGE_ARCH != $BASE_IMAGE_TYPE ]; then echo '-'${BASE_IMAGE_ARCH}; else echo ''; fi )"
+
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}"
+      echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
+
+    - docker build --pull --build-arg EXCLUDE_DB="${EXCLUDE_DB}" --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
+    - docker push "${IMAGE_NAME}"
+  rules:
+    - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
+      when: never
+    - if: $CI_COMMIT_BRANCH
+      exists:
+        - Dockerfile
+
+docker-latest-no-db-build:
+  image: docker:latest
+  stage: build
+  variables:
+    EXCLUDE_DB: "true"
+    BASE_IMAGE: "node:18-bullseye-slim"
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - |
+      BRANCH_PREFIX="$(if [ $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH ]; then echo ${CI_COMMIT_REF_SLUG} ; else echo 'latest'; fi)"
+      NO_DB_SUFIX="$(${EXCLUDE_DB} && echo '-no-db' || echo '')"
+      BASE_IMAGE_ARCH="$(echo ${BASE_IMAGE} | cut -d'/' -f1)"
+      BASE_IMAGE_TYPE="$(echo ${BASE_IMAGE} | cut -d'/' -f2)"
+      ARCH_TYPE="$(if [ $BASE_IMAGE_ARCH != $BASE_IMAGE_TYPE ]; then echo '-'${BASE_IMAGE_ARCH}; else echo ''; fi )"
+
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}"
+      echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
+
+    - docker build --pull --build-arg EXCLUDE_DB="${EXCLUDE_DB}" --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
+    - docker push "${IMAGE_NAME}"
   rules:
     - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
       when: never
@@ -40,60 +59,181 @@ docker-latest-build:
         - Dockerfile
 
 docker-arm32v7-build:
-  # Use the official docker image.
   image: docker:latest
   stage: build
+  variables:
+    EXCLUDE_DB: "false"
+    BASE_IMAGE: "arm32v7/node:18-bullseye-slim"
   services:
     - docker:dind
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-  # Default branch leaves tag empty (= latest tag)
-  # All other branches are tagged with the escaped branch name (commit ref slug)
   script:
     - |
-      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag=":arm32v7"
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'arm32v7'"
-      else
-        tag=":arm32v7-$CI_COMMIT_REF_SLUG"
-        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
-      fi
-    - docker build --pull -t "$CI_REGISTRY_IMAGE${tag}" . -f Dockerfile.arm32v7
-    - docker push "$CI_REGISTRY_IMAGE${tag}"
-  # Run this job in a branch where a Dockerfile exists
+      BRANCH_PREFIX="$(if [ $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH ]; then echo ${CI_COMMIT_REF_SLUG} ; else echo 'latest'; fi)"
+      NO_DB_SUFIX="$(${EXCLUDE_DB} && echo '-no-db' || echo '')"
+      BASE_IMAGE_ARCH="$(echo ${BASE_IMAGE} | cut -d'/' -f1)"
+      BASE_IMAGE_TYPE="$(echo ${BASE_IMAGE} | cut -d'/' -f2)"
+      ARCH_TYPE="$(if [ $BASE_IMAGE_ARCH != $BASE_IMAGE_TYPE ]; then echo '-'${BASE_IMAGE_ARCH}; else echo ''; fi )"
+
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}"
+      echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
+
+    - docker build --pull --build-arg EXCLUDE_DB="${EXCLUDE_DB}" --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
+    - docker push "${IMAGE_NAME}"
   rules:
     - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
       when: never
     - if: $CI_COMMIT_BRANCH
       exists:
-        - Dockerfile.arm32v7
+        - Dockerfile
 
+docker-arm32v7-no-db-build:
+  image: docker:latest
+  stage: build
+  variables:
+    EXCLUDE_DB: "true"
+    BASE_IMAGE: "arm32v7/node:18-bullseye-slim"
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - |
+      BRANCH_PREFIX="$(if [ $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH ]; then echo ${CI_COMMIT_REF_SLUG} ; else echo 'latest'; fi)"
+      NO_DB_SUFIX="$(${EXCLUDE_DB} && echo '-no-db' || echo '')"
+      BASE_IMAGE_ARCH="$(echo ${BASE_IMAGE} | cut -d'/' -f1)"
+      BASE_IMAGE_TYPE="$(echo ${BASE_IMAGE} | cut -d'/' -f2)"
+      ARCH_TYPE="$(if [ $BASE_IMAGE_ARCH != $BASE_IMAGE_TYPE ]; then echo '-'${BASE_IMAGE_ARCH}; else echo ''; fi )"
+
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}"
+      echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
+
+    - docker build --pull --build-arg EXCLUDE_DB="${EXCLUDE_DB}" --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
+    - docker push "${IMAGE_NAME}"
+  rules:
+    - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
+      when: never
+    - if: $CI_COMMIT_BRANCH
+      exists:
+        - Dockerfile
+
+docker-arm64v8-build:
+  image: docker:latest
+  stage: build
+  variables:
+    EXCLUDE_DB: "false"
+    BASE_IMAGE: "arm64v8/node:18-bullseye-slim"
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - |
+      BRANCH_PREFIX="$(if [ $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH ]; then echo ${CI_COMMIT_REF_SLUG} ; else echo 'latest'; fi)"
+      NO_DB_SUFIX="$(${EXCLUDE_DB} && echo '-no-db' || echo '')"
+      BASE_IMAGE_ARCH="$(echo ${BASE_IMAGE} | cut -d'/' -f1)"
+      BASE_IMAGE_TYPE="$(echo ${BASE_IMAGE} | cut -d'/' -f2)"
+      ARCH_TYPE="$(if [ $BASE_IMAGE_ARCH != $BASE_IMAGE_TYPE ]; then echo '-'${BASE_IMAGE_ARCH}; else echo ''; fi )"
+
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}"
+      echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
+
+    - docker build --pull --build-arg EXCLUDE_DB="${EXCLUDE_DB}" --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
+    - docker push "${IMAGE_NAME}"
+  rules:
+    - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
+      when: never
+    - if: $CI_COMMIT_BRANCH
+      exists:
+        - Dockerfile
+
+docker-arm64v8-no-db-build:
+  image: docker:latest
+  stage: build
+  variables:
+    EXCLUDE_DB: "true"
+    BASE_IMAGE: "arm64v8/node:18-bullseye-slim"
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - |
+      BRANCH_PREFIX="$(if [ $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH ]; then echo ${CI_COMMIT_REF_SLUG} ; else echo 'latest'; fi)"
+      NO_DB_SUFIX="$(${EXCLUDE_DB} && echo '-no-db' || echo '')"
+      BASE_IMAGE_ARCH="$(echo ${BASE_IMAGE} | cut -d'/' -f1)"
+      BASE_IMAGE_TYPE="$(echo ${BASE_IMAGE} | cut -d'/' -f2)"
+      ARCH_TYPE="$(if [ $BASE_IMAGE_ARCH != $BASE_IMAGE_TYPE ]; then echo '-'${BASE_IMAGE_ARCH}; else echo ''; fi )"
+
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}"
+      echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
+
+    - docker build --pull --build-arg EXCLUDE_DB="${EXCLUDE_DB}" --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
+    - docker push "${IMAGE_NAME}"
+  rules:
+    - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
+      when: never
+    - if: $CI_COMMIT_BRANCH
+      exists:
+        - Dockerfile
 
 docker-nvidia-build:
-  # Use the official docker image.
   image: docker:latest
   stage: build
+  variables:
+    EXCLUDE_DB: "false"
+    BASE_IMAGE: "nvidia/cuda:11.7.1-cudnn8-runtime-ubuntu22.04"
   services:
     - docker:dind
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-  # Default branch leaves tag empty (= latest tag)
-  # All other branches are tagged with the escaped branch name (commit ref slug)
   script:
     - |
-      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag=":nvidia"
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'nvidia'"
-      else
-        tag=":nvidia-$CI_COMMIT_REF_SLUG"
-        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
-      fi
-    - docker build --pull -t "$CI_REGISTRY_IMAGE${tag}" . -f Dockerfile.nvidia
-    - docker push "$CI_REGISTRY_IMAGE${tag}"
-  # Run this job in a branch where a Dockerfile exists
+      BRANCH_PREFIX="$(if [ $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH ]; then echo ${CI_COMMIT_REF_SLUG} ; else echo 'latest'; fi)"
+      NO_DB_SUFIX="$(${EXCLUDE_DB} && echo '-no-db' || echo '')"
+      BASE_IMAGE_ARCH="$(echo ${BASE_IMAGE} | cut -d'/' -f1)"
+      BASE_IMAGE_TYPE="$(echo ${BASE_IMAGE} | cut -d'/' -f2)"
+      ARCH_TYPE="$(if [ $BASE_IMAGE_ARCH != $BASE_IMAGE_TYPE ]; then echo '-'${BASE_IMAGE_ARCH}; else echo ''; fi )"
+
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}"
+      echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
+
+    - docker build --pull --build-arg EXCLUDE_DB="${EXCLUDE_DB}" --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
+    - docker push "${IMAGE_NAME}"
   rules:
     - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
       when: never
     - if: $CI_COMMIT_BRANCH
       exists:
-        - Dockerfile.nvidia
+        - Dockerfile
+
+docker-nvidia-no-db-build:
+  image: docker:latest
+  stage: build
+  variables:
+    EXCLUDE_DB: "true"
+    BASE_IMAGE: "nvidia/cuda:11.7.1-cudnn8-runtime-ubuntu22.04"
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - |
+      BRANCH_PREFIX="$(if [ $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH ]; then echo ${CI_COMMIT_REF_SLUG} ; else echo 'latest'; fi)"
+      NO_DB_SUFIX="$(${EXCLUDE_DB} && echo '-no-db' || echo '')"
+      BASE_IMAGE_ARCH="$(echo ${BASE_IMAGE} | cut -d'/' -f1)"
+      BASE_IMAGE_TYPE="$(echo ${BASE_IMAGE} | cut -d'/' -f2)"
+      ARCH_TYPE="$(if [ $BASE_IMAGE_ARCH != $BASE_IMAGE_TYPE ]; then echo '-'${BASE_IMAGE_ARCH}; else echo ''; fi )"
+
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}"
+      echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
+
+    - docker build --pull --build-arg EXCLUDE_DB="${EXCLUDE_DB}" --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
+    - docker push "${IMAGE_NAME}"
+  rules:
+    - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
+      when: never
+    - if: $CI_COMMIT_BRANCH
+      exists:
+        - Dockerfile

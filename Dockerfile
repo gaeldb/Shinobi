@@ -1,4 +1,8 @@
-FROM node:16-buster-slim
+ARG BASE_IMAGE=node:18-bullseye-slim
+FROM ${BASE_IMAGE}
+    
+ARG DEBIAN_FRONTEND=noninteractive \
+    EXCLUDE_DB=false
 
 ENV DB_USER=majesticflame \
     DB_PASSWORD='' \
@@ -15,97 +19,57 @@ ENV DB_USER=majesticflame \
     SSL_ORGANIZATION='Shinobi Systems' \
     SSL_ORGANIZATION_UNIT='IT Department' \
     SSL_COMMON_NAME='nvr.ninja' \
-    DB_DISABLE_INCLUDED=false
-ARG DEBIAN_FRONTEND=noninteractive
+    DB_DISABLE_INCLUDED=$EXCLUDE_DB
 
-RUN mkdir -p /home/Shinobi /config /var/lib/mysql
+WORKDIR /home/Shinobi
+COPY . ./
 
-RUN apt update -y
-RUN apt install wget curl net-tools -y
+RUN apt-get update -y
+RUN apt-get upgrade -y
 
-# Install MariaDB server... the debian way
-RUN if [ "$DB_DISABLE_INCLUDED" = "false" ] ; then set -ex; \
-	{ \
-		echo "mariadb-server" mysql-server/root_password password '${DB_ROOT_PASSWORD}'; \
-		echo "mariadb-server" mysql-server/root_password_again password '${DB_ROOT_PASSWORD}'; \
-	} | debconf-set-selections; \
-	apt-get update; \
-	apt-get install -y \
-		"mariadb-server" \
-        socat \
-	; \
-    find /etc/mysql/ -name '*.cnf' -print0 \
-		| xargs -0 grep -lZE '^(bind-address|log)' \
-		| xargs -rt -0 sed -Ei 's/^(bind-address|log)/#&/'; fi
-
-RUN if [ "$DB_DISABLE_INCLUDED" = "false" ] ; then sed -ie "s/^bind-address\s*=\s*127\.0\.0\.1$/#bind-address = 0.0.0.0/" /etc/mysql/my.cnf; fi
-
-# Install FFmpeg
-
-RUN apt update --fix-missing
-RUN apt install -y software-properties-common \
-        libfreetype6-dev \
-        libgnutls28-dev \
-        libmp3lame-dev \
-        libass-dev \
-        libogg-dev \
-        libtheora-dev \
-        libvorbis-dev \
-        libvpx-dev \
-        libwebp-dev \
-        libssh2-1-dev \
-        libopus-dev \
-        librtmp-dev \
-        libx264-dev \
-        libx265-dev \
-        yasm
-RUN apt install -y \
+RUN apt-get install -y \
+        wget \
+        curl \
+        net-tools \
+        software-properties-common \
         build-essential \
+        git \
+        python3 \
+        sudo \
+        pkg-config \
+        apt-utils \
+        yasm \
         bzip2 \
         coreutils \
         procps \
         gnutls-bin \
         nasm \
         tar \
-        x264
+        make \
+        g++ \
+        gcc \
+        tar \
+        xz-utils
 
-RUN apt install -y \
-                ffmpeg \
-                git \
-                make \
-                g++ \
-                gcc \
-                pkg-config \
-                python3 \
-                wget \
-                tar \
-                sudo \
-                xz-utils
+RUN sh /home/Shinobi/Docker/install_ffmpeg.sh
+RUN sh /home/Shinobi/Docker/install_mariadb.sh
+RUN sh /home/Shinobi/Docker/install_nodejs.sh
 
-
-WORKDIR /home/Shinobi
-COPY . .
-#RUN rm -rf /home/Shinobi/plugins
-COPY ./plugins  /home/Shinobi/plugins
-RUN chmod -R 777 /home/Shinobi/plugins
 RUN chmod 777 /home/Shinobi
-RUN npm i npm@latest -g && \
-    npm install --unsafe-perm && \
-    npm install pm2 -g
-COPY ./Docker/pm2.yml ./
-
-# Copy default configuration files
+RUN chmod -R 777 /home/Shinobi/plugins
 RUN chmod -f +x /home/Shinobi/Docker/init.sh
+
 RUN sed -i -e 's/\r//g' /home/Shinobi/Docker/init.sh
-# RUN chmod -f +x /home/Shinobi/shinobi
+
+RUN apt-get update -y --fix-missing
+RUN apt-get upgrade -y
 
 VOLUME ["/home/Shinobi/videos"]
 VOLUME ["/home/Shinobi/libs/customAutoLoad"]
 VOLUME ["/config"]
-VOLUME ["/var/lib/mysql"]
 
 EXPOSE 8080 443 21 25
 
-ENTRYPOINT ["sh","/home/Shinobi/Docker/init.sh"]
+ENTRYPOINT ["/home/Shinobi/Docker/init.sh"]
 
 CMD [ "pm2-docker", "/home/Shinobi/Docker/pm2.yml" ]
