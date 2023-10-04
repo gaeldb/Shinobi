@@ -448,8 +448,8 @@ module.exports = (s,config,lang) => {
             createEventBasedRecording(d,moment(eventTime).subtract(secondBefore,'seconds').format('YYYY-MM-DDTHH-mm-ss'))
         }
         d.currentTime = eventTime
-        d.currentTimestamp = s.timeObject(d.currentTime).format()
-        d.screenshotName =  eventDetails.reason + '_'+(monitorConfig.name.replace(/[^\w\s]/gi,''))+'_'+d.id+'_'+d.ke+'_'+s.formattedTime()
+        d.currentTimestamp = s.timeObject(eventTime).format()
+        d.screenshotName =  eventDetails.reason + '_'+(monitorConfig.name.replace(/[^\w\s]/gi,''))+'_'+d.id+'_'+d.ke+'_'+s.formattedTime(eventTime)
         d.screenshotBuffer = null
 
         if(filter.webhook && monitorDetails.detector_webhook === '1' && !s.group[d.ke].activeMonitors[d.id].detector_webhook){
