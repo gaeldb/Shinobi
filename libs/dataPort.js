@@ -39,6 +39,8 @@ module.exports = function(s,config,lang,app,io){
                     s.debugLog(data.data)
                 break;
                 default:
+                    console.log(`No Data Port Handler!`)
+                    console.log(`here's what we got :`)
                     console.log(data)
                 break;
             }
