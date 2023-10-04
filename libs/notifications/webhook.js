@@ -240,7 +240,29 @@ module.exports = function(s,config,lang,getSnapshot){
                "placeholder": "http://your-webhook-point/onEvent/{{INNER_EVENT_TITLE}}?info={{INNER_EVENT_INFO}}",
                "field": lang["Webhook URL"],
                "form-group-class":"u_global_webhook_input u_global_webhook_1",
-            }
+           },
+           {
+                hidden: true,
+                "name": "detail=global_webhook_method",
+               "field": lang['Call Method'],
+               "default": "GET",
+               "form-group-class":"u_global_webhook_input u_global_webhook_1",
+               "fieldType": "select",
+               "possible": [
+                   {
+                      "name": `GET (${lang.Default})`,
+                      "value": "GET"
+                   },
+                   {
+                      "name": "PUT",
+                      "value": "PUT"
+                   },
+                   {
+                      "name": "POST",
+                      "value": "POST"
+                   }
+                ]
+            },
         ]
     }
     s.definitions["Event Filters"].blocks["Action for Selected"].info.push({
