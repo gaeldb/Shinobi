@@ -617,7 +617,8 @@ module.exports = (s,config,lang) => {
         const sendFramesGlobally = (e.details.detector_send_frames === '1')
         const objectDetectorOutputIsEnabled = (e.details.detector_use_detect_object === '1')
         const builtInMotionDetectorIsEnabled = (e.details.detector_pam === '1')
-        const sendFramesToObjectDetector = (e.details.detector_send_frames_object !== '0' && e.details.detector_use_detect_object === '1')
+        const objectDetectorSendFrames = e.details.detector_send_frames_object !== '0' || e.details.detector_pam !== '1'
+        const sendFramesToObjectDetector = (objectDetectorSendFrames && e.details.detector_use_detect_object === '1')
         const baseWidth = e.details.detector_scale_x ? e.details.detector_scale_x : '640'
         const baseHeight = e.details.detector_scale_y ? e.details.detector_scale_y : '480'
         const baseDimensionsFlag = `-s ${baseWidth}x${baseHeight}`
