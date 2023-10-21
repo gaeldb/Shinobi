@@ -2911,7 +2911,7 @@ module.exports = function(s,config,lang){
                       "name": "detail=snap_seconds_inward",
                       "field": lang['Delay for Snapshot'],
                       "description": lang[lang["fieldTextSnapSecondsInward"]],
-                      "default": "0"
+                      "default": "5"
                    },
                    {
                        hidden: true,

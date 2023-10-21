@@ -158,7 +158,7 @@ module.exports = function(s,config,lang){
             var outputOptions = []
             var streamDir = s.dir.streams + monitor.ke + '/' + monitor.mid + '/'
             var url = options.url
-            var secondsInward = options.secondsInward || '0'
+            var secondsInward = options.secondsInward || '5'
             if(secondsInward.length === 1 && !isNaN(secondsInward))secondsInward = '0' + secondsInward;
             var dynamicTimeout = (secondsInward * 1000) + 5000;
             if(options.flags)outputOptions.push(options.flags)
