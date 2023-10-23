@@ -58,7 +58,7 @@ if [ "$DB_DISABLE_INCLUDED" = "false" ]; then
     fi
 
     echo "Create database user if it does not exists ..."
-    mysql -e "source /home/Shinobi/sql/user.sql" || true
+    mysql -u root -e "source /home/Shinobi/sql/user.sql" || true
 
 else
     echo "Create database schema if it does not exists ..."
