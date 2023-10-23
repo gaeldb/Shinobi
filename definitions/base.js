@@ -7773,6 +7773,7 @@ module.exports = function(s,config,lang){
                           label: `${lang['Timeline']}`,
                           pageOpen: 'timeline',
                           addUl: true,
+                          ulStyle: `max-height:250px;overflow:auto;`
                       },
                       {
                           icon: 'map-marker',
@@ -9178,7 +9179,7 @@ module.exports = function(s,config,lang){
                               <div class="btn-group">
                                   <a class="btn btn-sm btn-primary" timeline-action="autoGridSizer" title="${lang.autoResizeGrid}"><i class="fa fa-expand"></i></a>
                                   <a class="btn btn-sm btn-primary" timeline-action="playUntilVideoEnd" title="${lang.playUntilVideoEnd}"><i class="fa fa-step-forward"></i></a>
-                                  <a class="btn btn-sm btn-primary" timeline-action="dontShowDetection" title="${lang['Hide Detection on Stream']}"><i class="fa fa-grav"></i></a>
+                                  <a class="btn btn-sm btn-primary btn-warning" timeline-action="dontShowDetection" title="${lang['Hide Detection on Stream']}"><i class="fa fa-grav"></i></a>
                               </div>
                               <div class="btn-group">
                                   <a class="btn btn-sm btn-success" timeline-action="downloadAll" title="${lang.Download}"><i class="fa fa-download"></i></a>
