@@ -182,7 +182,12 @@ $(document).ready(function(){
     onWebSocketEvent(function (d){
         switch(d.f){
             case'monitor_edit':
-                loadMonitorsFromMemory()
+                clearTimeout(window.renewListTimeout)
+                window.renewListTimeout = setTimeout(() => {
+                    if(tabTree.name === 'monitorsList'){
+                        loadMonitorsFromMemory()
+                    }
+                },5000)
             break;
         }
     })
