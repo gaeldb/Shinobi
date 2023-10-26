@@ -1155,7 +1155,9 @@ $(document).ready(function(e){
         },700)
     })
     .on('resizestop', function(){
-        resetAllLiveGridDimensionsInMemory()
+        setTimeout(() => {
+            resetAllLiveGridDimensionsInMemory()
+        },2000)
         saveLiveGridBlockPositions()
     });
     addOnTabReopen('liveGrid', function () {
