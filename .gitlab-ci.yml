@@ -3,7 +3,7 @@ docker-latest-build:
   stage: build
   variables:
     EXCLUDE_DB: "false"
-    BASE_IMAGE: "node:18-bullseye-slim"
+    BASE_IMAGE: "node:18-buster-slim"
   services:
     - docker:dind
   before_script:
@@ -33,7 +33,7 @@ docker-latest-no-db-build:
   stage: build
   variables:
     EXCLUDE_DB: "true"
-    BASE_IMAGE: "node:18-bullseye-slim"
+    BASE_IMAGE: "node:18-buster-slim"
   services:
     - docker:dind
   before_script:
@@ -63,7 +63,7 @@ docker-arm32v7-build:
   stage: build
   variables:
     EXCLUDE_DB: "false"
-    BASE_IMAGE: "arm32v7/node:18-bullseye-slim"
+    BASE_IMAGE: "arm32v7/node:18-buster-slim"
   services:
     - docker:dind
   before_script:
@@ -93,7 +93,7 @@ docker-arm32v7-no-db-build:
   stage: build
   variables:
     EXCLUDE_DB: "true"
-    BASE_IMAGE: "arm32v7/node:18-bullseye-slim"
+    BASE_IMAGE: "arm32v7/node:18-buster-slim"
   services:
     - docker:dind
   before_script:
@@ -123,7 +123,7 @@ docker-arm64v8-build:
   stage: build
   variables:
     EXCLUDE_DB: "false"
-    BASE_IMAGE: "arm64v8/node:18-bullseye-slim"
+    BASE_IMAGE: "arm64v8/node:18-buster-slim"
   services:
     - docker:dind
   before_script:
@@ -153,7 +153,7 @@ docker-arm64v8-no-db-build:
   stage: build
   variables:
     EXCLUDE_DB: "true"
-    BASE_IMAGE: "arm64v8/node:18-bullseye-slim"
+    BASE_IMAGE: "arm64v8/node:18-buster-slim"
   services:
     - docker:dind
   before_script:
