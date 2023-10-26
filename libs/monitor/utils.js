@@ -8,6 +8,7 @@ const spawn = require('child_process').spawn;
 const connectionTester = require('connection-tester')
 const SoundDetection = require('shinobi-sound-detection')
 const streamViewerCountTimeouts = {}
+const { createQueueAwaited } = require('../common.js')
 module.exports = (s,config,lang) => {
     const {
         applyPartialToConfiguration,
@@ -1431,6 +1432,9 @@ module.exports = (s,config,lang) => {
         const typeIsLocal = e.type === 'local'
         const monitorConfig = theGroup.rawMonitorConfigurations[monitorId]
         const doPingTest = e.type !== 'socket' && e.type !== 'dashcam' && e.protocol !== 'udp' && e.type !== 'local' && e.details.skip_ping !== '1';
+        if(!theGroup.startMonitorInQueue){
+            theGroup.startMonitorInQueue = createQueueAwaited(0.5, 1)
+        }
         const startMonitorInQueue = theGroup.startMonitorInQueue
         if(!activeMonitor.isStarted)return;
         // e = monitor object

@@ -67,7 +67,7 @@ module.exports = function(s,config,lang,app,io){
                     })
                 }else{
                     s.debugLog('Child Node Force Disconnected!',new Date(),ipAddress)
-                    client.destroy()
+                    client.disconnect()
                 }
             }
             client.on('message',onAuthenticate)
