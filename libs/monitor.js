@@ -687,7 +687,7 @@ module.exports = function(s,config,lang){
                 await monitorStart(e)
             break;
             default:
-                console.log(selectedMode)
+                console.log('No s.camera execute : ',selectedMode)
             break;
         }
         if(typeof cn === 'function'){cn()}
