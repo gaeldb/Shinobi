@@ -665,8 +665,8 @@ module.exports = function(s,config,lang){
         e.functionMode = selectedMode
         if(!e.mode){e.mode = selectedMode}
         s.checkDetails(e)
-        checkObjectsInMonitorDetails(e)
         s.initiateMonitorObject({ke:e.ke,mid:monitorId})
+        checkObjectsInMonitorDetails(e)
         switch(e.functionMode){
             case'watch_on':
                 monitorAddViewer(e,cn)
