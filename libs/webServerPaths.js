@@ -1284,12 +1284,12 @@ module.exports = function(s,config,lang,app,io){
                                 ]
                             })
                             s.group[r.ke].rawMonitorConfigurations[r.mid]=r;
-                            s.tx({f:'monitor_edit',mid:r.mid,ke:r.ke,mon:r},'GRP_'+r.ke);
-                            s.tx({f:'monitor_edit',mid:r.mid,ke:r.ke,mon:r},'STR_'+r.ke);
                             await s.camera('stop',s.cleanMonitorObject(r));
                             if(req.params.f!=='stop'){
-                                s.camera(req.params.f,s.cleanMonitorObject(r));
+                                await s.camera(req.params.f,s.cleanMonitorObject(r));
                             }
+                            s.tx({f:'monitor_edit',mid:r.mid,ke:r.ke,mon:r},'GRP_'+r.ke);
+                            s.tx({f:'monitor_edit',mid:r.mid,ke:r.ke,mon:r},'STR_'+r.ke);
                             response.msg = user.lang['Monitor mode changed']+' : '+req.params.f;
                         }else{
                             response.msg = user.lang['Reset Timer'];
@@ -1331,7 +1331,7 @@ module.exports = function(s,config,lang,app,io){
                                 r.fps=s.group[r.ke].activeMonitors[r.mid].currentState.fps;
                                 await s.camera('stop',s.cleanMonitorObject(r));
                                 if(s.group[r.ke].activeMonitors[r.mid].currentState.mode!=='stop'){
-                                    s.camera(s.group[r.ke].activeMonitors[r.mid].currentState.mode,s.cleanMonitorObject(r));
+                                    await s.camera(s.group[r.ke].activeMonitors[r.mid].currentState.mode,s.cleanMonitorObject(r));
                                 }
                                 s.group[r.ke].rawMonitorConfigurations[r.mid]=r;
                                 s.tx({f:'monitor_edit',mid:r.mid,ke:r.ke,mon:r},'GRP_'+r.ke);
