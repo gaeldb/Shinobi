@@ -2,7 +2,7 @@
 if [ -x "$(command -v node)" ]; then
     echo "Node.js detected. Version : $(node -v)"
 else
-    echo "Installing NodeJS 18"
+    echo "Installing Node.js 18"
     mkdir -p /etc/apt/keyrings
     apt-get install -y ca-certificates gnupg
     curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
@@ -15,9 +15,11 @@ else
 fi
 
 if [ -x "$(command -v npm)" ]; then
-    echo "NPM detected. Version : $(npm -v)"
-    npm i npm@latest pm2 pg -g --save
-    npm install --unsafe-perm
-else
     echo "NPM NOT FOUND!"
+else
+    echo "NPM detected. Version : $(npm -v)"
+    npm i npm@latest -g
+    npm install --unsafe-perm
 fi
+npm i pm2@latest -g
+npm i pg
