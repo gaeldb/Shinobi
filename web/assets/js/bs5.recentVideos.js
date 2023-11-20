@@ -75,7 +75,7 @@ $(document).ready(function(){
     function onRecentVideosFieldChange(){
         var theSelected = `${monitorList.val()}`
         loadVideos({
-            limit: 10,
+            limit: 0,
             monitorId: theSelected || undefined,
         },function(){
             liveStamp()
@@ -88,7 +88,7 @@ $(document).ready(function(){
         drawMonitorListToSelector(monitorList.find('optgroup'))
         monitorList.val(theSelected)
         loadVideos({
-            limit: 20,
+            limit: 0,
             monitorId: theSelected || undefined,
         },function(){
             liveStamp()
@@ -97,7 +97,7 @@ $(document).ready(function(){
     onDashboardReady(function(){
         drawMonitorListToSelector(monitorList.find('optgroup'))
         loadVideos({
-            limit: 20,
+            limit: 0,
         },function(){
             liveStamp()
         })
