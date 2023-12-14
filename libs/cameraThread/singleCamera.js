@@ -137,7 +137,7 @@ if(rawMonitorConfig.details.detector === '1' && rawMonitorConfig.details.detecto
   try{
     const attachPamDetector = require(config.monitorDetectorDaemonPath ? config.monitorDetectorDaemonPath : __dirname + '/detector.js')(jsonData,(detectorObject) => {
         dataPort.send(JSON.stringify(detectorObject))
-    })
+    },dataPort)
     attachPamDetector(cameraProcess)
   }catch(err){
     writeToStderr(err.stack)
