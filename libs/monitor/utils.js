@@ -332,6 +332,23 @@ module.exports = (s,config,lang) => {
                 })
             }
 
+            subStreamProcess.stderr.on('data',(data) => {
+                const string = data.toString();
+                if(string.includes('No such')){
+                    processKill(subStreamProcess);
+                    return;
+                }
+                if(logLevel !== 'quiet'){
+                    s.userLog({
+                        ke: groupKey,
+                        mid: monitorId,
+                    },{
+                        type: lang["Substream Process"],
+                        msg: string
+                    })
+                }
+            });
+
             subStreamProcess.stdio[5].on('data',(data) => {
                 resetStreamCheck({
                     ke: groupKey,
