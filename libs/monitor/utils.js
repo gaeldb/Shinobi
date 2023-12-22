@@ -331,17 +331,14 @@ module.exports = (s,config,lang) => {
                     console.log(data.toString())
                 })
             }
-            if(logLevel !== 'quiet'){
-                subStreamProcess.stderr.on('data',(data) => {
-                    s.userLog({
-                        ke: groupKey,
-                        mid: monitorId,
-                    },{
-                        type: lang["Substream Process"],
-                        msg: data.toString()
-                    })
+
+            subStreamProcess.stdio[5].on('data',(data) => {
+                resetStreamCheck({
+                    ke: groupKey,
+                    mid: monitorId,
                 })
-            }
+            });
+
             subStreamProcess.on('close',(data) => {
                 if(!activeMonitor.allowDestroySubstream){
                     subStreamProcess.stderr.on('data',(data) => {
