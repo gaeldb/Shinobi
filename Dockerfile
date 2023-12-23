@@ -1,6 +1,6 @@
-ARG BASE_IMAGE=node:18-bullseye-slim
+ARG BASE_IMAGE=node:18-buster-slim
 FROM ${BASE_IMAGE}
-    
+
 ARG DEBIAN_FRONTEND=noninteractive \
     EXCLUDE_DB=false
 

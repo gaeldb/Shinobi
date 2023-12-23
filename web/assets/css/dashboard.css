@@ -141,6 +141,7 @@ body {
     box-shadow: 0 0 5px #1e2b37;
 }
 
+.dot-grey {background:#777}
 .dot-red {background:#d9534f}
 .dot-purple {background:#3f51b5}
 .dot-blue {background:#375182}
@@ -148,7 +149,6 @@ body {
 .dot-green {background:#449d44}
 .dot-forestgreen {background:#408693}
 .dot-orange {background:#c49a68}
-.dot-grey {background:#777}
 
 .slidemenu .nav-link:hover {
     color: #9abadd!important;

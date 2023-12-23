@@ -16,6 +16,8 @@ apt-get install -y \
         libx264-dev \
         libx265-dev \
         x264 \
-        ffmpeg 
+        ffmpeg
 
 ffmpeg -version
+
+apt-get install git -y

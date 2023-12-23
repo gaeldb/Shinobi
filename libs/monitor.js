@@ -158,7 +158,7 @@ module.exports = function(s,config,lang){
             var outputOptions = []
             var streamDir = s.dir.streams + monitor.ke + '/' + monitor.mid + '/'
             var url = options.url
-            var secondsInward = options.secondsInward || '0'
+            var secondsInward = options.secondsInward || '5'
             if(secondsInward.length === 1 && !isNaN(secondsInward))secondsInward = '0' + secondsInward;
             var dynamicTimeout = (secondsInward * 1000) + 5000;
             if(options.flags)outputOptions.push(options.flags)
@@ -665,8 +665,8 @@ module.exports = function(s,config,lang){
         e.functionMode = selectedMode
         if(!e.mode){e.mode = selectedMode}
         s.checkDetails(e)
-        checkObjectsInMonitorDetails(e)
         s.initiateMonitorObject({ke:e.ke,mid:monitorId})
+        checkObjectsInMonitorDetails(e)
         switch(e.functionMode){
             case'watch_on':
                 monitorAddViewer(e,cn)
@@ -687,7 +687,7 @@ module.exports = function(s,config,lang){
                 await monitorStart(e)
             break;
             default:
-                console.log(selectedMode)
+                console.log('No s.camera execute : ',selectedMode)
             break;
         }
         if(typeof cn === 'function'){cn()}

@@ -264,9 +264,9 @@ function updateLiveGridElementHeightWidth(monitorId){
     var streamElement = liveGridElement.streamElement
     liveGridElement.width = streamElement.width()
     liveGridElement.height = streamElement.height()
-    console.log(liveGridElement.width,liveGridElement.height)
+    console.log('update drawArea',monitorId,liveGridElement.width,liveGridElement.height)
 }
-function updateAllLiveGridElementsHeightWidth(monitorId){
+function updateAllLiveGridElementsHeightWidth(){
     $.each(liveGridElements,function(monitorId){
         updateLiveGridElementHeightWidth(monitorId)
     })
@@ -1004,6 +1004,7 @@ $(document).ready(function(e){
     $('body')
     .resize(function(){
         resetAllLiveGridDimensionsInMemory()
+        updateAllLiveGridElementsHeightWidth()
     })
     .on('click','.launch-live-grid-monitor',function(){
         var monitorId = $(this).parents('[data-mid]').attr('data-mid')
@@ -1034,7 +1035,8 @@ $(document).ready(function(e){
             f: 'monitor',
             ff: 'watch_on',
             id: monitorId
-        })
+        });
+        updateLiveGridElementHeightWidth(monitorId)
     })
     .on('click','.close-live-grid-monitor',function(){
         var monitorId = $(this).parents('[data-mid]').attr('data-mid')
@@ -1155,11 +1157,15 @@ $(document).ready(function(e){
         },700)
     })
     .on('resizestop', function(){
-        resetAllLiveGridDimensionsInMemory()
+        setTimeout(() => {
+            resetAllLiveGridDimensionsInMemory()
+        },2000)
         saveLiveGridBlockPositions()
+        updateAllLiveGridElementsHeightWidth()
     });
     addOnTabReopen('liveGrid', function () {
         pauseAllLiveGridPlayers(true)
+        updateAllLiveGridElementsHeightWidth()
     })
     addOnTabAway('liveGrid', function () {
         pauseAllLiveGridPlayers(false)

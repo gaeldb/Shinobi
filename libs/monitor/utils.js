@@ -8,6 +8,7 @@ const spawn = require('child_process').spawn;
 const connectionTester = require('connection-tester')
 const SoundDetection = require('shinobi-sound-detection')
 const streamViewerCountTimeouts = {}
+const { createQueueAwaited } = require('../common.js')
 module.exports = (s,config,lang) => {
     const {
         applyPartialToConfiguration,
@@ -330,17 +331,31 @@ module.exports = (s,config,lang) => {
                     console.log(data.toString())
                 })
             }
-            if(logLevel !== 'quiet'){
-                subStreamProcess.stderr.on('data',(data) => {
+
+            subStreamProcess.stderr.on('data',(data) => {
+                const string = data.toString();
+                if(string.includes('No such')){
+                    processKill(subStreamProcess);
+                    return;
+                }
+                if(logLevel !== 'quiet'){
                     s.userLog({
                         ke: groupKey,
                         mid: monitorId,
                     },{
                         type: lang["Substream Process"],
-                        msg: data.toString()
+                        msg: string
                     })
+                }
+            });
+
+            subStreamProcess.stdio[5].on('data',(data) => {
+                resetStreamCheck({
+                    ke: groupKey,
+                    mid: monitorId,
                 })
-            }
+            });
+
             subStreamProcess.on('close',(data) => {
                 if(!activeMonitor.allowDestroySubstream){
                     subStreamProcess.stderr.on('data',(data) => {
@@ -1431,6 +1446,9 @@ module.exports = (s,config,lang) => {
         const typeIsLocal = e.type === 'local'
         const monitorConfig = theGroup.rawMonitorConfigurations[monitorId]
         const doPingTest = e.type !== 'socket' && e.type !== 'dashcam' && e.protocol !== 'udp' && e.type !== 'local' && e.details.skip_ping !== '1';
+        if(!theGroup.startMonitorInQueue){
+            theGroup.startMonitorInQueue = createQueueAwaited(0.5, 1)
+        }
         const startMonitorInQueue = theGroup.startMonitorInQueue
         if(!activeMonitor.isStarted)return;
         // e = monitor object

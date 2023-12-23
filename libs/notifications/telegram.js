@@ -140,9 +140,12 @@ module.exports = function(s,config,lang,getSnapshot){
                             videoPath = siftedVideoFileFromRam.filePath
                             videoName = siftedVideoFileFromRam.filename
                         }
-                        if(videoPath){
-                            const thumbFile = getStreamDirectory(d) + 'thumb.jpg';
+                        var thumbFile = undefined;
+                        if(d.screenshotBuffer){
+                            thumbFile = getStreamDirectory(d) + 'thumb.jpg';
                             fs.writeFileSync(thumbFile, d.screenshotBuffer)
+                        }
+                        if(videoPath){
                             sendMessage({
                                 title: notifyText,
                             },[

@@ -5,6 +5,7 @@ module.exports = function(s,config,lang,app,io){
     } = require('./events/utils.js')(s,config,lang)
     s.dataPortTokens = {}
     const theWebSocket = createWebSocketServer()
+    s.dataPortServer = theWebSocket;
     function setClientKillTimerIfNotAuthenticatedInTime(client){
         client.killTimer = setTimeout(function(){
             client.terminate()
