@@ -391,7 +391,7 @@ module.exports = (s,config,lang) => {
                 where: [
                     ['status','!=','0'],
                     ['ke','=',groupKey],
-                    ['details','LIKE',`%"type":"${storageType}"%`],
+                    ['type','=',storageType],
                 ],
                 orderBy: ['time','asc'],
                 limit: 2
@@ -413,7 +413,7 @@ module.exports = (s,config,lang) => {
                         amount : -(video.size/1048576),
                         storageType : storageType
                     })
-                    s.deleteVideoFromCloudExtensionsRunner(groupKey,storageType,video)
+                    s.deleteVideoFromCloudExtensionsRunner({ke: groupKey},storageType,video)
                 })
                 const whereGroupLength = whereGroup.length
                 if(whereGroupLength > 0){
@@ -464,7 +464,7 @@ module.exports = (s,config,lang) => {
                         amount : -(frame.size/1048576),
                         storageType : storageType
                     })
-                    // s.deleteVideoFromCloudExtensionsRunner(groupKey,storageType,frame)
+                    // s.deleteVideoFromCloudExtensionsRunner({ke: groupKey},storageType,frame)
                 })
                 const whereGroupLength = whereGroup.length
                 if(whereGroupLength > 0){
