@@ -1900,5 +1900,6 @@
    "HowToConnectDes2": "If you would like to get access to a private (dedicated) P2P server please create an account at the <a href='https: //licenses.shinobi.video/login' target='_blank'>Shinobi<b>Shop</b></a> and contact us via the Live Chat widget",
    "User": "User",
    "Current Version": "Current Version",
-   "Default is Global value": "Default is Global value"
+   "Default is Global value": "Default is Global value",
+   "rejectUnauth": "Ignore server certificate"
 }
