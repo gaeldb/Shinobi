@@ -20,7 +20,7 @@ module.exports = function(s,config,lang,app,io){
             break;
             case'kill':
                 s.initiateMonitorObject(d.d);
-                cameraDestroy(d.d)
+                await cameraDestroy(d.d);
             break;
             case'sync':
                 s.initiateMonitorObject(d.sync);
@@ -41,7 +41,7 @@ module.exports = function(s,config,lang,app,io){
             break;
             case'cameraStart'://start or record camera
                 try{
-                    await s.camera(d.mode,d.d)
+                    await s.camera(d.d.mode,d.d)
                     let activeMonitor = s.group[d.d.ke].activeMonitors[d.d.mid]
                     // activeMonitor.masterSaysToStop = false
                     clearTimeout(activeMonitor.recordingChecker);

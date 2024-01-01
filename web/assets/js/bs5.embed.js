@@ -22,6 +22,9 @@ function onBuildStreamElement(callback){
     onBuildStreamElementExtensions.push(callback)
 }
 //
+function debugLog(...args){
+    console.log(...args)
+}
 function buildStreamElementHtml(streamType){
     var html = ''
     if(window.jpegModeOn === true){
@@ -499,6 +502,26 @@ function requestMonitorInit(){
         ff: 'watch_on',
         id: monitorId
     });
+}
+function toggleSubStream(monitorId,callback){
+    var monitor = loadedMonitors[monitorId]
+    var substreamConfig = monitor.details.substream
+    var isSubStreamConfigured = !!substreamConfig.output;
+    if(!isSubStreamConfigured){
+        new PNotify({
+            type: 'warning',
+            title: lang['Invalid Settings'],
+            text: lang.SubstreamNotConfigured,
+        });
+        return;
+    }
+    if(monitor.subStreamToggleLock)return false;
+    monitor.subStreamToggleLock = true
+    $.getJSON(getApiPrefix() + '/toggleSubstream/'+$user.ke+'/'+monitorId,function(d){
+        monitor.subStreamToggleLock = false
+        debugLog(d)
+        if(callback)callback()
+    })
 }
 $(document).ready(function(e){
     $('body')

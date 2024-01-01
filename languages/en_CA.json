@@ -760,7 +760,7 @@
    "hlsOptionsInvalid": "HLS Options are Invalid",
    "HLS Video Encoder": "Video Encoder",
    "HLS Audio Encoder": "Audio Encoder",
-   "HLS Segment Length": "Segment Length <small>in Seconds</small>",
+   "HLS Segment Length": "Segment Length",
    "HLS Preset": "Preset Template",
    "in seconds": "in seconds",
    "HLS List Size": "List Size",
