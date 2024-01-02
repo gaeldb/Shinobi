@@ -20,7 +20,7 @@ module.exports = function(s,config,lang,app,io){
             break;
             case'kill':
                 s.initiateMonitorObject(d.d);
-                cameraDestroy(d.d)
+                await cameraDestroy(d.d);
             break;
             case'sync':
                 s.initiateMonitorObject(d.sync);
