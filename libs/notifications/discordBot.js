@@ -34,8 +34,7 @@ module.exports = function(s,config,lang,getSnapshot){
                     }).catch(err => {
                         if(err){
                             s.userLog({ke:groupKey,mid:'$USER'},{type:lang.DiscordErrorText,msg:err})
-                            s.group[groupKey].discordBot = null
-                            s.loadGroupApps({ke:groupKey})
+                            restartDiscordBot(groupKey, 1)
                         }
                     })
                 }else{
@@ -45,7 +44,7 @@ module.exports = function(s,config,lang,getSnapshot){
                     },{
                         type: lang.DiscordErrorText,
                         msg: 'Check the Channel ID'
-                    })
+                    });
                 }
             }
             const onEventTriggerBeforeFilterForDiscord = function(d,filter){
@@ -149,6 +148,15 @@ module.exports = function(s,config,lang,getSnapshot){
                     },[],r.ke)
                 }
             }
+            let restartAttemptLockTimer = null
+            const restartDiscordBot = function(groupKey, timer = 60000 * 5){
+                s.debugLog(`Discord Bot Restarting : ${groupKey}`)
+                s.group[groupKey].discordBot = null;
+                clearTimeout(restartAttemptLockTimer);
+                restartAttemptLockTimer = setTimeout(function(){
+                    s.loadGroupApps({ke: groupKey});
+                }, timer);
+            }
             const loadDiscordBotForUser = function(user){
                 const userDetails = s.parseJSON(user.details);
                 //discordbot
@@ -157,19 +165,35 @@ module.exports = function(s,config,lang,getSnapshot){
                    userDetails.discordbot === '1' &&
                    userDetails.discordbot_token !== ''
                   ){
+                    const groupKey = user.ke;
+                    const theGroup = s.group[groupKey];
                     s.debugLog(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`)
                     s.debugLog(`Discord Connecting ${userDetails.discordbot_token}`)
-                    s.group[user.ke].discordBot = new Discord.Client()
-                    s.group[user.ke].discordBot.on('ready', () => {
+                    const discordBot = new Discord.Client();
+                    discordBot.on('ready', () => {
+                        const botTag = discordBot.user.tag;
+                        s.debugLog(`Discord Bot Ready : ${groupKey} : ${botTag}`)
                         s.userLog({
-                            ke: user.ke,
+                            ke: groupKey,
                             mid: '$USER'
                         },{
                             type: lang.DiscordLoggedIn,
-                            msg: s.group[user.ke].discordBot.user.tag
+                            msg: botTag
                         })
-                    })
-                    s.group[user.ke].discordBot.login(userDetails.discordbot_token)
+                    });
+                    discordBot.on('error', (error) => {
+                        s.debugLog(`Discord Error : ${groupKey} : ${error}`)
+                        s.userLog({
+                            ke: groupKey,
+                            mid: '$USER'
+                        },{
+                            type: lang.DiscordErrorText,
+                            msg: error
+                        });
+                        restartDiscordBot(groupKey)
+                    });
+                    discordBot.login(userDetails.discordbot_token);
+                    theGroup.discordBot = discordBot;
                 }
             }
             const unloadDiscordBotForUser = function(user){
