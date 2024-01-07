@@ -16,8 +16,6 @@ fi
 
 if [ -x "$(command -v npm)" ]; then
     echo "NPM detected. Version : $(npm -v)"
-else
-    npm i npm@latest -g
 fi
 npm install --unsafe-perm
 npm i pm2@latest -g
