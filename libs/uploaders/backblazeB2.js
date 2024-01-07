@@ -47,7 +47,9 @@ module.exports = function(s,config,lang){
                 }
                 var backblazeErr = function(err){
                     // console.log(err)
-                    s.userLog({mid:'$USER',ke:e.ke},{type:lang['Backblaze Error'],msg:err.stack || err.data || err})
+                    const msg = err.stack || err.data || err;
+                    delete(msg.data)
+                    s.userLog({mid:'$USER',ke:e.ke},{type:lang['Backblaze Error'],msg: msg})
                 }
                 async function createB2Connection(){
                     const b2 = new B2({
@@ -107,6 +109,7 @@ module.exports = function(s,config,lang){
         const theGroup = s.group[e.ke]
         if(theGroup.bb_b2 && theGroup.init.use_bb_b2 !== '0' && theGroup.init.bb_b2_save === '1'){
             function backblazeErr(err){
+                delete(err.data)
                 s.userLog({mid:'$USER',ke:e.ke},{type:lang['Backblaze Error'],msg:err})
                 s.debugLog(err)
             }
