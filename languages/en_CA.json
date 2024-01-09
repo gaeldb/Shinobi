@@ -11,6 +11,8 @@
    "contactAdmin": "Contact the maintainer of your Shinobi installation.",
    "accountAdded": "Account Added",
    "accountAddedText": "Account has been added.",
+   "tooManyMonitorsSelected": "Too Many Monitors Selected",
+   "performanceMayBeAffected": "Performance may be affected. Do you wish to continue?",
    "monitorDeleted": "Monitor Deleted",
    "accountCreationError": "Account Creation Error",
    "accountEditError": "Account Edit Error",
