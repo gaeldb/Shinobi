@@ -57,7 +57,7 @@
     "shinobi-onvif": "0.1.9",
     "shinobi-sound-detection": "^0.1.13",
     "shinobi-zwave": "^1.0.11",
-    "smtp-server": "^3.9.0",
+    "smtp-server": "^3.13.0",
     "socket.io": "^4.4.1",
     "socket.io-client": "^4.5.3",
     "tree-kill": "1.2.2",
