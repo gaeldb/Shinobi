@@ -7,9 +7,9 @@ if(!process.argv[2]||!process.argv[3]||!process.argv[4]){
     console.log('# node translateLanguageFile.js en_CA en ar')
     return
 }
-let translate;
+let translate = {};
 try{
-    translate = require('@vitalets/google-translate-api')
+    translate = (require('@vitalets/google-translate-api')).translate
 }catch(err){
     console.log(`You are missing a module to use this tool. Run "npm install @vitalets/google-translate-api" to install the required module.`)
     return
@@ -108,13 +108,26 @@ function runTranslation(termKey,numberInLine){
     })
 }
 async function runTranslatorOnSourceTerms(){
-    await makeFolderForOutput()
-    for (let i = 0; i < list.length; i++) {
-        let termKey = list[i]
-        await runTranslation(termKey,i)
-        await writeLanguageFile(newList)
+    try{
+        await makeFolderForOutput()
+        for (let i = 0; i < list.length; i++) {
+            let termKey = list[i]
+            await runTranslation(termKey,i)
+            await writeLanguageFile(newList)
+        }
+        await moveNewLanguageFile()
+        console.log('Building Language File Complete!')
+    }catch(err){
+        console.log(err)
+        console.log('!!!!!!!!!!!!!!!----------------------')
+        console.log('!!!!!!!!!!!!!!!----------------------')
+        console.log('!!!!!!!!!!!!!!!----------------------')
+        console.log('!!!!!!!!!!!!!!!----------------------')
+        console.log('!!!!!!!!!!!!!!!----------------------')
+        console.log('!!!!!!!!!!!!!!!----------------------')
+        console.log('!!!!!!!!!!!!!!!----------------------')
+        console.log(translate)
     }
-    await moveNewLanguageFile()
-    console.log('Building Language File Complete!')
+
 }
 runTranslatorOnSourceTerms()
