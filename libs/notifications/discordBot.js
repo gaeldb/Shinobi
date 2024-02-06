@@ -8,6 +8,10 @@ module.exports = function(s,config,lang,getSnapshot){
     //discord bot
     if(config.discordBot === true){
         try{
+            const messageFooter = {
+                icon_url: config.iconURL,
+                text: config.notifyFooterText || "Shinobi Systems"
+            };
             const sendMessage = function(data,files,groupKey){
                 if(!data)data = {};
                 var bot = s.group[groupKey].discordBot
@@ -21,10 +25,7 @@ module.exports = function(s,config,lang,getSnapshot){
                     description: "",
                     fields: [],
                     timestamp: new Date(),
-                    footer: {
-                      icon_url: config.iconURL,
-                      text: "Shinobi Systems"
-                    }
+                    footer: messageFooter
                 },data)
                 const discordChannel = bot.channels.cache.get(s.group[groupKey].init.discordbot_channel)
                 if(discordChannel && discordChannel.send){
@@ -79,10 +80,7 @@ module.exports = function(s,config,lang,getSnapshot){
                             description: notifyText+' '+d.currentTimestamp,
                             fields: [],
                             timestamp: d.currentTime,
-                            footer: {
-                              icon_url: config.iconURL,
-                              text: "Shinobi Systems"
-                            }
+                            footer: messageFooter
                         },[
                             {
                                 attachment: d.screenshotBuffer,
@@ -115,10 +113,7 @@ module.exports = function(s,config,lang,getSnapshot){
                                 description: notifyText,
                                 fields: [],
                                 timestamp: d.currentTime,
-                                footer: {
-                                    icon_url: config.iconURL,
-                                    text: "Shinobi Systems"
-                                }
+                                footer: messageFooter
                             },[
                                 {
                                     attachment: videoPath,
@@ -141,10 +136,7 @@ module.exports = function(s,config,lang,getSnapshot){
                         description: '**'+s.factorAuth[r.ke][r.uid].key+'** '+r.lang.FactorAuthText1,
                         fields: [],
                         timestamp: new Date(),
-                        footer: {
-                          icon_url: config.iconURL,
-                          text: "Shinobi Systems"
-                        }
+                        footer: messageFooter
                     },[],r.ke)
                 }
             }
@@ -219,10 +211,7 @@ module.exports = function(s,config,lang,getSnapshot){
                         description: html,
                         fields: [],
                         timestamp: currentTime,
-                        footer: {
-                          icon_url: config.iconURL,
-                          text: "Shinobi Systems"
-                        }
+                        footer: messageFooter
                     },[],e.ke)
                 }
             }
@@ -241,10 +230,7 @@ module.exports = function(s,config,lang,getSnapshot){
                         description: description,
                         fields: [],
                         timestamp: currentTime,
-                        footer: {
-                          icon_url: config.iconURL,
-                          text: "Shinobi Systems"
-                        }
+                        footer: messageFooter
                     },[],monitorConfig.ke)
                 }
             }
