@@ -11,6 +11,18 @@ module.exports = function(s,config,lang,app,io){
         let text = buff.toString('ascii');
         return text
     }
+    async function copyFileAsync(filePath, snapPath) {
+        return new Promise((resolve, reject) => {
+            const readStream = fs.createReadStream(filePath);
+            const writeStream = fs.createWriteStream(snapPath);
+
+            readStream.on('error', reject);
+            writeStream.on('error', reject);
+            writeStream.on('finish', resolve);
+
+            readStream.pipe(writeStream);
+        });
+    }
     const {
         triggerEvent,
     } = require('./events/utils.js')(s,config,lang)
@@ -39,8 +51,8 @@ module.exports = function(s,config,lang,app,io){
             var filename = getFileNameFromPath(filePath)
             if(search(filename,'.jpg') || search(filename,'.jpeg')){
                 var snapPath = s.dir.streams + ke + '/' + mid + '/s.jpg'
-                fs.rm(snapPath,function(err){
-                    fs.createReadStream(filePath).pipe(fs.createWriteStream(snapPath))
+                fs.rm(snapPath,async function(err){
+                    await copyFileAsync(filePath, snapPath)
                     triggerEvent({
                         id: mid,
                         ke: ke,
