@@ -655,8 +655,30 @@ function drawMatrices(event,options){
     theContainer.find(`.stream-detected-object[name="${objectTagGroup}"]`).remove()
     var html = ''
     $.each(event.details.matrices,function(n,matrix){
-        html += `<div class="stream-detected-object" name="${objectTagGroup}" style="height:${heightRatio * matrix.height}px;width:${widthRatio * matrix.width}px;top:${heightRatio * matrix.y}px;left:${widthRatio * matrix.x}px;">`
+        html += `<div class="stream-detected-object" name="${objectTagGroup}" style="height:${heightRatio * matrix.height}px;width:${widthRatio * matrix.width}px;top:${heightRatio * matrix.y}px;left:${widthRatio * matrix.x}px;border-color: ${matrix.color};">`
         if(matrix.tag)html += `<span class="tag">${matrix.tag}${!isNaN(matrix.id) ? ` <small class="label label-default">${matrix.id}</small>`: ''}</span>`
+        if(matrix.notice)html += `<div class="matrix-info" style="color:yellow">${matrix.notice}</div>`;
+        if(matrix.missingRecently){
+            html += `<div class="matrix-info" style="color:yellow">${matrix.missingRecently.join(',')}</div>`;
+        }
+        if(matrix.pose){
+            var pose = matrix.pose;
+            html += `<div class="matrix-info text-left">`;
+            if(pose.isPersonFallen)html += `<div><small>Stance</small><br>${pose.isPersonFallen}</div>`;
+            if(pose.isPersonReaching){
+                html += `<div><small>Left Hand</small><br>${pose.isPersonReaching.left.pose}</div>`;
+                html += `<div><small>Right Hand</small><br>${pose.isPersonReaching.right.pose}</div>`;
+            }
+            // if(pose.isPersonTouchingWaistOrHips)html += `<div>Waist or Hips : ${pose.isPersonTouchingWaistOrHips}</div>`;
+            html += `</div>`;
+        }
+        if(matrix.nearBy){
+            html += `<div class="matrix-info">`
+            matrix.nearBy.forEach((nearMatrix) => {
+                html += `<div class="mb-1">${nearMatrix.tag} <small class="label label-default">${nearMatrix.id}</small> (${nearMatrix.overlapPercent}%)</div>`
+            });
+            html += `</div>`
+        }
         html += '</div>'
     })
     theContainer.append(html)
