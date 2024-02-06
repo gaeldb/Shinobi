@@ -31,12 +31,13 @@ module.exports = function(s,config,lang,getSnapshot){
                     };
                     client.sendMessage(roomId, content);
                 }).catch(err => {
+                    console.error(err)
                     s.userLog({
                         ke: groupKey,
                         mid: '$USER'
                     },{
                         type: 'matrix.org Error',
-                        msg: err
+                        msg: err.toString()
                     });
                 })
             }
