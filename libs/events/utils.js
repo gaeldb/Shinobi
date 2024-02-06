@@ -30,7 +30,7 @@ module.exports = (s,config,lang) => {
         setLastTracked,
         trackObjectWithTimeout,
         getAllMatricesThatMoved,
-    } = require('./tracking.js')(s,config,lang)
+    } = require('./tracking.js')(config)
     const {
         isEven,
         fetchTimeout,
