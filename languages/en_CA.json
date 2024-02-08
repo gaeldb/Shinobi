@@ -1443,7 +1443,7 @@
    "Daily Events": "Daily Events",
    "Send Notification": "Send Notification",
    "Send to": "Send to",
-   "setMaxStorageAmountText": "You should set your Max Storage Amount in your Account Settings located on the left. Find the option under the Profile section. Default is 10 GB.",
+   "setMaxStorageAmountText": "Please configure the Max Storage Amount in your Account Settings/Profile located on the left. Set at least 20 GB to disable this alert (Default 10 GB).",
    "Save Events": "Save Events",
    "Original Choice": "Original Choice",
    "Legacy Webhook": "Legacy Webhook",
