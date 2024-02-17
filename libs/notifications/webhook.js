@@ -25,7 +25,8 @@ module.exports = function(s,config,lang,getSnapshot){
                 })
             })
         }
-        const doPostMethod = s.group[groupKey].init.global_webhook_method === 'post';
+        const globalWebhookMethod = s.group[groupKey].init.global_webhook_method;
+        const doPostMethod = globalWebhookMethod !== 'GET';
         // const includeSnapshot = s.group[groupKey].init.global_webhook_include_image === '1';
         const webhookInfoData = {
             info: sendBody,
@@ -75,7 +76,7 @@ module.exports = function(s,config,lang,getSnapshot){
                 ok: true,
             }
             fetch(webhookEndpoint,doPostMethod ? {
-                method: 'POST',
+                method: globalWebhookMethod,
                 body: formData
             } : undefined)
                 .then(res => res.text())
