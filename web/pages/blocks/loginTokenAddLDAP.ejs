@@ -17,9 +17,7 @@
     var buildOptions
 %>
 <form class="dark">
-<%
-    include fieldBuilders.ejs
-%>
+<%- include('home/fieldBuilders'); %>
 <%
     drawBlock(define['LDAP'].blocks.LDAP)
 %>

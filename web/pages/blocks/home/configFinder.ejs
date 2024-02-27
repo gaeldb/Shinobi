@@ -1,16 +1,10 @@
 <main class="page-tab pt-3 dark" id="tab-configFinder">
     <div class="row">
-        <%
-          var drawBlock
-          var buildOptions
-        %>
-        <%
-          include fieldBuilders.ejs
-        %>
-        <% Object.keys(define['Montior Configuration Finder'].blocks).forEach(function(blockKey){
-              var accountSettings = define['Montior Configuration Finder'].blocks[blockKey]
-              drawBlock(accountSettings)
-          }) %>
+        <%  Object.keys(define['Montior Configuration Finder'].blocks).forEach(function(blockKey) { -%>
+        <%- include('drawBlock', {
+                theBlock: define['Montior Configuration Finder'].blocks[blockKey]
+            }) %>
+        <%  }) -%>
     </div>
     <% window.additionalJsScripts.push('assets/js/bs5.configFinder.js') %>
 </main>

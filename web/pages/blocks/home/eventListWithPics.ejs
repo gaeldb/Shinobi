@@ -1,16 +1,10 @@
 <main class="page-tab pt-3" id="tab-eventListWithPics">
     <form class="dark row">
-        <%
-          var drawBlock
-          var buildOptions
-        %>
-        <%
-          include fieldBuilders.ejs
-        %>
-        <% Object.keys(define['Events'].blocks).forEach(function(blockKey){
-              var theBlocks = define['Events'].blocks[blockKey]
-              drawBlock(theBlocks)
-          }) %>
+        <%  Object.keys(define['Events'].blocks).forEach(function(blockKey) { -%>
+        <%- include('drawBlock', {
+                theBlock: define['Events'].blocks[blockKey]
+            }) %>
+        <%  }) -%>
     </form>
 </main>
 <script src="<%-window.libURL%>assets/js/bs5.eventListWithPics.js"></script>

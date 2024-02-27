@@ -1,14 +1,9 @@
 <form>
-    <%
-      var drawBlock
-      var buildOptions
-    %>
-    <%
-      include home/fieldBuilders.ejs
-    %>
-    <% Object.keys(define['Super User Preferences'].blocks).forEach(function(blockKey){
-          var accountSettings = define['Super User Preferences'].blocks[blockKey]
-          drawBlock(accountSettings)
-      }) %>
+  <%  Object.keys(define['Super User Preferences'].blocks).forEach(function(blockKey) { -%>
+    <%- include('home/drawBlock', {
+          theBlock: define['Super User Preferences'].blocks[blockKey]
+        }) %>
+  <%  }) -%>
+
 </form>
 <script src="<%-window.libURL%>assets/js/super.preferences.js" type="text/javascript"></script>

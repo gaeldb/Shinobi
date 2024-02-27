@@ -8,18 +8,13 @@
         </div>
         <%
           const details = $user.details
-          var drawBlock
-          var buildOptions
         %>
-        <%
-          include fieldBuilders.ejs
-        %>
-        <% Object.keys(define['Account Settings'].blocks).forEach(function(blockKey){
-              var accountSettings = define['Account Settings'].blocks[blockKey]
-              drawBlock(accountSettings)
-        }) %>
-        <%
-          include stickySubmitBar.ejs
-        %>
+        <% Object.keys(define['Account Settings'].blocks).forEach(function(blockKey) { -%>
+            <%- include('drawBlock', {
+                    theBlock: define['Account Settings'].blocks[blockKey],
+                    details: details
+                }) %>
+            <%  }) -%>
+        <%- include('stickySubmitBar'); %>
     </form>
 </main>

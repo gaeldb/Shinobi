@@ -1,8 +1,8 @@
 <% var pageTitle = lang.Shinobi %>
 
-<% include blocks/header.ejs %>
-<% include blocks/header-loggedIn.ejs %>
+<%- include('blocks/header', {pageTitle: pageTitle}); %>
+<%- include('blocks/header-loggedIn'); %>
 <!-- Page -->
-<% include blocks/home.ejs %>
+<%- include('blocks/home'); %>
 <!-- Footer -->
-<% include blocks/footer.ejs %>
+<%- include('blocks/footer'); %>

@@ -1,69 +1,51 @@
 <%
-buildOptions = function(field,possiblities){
-    if(!field)console.error('field',field)
-    var fieldElement = ''
-    possiblities.forEach(function(option){
-        if(option.optgroup){
-            fieldElement += '<optgroup label="' + option.name + '">'
-            fieldElement += buildOptions(field,option.optgroup)
-            fieldElement += '</optgroup>'
-        }else{
-            var selected = ''
-            if(option.value === field.default){
-              selected = 'selected'
-            }
-            fieldElement += '<option value="' + option.value + '" ' + selected + '>' + option.name + '</option>'
-        }
-    })
-    return fieldElement
-}
-drawBlock = function(monitorSettings){
-  if(monitorSettings.evaluation && !eval(monitorSettings.evaluation)){
+drawBlock = function(theBlock){
+  if(theBlock.evaluation && !eval(theBlock.evaluation)){
       return
   }
   var attributes = []
   var styles = []
   var sectionClass = []
-  var headerTitle = monitorSettings.headerTitle || lang[monitorSettings.name] || monitorSettings.name
-  if(monitorSettings.hidden === true){
+  var headerTitle = theBlock.headerTitle || lang[theBlock.name] || theBlock.name
+  if(theBlock.hidden === true){
       styles.push('display:none')
   }
-  if(monitorSettings.style){
-      styles.push(monitorSettings.style)
+  if(theBlock.style){
+      styles.push(theBlock.style)
   }
-  if(monitorSettings.isSection === true){
+  if(theBlock.isSection === true){
       attributes.push('section')
   }
-  if(monitorSettings.attribute){
-      attributes.push(monitorSettings.attribute)
+  if(theBlock.attribute){
+      attributes.push(theBlock.attribute)
   }
-  if(!monitorSettings.noId && !monitorSettings.id && monitorSettings.name){
-      var userSettingsId = monitorSettings.name.replace(/[^a-zA-Z ]/g, '').replace(/[^a-zA-Z ]/g, '').replace(/ /g, '')
-      monitorSettings.id = userSettingsId
+  if(!theBlock.noId && !theBlock.id && theBlock.name){
+      var userSettingsId = theBlock.name.replace(/[^a-zA-Z ]/g, '').replace(/[^a-zA-Z ]/g, '').replace(/ /g, '')
+      theBlock.id = userSettingsId
   }
-  if(monitorSettings.id)attributes.push(`id="${monitorSettings.id}"`);
-  if(monitorSettings.color){
-      sectionClass.push(monitorSettings.color)
+  if(theBlock.id)attributes.push(`id="${theBlock.id}"`);
+  if(theBlock.color){
+      sectionClass.push(theBlock.color)
   }
-  if(monitorSettings['section-class']){
-      sectionClass.push(monitorSettings['section-class'])
+  if(theBlock['section-class']){
+      sectionClass.push(theBlock['section-class'])
   }
-  if(monitorSettings.isAdvanced){ %>
+  if(theBlock.isAdvanced){ %>
  <div class="h_us_input h_us_advanced" style="display:none">
  <% }
-  if(monitorSettings['section-pre-pre-class']){ %>
- <div class="<%- monitorSettings['section-pre-pre-class'] %>">
+  if(theBlock['section-pre-pre-class']){ %>
+ <div class="<%- theBlock['section-pre-pre-class'] %>">
  <% }
-  if(monitorSettings['section-pre-class']){ %>
- <div class="<%- monitorSettings['section-pre-class'] %>">
+  if(theBlock['section-pre-class']){ %>
+ <div class="<%- theBlock['section-pre-class'] %>">
  <% }
   %>
-  <<%- monitorSettings.isForm ? 'form' : 'div' %> <%- attributes.join(' ') %> style="<%- styles.join(';') %>" class="<%- !monitorSettings.noDefaultSectionClasses ? `card form-group-group p-3 ${define.Theme.isDark ? 'bg-dark' : 'bg-light'} mb-3 shadow` : '' %> <%- sectionClass.join(' ') %>">
-      <% if(!monitorSettings['noHeader']){ %>
-          <h4 class="form-section-header <%- monitorSettings.headerButtons || monitorSettings.headerTitle && ( monitorSettings.headerTitle.indexOf('<a ') > -1 || monitorSettings.headerTitle.indexOf('<button ') > -1 ) ? 'no-toggle-header' : '' %> cursor-pointer mb-3 pb-3 <%- define.Theme.isDark ? 'text-white' : '' %> border-bottom-dotted border-color-<%- monitorSettings.color || 'dark' %> <%- monitorSettings.headerClass %>"><%- headerTitle %>
-              <% if(monitorSettings.headerButtons){ %>
+  <<%- theBlock.isForm ? 'form' : 'div' %> <%- attributes.join(' ') %> style="<%- styles.join(';') %>" class="<%- !theBlock.noDefaultSectionClasses ? `card form-group-group p-3 ${define.Theme.isDark ? 'bg-dark' : 'bg-light'} mb-3 shadow` : '' %> <%- sectionClass.join(' ') %>">
+      <% if(!theBlock['noHeader']){ %>
+          <h4 class="form-section-header <%- theBlock.headerButtons || theBlock.headerTitle && ( theBlock.headerTitle.indexOf('<a ') > -1 || theBlock.headerTitle.indexOf('<button ') > -1 ) ? 'no-toggle-header' : '' %> cursor-pointer mb-3 pb-3 <%- define.Theme.isDark ? 'text-white' : '' %> border-bottom-dotted border-color-<%- theBlock.color || 'dark' %> <%- theBlock.headerClass %>"><%- headerTitle %>
+              <% if(theBlock.headerButtons){ %>
                   <div class="pull-right">
-                      <% monitorSettings.headerButtons.forEach(function(button){ %>
+                      <% theBlock.headerButtons.forEach(function(button){ %>
                           <a class="btn btn-success btn-xs <%- button.class %>">
                               <% if(button.icon){ %><i class="fa fa-<%- button.icon %>"></i><% } %>
                                <% if(button.text){ %><%- button.text %><% } %>
@@ -73,9 +55,9 @@ drawBlock = function(monitorSettings){
               <% } %>
           </h4>
       <% } %>
-      <div class="box-wrapper <%- monitorSettings['box-wrapper-class'] || '' %>" style="<%- monitorSettings['box-wrapper-style'] || '' %>">
-  <% if(monitorSettings['input-mapping']){ %>
-      <div class="form-group-group btn-default card shadow mb-2" style="display:none" input-mapping="<%- monitorSettings['input-mapping'] %>">
+      <div class="box-wrapper <%- theBlock['box-wrapper-class'] || '' %>" style="<%- theBlock['box-wrapper-style'] || '' %>">
+  <% if(theBlock['input-mapping']){ %>
+      <div class="form-group-group btn-default card shadow mb-2" style="display:none" input-mapping="<%- theBlock['input-mapping'] %>">
           <h5 class="card-body d-flex flex-row m-0">
               <div class="flex-grow-1">
                   <%-lang['Input Feeds Selected']%>
@@ -87,17 +69,17 @@ drawBlock = function(monitorSettings){
           <div class="card-footer pb-0 choices"></div>
       </div>
   <% } %>
-  <% if(monitorSettings.blockquote){ %>
-      <blockquote class="<%- monitorSettings.blockquoteClass || '' %>">
-          <%- monitorSettings.blockquote %>
+  <% if(theBlock.blockquote){ %>
+      <blockquote class="<%- theBlock.blockquoteClass || '' %>">
+          <%- theBlock.blockquote %>
       </blockquote>
   <% } %>
-  <% if(monitorSettings.blocks){
-          monitorSettings.blocks.forEach(function(settingsBlock){
-              drawBlock(settingsBlock)
+  <% if(theBlock.blocks){
+          theBlock.blocks.forEach(function(theBlock){
+              drawBlock(theBlock)
           })
       }
-    if(monitorSettings.info){
+    if(theBlock.info){
         function drawInfoItem(field){
             let evaluation = `${field.evaluation || ''}`
             if(field.ejs){
@@ -257,7 +239,7 @@ drawBlock = function(monitorSettings){
              break;
              case'select':
                    fieldElement = `<select class="form-control ${fieldClass.join(' ')}" ${attributes.join(' ')}>`
-                   fieldElement += buildOptions(field,possiblities)
+                   fieldElement += fieldBuild.buildOptions(field,possiblities)
                    fieldElement += '</select>'
              break;
          }
@@ -319,20 +301,21 @@ drawBlock = function(monitorSettings){
         <% };
      };
        }
-        monitorSettings.info.forEach(drawInfoItem)
+        theBlock.info.forEach(drawInfoItem)
     }
 %>
 </div>
-</<%- monitorSettings.isForm ? 'form' : 'div' %>>
+</<%- theBlock.isForm ? 'form' : 'div' %>>
 <%
-if(monitorSettings['section-pre-class']){ %>
+if(theBlock['section-pre-class']){ %>
 </div>
 <% }
-if(monitorSettings['section-pre-pre-class']){ %>
+if(theBlock['section-pre-pre-class']){ %>
 </div>
 <% }
-if(monitorSettings.isAdvanced){ %>
+if(theBlock.isAdvanced){ %>
 </div>
 <% }
 }
+drawBlock(theBlock)
 %>

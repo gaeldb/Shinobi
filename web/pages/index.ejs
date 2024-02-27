@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <!-- Powered by Shinobi, http://shinobi.video -->
-<% include blocks/header-title.ejs %>
+<%- include('blocks/header-title'); %>
 <%
     if(config.baseURL)window.libURL = config.baseURL;
     if(!window.libURL)window.libURL = originalURL;
  %>
-<% include blocks/header-meta.ejs %>
+<%- include('blocks/header-meta'); %>
 <meta http-equiv="content-type" content="text/html;charset=UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <link rel="stylesheet" href="<%-window.libURL%>assets/vendor/bootstrap5/css/bootstrap.min.css">
@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="<%-window.libURL%>assets/css/gradients.css">
 <link rel="stylesheet" href="<%-window.libURL%>assets/css/bs5.darktheme.css">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-<% include blocks/header-favicon.ejs %>
+<%- include('blocks/header-favicon'); %>
 <script src="<%-window.libURL%>assets/vendor/js/jquery.min.js"></script>
 <script src="<%-window.libURL%>assets/vendor/js/jquery-ui.min.js"></script>
 <script src="<%-window.libURL%>assets/vendor/js/jquery.serialize.js"></script>

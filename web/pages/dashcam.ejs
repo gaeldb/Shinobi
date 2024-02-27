@@ -1,5 +1,5 @@
 <% var pageTitle = lang.Shinobi %>
-<% include blocks/header %>
+<%- include('blocks/header', {pageTitle: pageTitle}); %>
 <script>var $user=<%- JSON.stringify($user) %>;</script>
 <link rel="stylesheet" href="<%-window.libURL%>assets/vendor/bootstrap5/css/bootstrap.min.css">
 <link rel="stylesheet" href="<%-window.libURL%>assets/css/bootstrap5-theme.css">

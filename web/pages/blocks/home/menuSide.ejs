@@ -25,14 +25,8 @@
             </div>
             <% } %>
         </div>
-        <%
-          var drawBlock
-          var buildOptions
-        %>
-        <%
-          include fieldBuilders.ejs
-        %>
-        <% drawBlock(define.SideMenu.blocks.SideMenuBeforeList) %>
+
+        <%- include('drawBlock', {theBlock: define.SideMenu.blocks.SideMenuBeforeList}); %>
         <div tab-specific-content="liveGrid" style="display:none">
             <div class="form-group px-3">
                 <div class="dropdown">
@@ -72,7 +66,7 @@
                   </div>
               </ul>
           </div>
-          <% drawBlock(define.SideMenu.blocks.SideMenuAfterList) %>
+          <%- include('drawBlock', {theBlock: define.SideMenu.blocks.SideMenuAfterList}); %>
           <% if(showMonitors){ %>
               <div>
                   <div class="form-group px-3">

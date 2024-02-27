@@ -3,17 +3,11 @@
   <div class="modal-dialog" role="document">
     <form class="modal-content" style="background:transparent">
       <div>
-          <%
-            var drawBlock
-            var buildOptions
-          %>
-          <%
-            include home/fieldBuilders.ejs
-          %>
-          <% Object.keys(define['Admin Account Settings'].blocks).forEach(function(blockKey){
-                var accountSettings = define['Admin Account Settings'].blocks[blockKey]
-                drawBlock(accountSettings)
-            }) %>
+          <%  Object.keys(define['Admin Account Settings'].blocks).forEach(function(blockKey) { -%>
+            <%- include('home/drawBlock', {
+                    theBlock: define['Admin Account Settings'].blocks[blockKey]
+                }) %>
+          <%  }) -%>
       </div>
       <input style="display:none" type="checkbox" id="edit"/>
       <input type="hidden" name="details" value="{}">

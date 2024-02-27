@@ -1,16 +1,10 @@
 <main class="page-tab pt-3" id="tab-calendarView">
     <div class="row <%- define.Theme.isDark ? `dark` : '' %>">
-        <%
-          var drawBlock
-          var buildOptions
-        %>
-        <%
-            include fieldBuilders.ejs
-        %>
-        <% Object.keys(define['Calendar'].blocks).forEach(function(blockKey){
-              var theBlock = define['Calendar'].blocks[blockKey]
-              drawBlock(theBlock)
-          }) %>
+        <%  Object.keys(define['Calendar'].blocks).forEach(function(blockKey) { -%>
+        <%- include('drawBlock', {
+                theBlock: define['Calendar'].blocks[blockKey]
+            }) %>
+        <%  }) -%>
     </div>
     <link rel="stylesheet" href="<%-window.libURL%>assets/vendor/fullcalendar.min.css">
     <script src="<%-window.libURL%>assets/vendor/js/fullcalendar.min.js"></script>

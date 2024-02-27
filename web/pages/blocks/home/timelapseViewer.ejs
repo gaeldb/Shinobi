@@ -1,16 +1,10 @@
 <main class="page-tab pt-3" id="tab-timelapseViewer">
     <div class="dark row">
-        <%
-          var drawBlock
-          var buildOptions
-        %>
-        <%
-          include fieldBuilders.ejs
-        %>
-        <% Object.keys(define['Timelapse'].blocks).forEach(function(blockKey){
-              var accountSettings = define['Timelapse'].blocks[blockKey]
-              drawBlock(accountSettings)
-          }) %>
+        <%  Object.keys(define['Timelapse'].blocks).forEach(function(blockKey) { -%>
+          <%- include('drawBlock', {
+                theBlock: define['Timelapse'].blocks[blockKey]
+              }) %>
+        <%  }) -%>
     </div>
     <div style="margin-bottom: 50px;"></div>
     <h4 class="sticky-bar p-3 d-flex flex-row">

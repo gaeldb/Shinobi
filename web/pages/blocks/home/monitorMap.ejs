@@ -1,19 +1,12 @@
 <main class="page-tab pt-3" id="tab-monitorMap">
    <form class="dark row">
        <%
-         var drawBlock
-         var buildOptions
-       %>
-       <%
-         include fieldBuilders.ejs
-       %>
-       <%
-           var pageName = 'Monitor Map';
-           Object.keys(define[pageName].blocks).forEach(function(blockKey){
-               var pageLayout = define[pageName].blocks[blockKey]
-               drawBlock(pageLayout)
-           })
-       %>
+       var pageName = 'Monitor Map';
+       Object.keys(define[pageName].blocks).forEach(function(blockKey) { -%>
+        <%- include('drawBlock', {
+              theBlock: define[pageName].blocks[blockKey]
+            }) %>
+      <%  }) -%>
 
    </form>
    <link rel="stylesheet" href="<%-window.libURL%>assets/css/bs5.monitorMap.css" />

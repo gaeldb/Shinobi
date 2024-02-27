@@ -12,6 +12,7 @@ var cors = require('cors')
 var proxy = httpProxy.createProxyServer({})
 var ejs = require('ejs');
 var fileupload = require("express-fileupload");
+var fieldBuild = require('./fieldBuild');
 module.exports = function(s,config,lang,app,io){
     const {
         ptzControl,
@@ -44,6 +45,7 @@ module.exports = function(s,config,lang,app,io){
         passables.originalURL = s.getOriginalUrl(req)
         passables.baseUrl = req.protocol+'://'+req.hostname
         passables.config = s.getConfigWithBranding(req.hostname)
+        passables.fieldBuild = fieldBuild
         res.render(paths,passables,callback)
     }
     //child node proxy check

@@ -1,20 +1,12 @@
 <main class="container page-tab pt-3" id="tab-eventFilters">
     <form class="dark row">
-        <%
-          var drawBlock
-          var buildOptions
-        %>
-        <%
-          include fieldBuilders.ejs
-        %>
-        <% Object.keys(define['Event Filters'].blocks).forEach(function(blockKey){
-              var accountSettings = define['Event Filters'].blocks[blockKey]
-              drawBlock(accountSettings)
-          }) %>
+        <%  Object.keys(define['Event Filters'].blocks).forEach(function(blockKey) { -%>
+        <%- include('drawBlock', {
+                theBlock: define['Event Filters'].blocks[blockKey]
+            }) %>
+        <%  }) -%>
           <div class="col-md-12">
-          <%
-            include stickySubmitBar.ejs
-          %>
+          <%- include('stickySubmitBar'); %>
           </div>
     </form>
 </main>

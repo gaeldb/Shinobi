@@ -1,16 +1,10 @@
 <main class="container page-tab dark pt-3" id="tab-subAccountManager">
     <div id="subAccountManager" class="row">
-      <%
-        const details = $user.details
-        var drawBlock
-        var buildOptions
-      %>
-      <%
-        include fieldBuilders.ejs
-      %>
-      <% Object.keys(define['Sub-Account Manager'].blocks).forEach(function(blockKey){
-            var accountSettings = define['Sub-Account Manager'].blocks[blockKey]
-            drawBlock(accountSettings)
-      }) %>
+      <% Object.keys(define['Sub-Account Manager'].blocks).forEach(function(blockKey) { -%>
+        <%- include('drawBlock', {
+                theBlock: define['Sub-Account Manager'].blocks[blockKey],
+                details: $user.details
+            }) %>
+        <%  }) -%>
     </div>
 </main>

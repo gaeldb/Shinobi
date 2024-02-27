@@ -1,17 +1,11 @@
 <main class="page-tab pt-3" id="tab-videosTableView">
     <link rel="stylesheet" href="<%-window.libURL%>assets/css/bs5.videosTable.css">
     <div class="row <%- define.Theme.isDark ? `dark` : '' %>">
-        <%
-          var drawBlock
-          var buildOptions
-        %>
-        <%
-            include fieldBuilders.ejs
-        %>
-        <% Object.keys(define['Videos Table'].blocks).forEach(function(blockKey){
-              var theBlock = define['Videos Table'].blocks[blockKey]
-              drawBlock(theBlock)
-          }) %>
+        <%  Object.keys(define['Videos Table'].blocks).forEach(function(blockKey) { -%>
+          <%- include('drawBlock', {
+                theBlock: define['Videos Table'].blocks[blockKey]
+              }) %>
+        <%  }) -%>
     </div>
     <div style="margin-bottom: 50px;"></div>
     <h4 class="sticky-bar p-3 d-flex flex-row">

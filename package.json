@@ -24,7 +24,7 @@
     "cws": "^2.0.0",
     "digest-fetch": "^1.2.1",
     "discord.js": "^12.2.0",
-    "ejs": "^2.7.4",
+    "ejs": "^3.1.9",
     "express": "^4.17.1",
     "express-fileupload": "^1.4.0",
     "form-data": "^4.0.0",

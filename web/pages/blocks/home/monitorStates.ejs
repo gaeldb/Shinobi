@@ -1,20 +1,12 @@
 <main class="container page-tab pt-3" id="tab-monitorStates">
     <form class="dark row">
-        <%
-          var drawBlock
-          var buildOptions
-        %>
-        <%
-          include fieldBuilders.ejs
-        %>
-        <% Object.keys(define['Monitor States'].blocks).forEach(function(blockKey){
-              var theBlock = define['Monitor States'].blocks[blockKey]
-              drawBlock(theBlock)
-          }) %>
+        <%  Object.keys(define['Monitor States'].blocks).forEach(function(blockKey) { -%>
+        <%- include('drawBlock', {
+                theBlock: define['Monitor States'].blocks[blockKey]
+            }) %>
+        <%  }) -%>
           <div class="col-md-12">
-          <%
-            include stickySubmitBar.ejs
-          %>
+          <%- include('stickySubmitBar'); %>
           </div>
     </form>
 </main>
