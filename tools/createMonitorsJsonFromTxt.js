@@ -7,6 +7,12 @@ if(!importFilePath){
     return console.error(`Example Use : node ./createMonitorsJsonFromTxt.js MONITOR_BASE.json PLAIN_LIST.txt`)
 }
 const monitorBase = require(monitorBasePath)
+function generateId(x){
+    if(!x){x=10};var t = "";var p = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for( var i=0; i < x; i++ )
+        t += p.charAt(Math.floor(Math.random() * p.length));
+    return t;
+}
 function getUrlProtocol(urlString){
     let modifiedUrlString = `${urlString}`.split('://')
     const originalProtocol = `${modifiedUrlString[0]}`
@@ -37,6 +43,8 @@ function makeConfig(streamUrl){
     // streamUrl = 'rtsp://1.1.1.1:554/'
     const copyOfBaseConfig = Object.assign({},monitorBase)
     const urlParts = getUrlParts(streamUrl)
+    copyOfBaseConfig.mid = generateId()
+    copyOfBaseConfig.name = urlParts.hostname
     copyOfBaseConfig.host = urlParts.hostname
     copyOfBaseConfig.port = urlParts.port
     copyOfBaseConfig.path = urlParts.pathname
