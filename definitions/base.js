@@ -7619,8 +7619,7 @@ module.exports = function(s,config,lang){
               },
               "Zoom In": {
                  "label": lang['Zoom In'],
-                 "attr": `monitor="zoomStreamWithMouse"`,
-                 "class": "default",
+                 "class": "default magnify-glass-live-grid-stream",
                  "icon": "search-plus"
               },
               // "Calendar": {

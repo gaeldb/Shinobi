@@ -1142,6 +1142,46 @@ $(document).ready(function(e){
             ]
         });
     })
+    .on('click','.magnify-glass-live-grid-stream',function(){
+        const monitorId = $(this).parents('[data-mid]').attr('data-mid')
+        const streamWindow = $('.monitor_item[data-mid="'+monitorId+'"]')
+        const monitor = loadedMonitors[monitorId]
+        if(monitor.magnifyStreamEnabled){
+            monitor.magnifyStreamEnabled = false
+            clearTimeout(monitor.magnifyMouseActionTimeout)
+            var zoomHoverShade = createMagnifyStreamMask({
+                p: streamWindow,
+            })
+            zoomHoverShade
+                .off('mousemove', monitor.magnifyMouseAction)
+                .off('touchmove', monitor.magnifyMouseAction);
+            streamWindow
+                .find('.zoomGlass,.zoomHoverShade').remove()
+        }else{
+            streamWindow.find('.mdl-overlay-menu-backdrop').addClass('hidden')
+            monitor.magnifyStreamEnabled = true
+            var zoomHoverShade = createMagnifyStreamMask({
+                p: streamWindow,
+            })
+            monitor.magnifyMouseAction = function(e){
+                clearTimeout(monitor.magnifyMouseActionTimeout)
+                monitor.magnifyMouseActionTimeout = setTimeout(function(){
+                    magnifyStream({
+                        p: streamWindow,
+                        zoomAmount: 1,
+                        auto: false,
+                        animate: false,
+                        pageX: e.pageX,
+                        pageY:  e.pageY,
+                        attribute: '.magnify-glass-live-grid-stream'
+                    })
+                },50)
+            }
+            zoomHoverShade
+                .on('mousemove', monitor.magnifyMouseAction)
+                .on('touchmove', monitor.magnifyMouseAction)
+        }
+    })
     $('.open-all-monitors').click(function(){
         openAllLiveGridPlayers()
     })

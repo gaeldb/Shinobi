@@ -658,8 +658,8 @@ function drawMatrices(event,options){
         html += `<div class="stream-detected-object" name="${objectTagGroup}" style="height:${heightRatio * matrix.height}px;width:${widthRatio * matrix.width}px;top:${heightRatio * matrix.y}px;left:${widthRatio * matrix.x}px;border-color: ${matrix.color};">`
         if(matrix.tag)html += `<span class="tag">${matrix.tag}${!isNaN(matrix.id) ? ` <small class="label label-default">${matrix.id}</small>`: ''}</span>`
         if(matrix.notice)html += `<div class="matrix-info" style="color:yellow">${matrix.notice}</div>`;
-        if(matrix.missingRecently){
-            html += `<div class="matrix-info" style="color:yellow">${matrix.missingRecently.join(',')}</div>`;
+        if(matrix.missingNear && matrix.missingNear.length > 0){
+            html += `<div class="matrix-info yellow"><small>Missing Recently</small><br>${matrix.missingRecently.map(item => `${item.tag} (${item.id}) by ${item.missedNear.tag} (${item.missedNear.id})`).join(', ')}</div>`;
         }
         if(matrix.pose){
             var pose = matrix.pose;
@@ -779,6 +779,21 @@ function buildDefaultMonitorMenuItems(){
     <li><a class="dropdown-item cursor-pointer" set-mode="start">${lang['Watch-Only']}</a></li>
     <li><a class="dropdown-item cursor-pointer" set-mode="record">${lang.Record}</a></li>`
 }
+function createMagnifyStreamMask(options){
+    if(!options.p && !options.parent){
+        var el = $(this),
+        parent = el.parents('[mid]')
+    }else{
+        parent = options.p || options.parent
+    }
+    var zoomHoverShade = parent.find('.zoomHoverShade')
+    if(zoomHoverShade.length === 0){
+        const html = `<div class="zoomHoverShade magnify-glass-live-grid-stream"></div>`
+        parent.append(html)
+        zoomHoverShade = parent.find('.zoomHoverShade')
+    }
+    return zoomHoverShade
+}
 function magnifyStream(options){
     if(!options.p && !options.parent){
         var el = $(this),
@@ -816,15 +831,10 @@ function magnifyStream(options){
         magnifiedElement = 'video'
     }
     if(!options.mon && !options.monitor){
-        var groupKey = parent.attr('ke')//group key
-        var monitorId = parent.attr('mid')//monitor id
-        var sessionKey = parent.attr('auth')//authkey
-        var monitor = $.ccio.mon[groupKey + monitorId + sessionKey]//monitor configuration
+        var monitorId = parent.attr('data-mid')//monitor id
+        var monitor = loadedMonitors[monitorId]
     }else{
         var monitor = options.mon || options.monitor
-        var groupKey = monitor.ke//group key
-        var monitorId = monitor.mid//monitor id
-        var sessionKey = monitor.auth//authkey
     }
     if(options.zoomAmount)zoomAmount = 3
     if(!zoomAmount)zoomAmount = 3
@@ -855,14 +865,14 @@ function magnifyStream(options){
         zoomGlass = parent.find(".zoomGlass")
         var zoomGlassShell = function(contents){return `<div ${options.attribute} class="zoomGlass">${contents}</div>`}
         if(!options.videoUrl){
-            $.ccio.snapshot(monitor,function(url,buffer,w,h){
+            getSnapshot(monitor,function(url,buffer,w,h){
                 parent.attr('realWidth',w)
                 parent.attr('realHeight',h)
                 if(zoomGlass.length === 0){
                     if(options.useCanvas === true){
                         parent.append(zoomGlassShell('<canvas class="blenderCanvas"></canvas>'))
                     }else{
-                        parent.append(zoomGlassShell('<iframe src="'+getApiPrefix('embed')+'/'+monitorId+'/fullscreen|jquery|relative"/><div class="hoverShade"></div>'))
+                        parent.append(zoomGlassShell('<iframe src="'+getApiPrefix('embed')+'/'+monitorId+'/fullscreen|jquery|relative"/>'))
                     }
                     zoomGlass = parent.find(".zoomGlass")
                 }
