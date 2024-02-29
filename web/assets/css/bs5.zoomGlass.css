@@ -5,7 +5,7 @@
 .zoomGlass {
     overflow: hidden;
     transition: none;
-	width: 175px; height: 175px;
+	width: 350px; height: 350px;
 	position: absolute;
     border-radius: 15px;
     border: 3px solid #ddd;
