@@ -659,7 +659,10 @@ function drawMatrices(event,options){
         if(matrix.tag)html += `<span class="tag">${matrix.tag}${!isNaN(matrix.id) ? ` <small class="label label-default">${matrix.id}</small>`: ''}</span>`
         if(matrix.notice)html += `<div class="matrix-info" style="color:yellow">${matrix.notice}</div>`;
         if(matrix.missingNear && matrix.missingNear.length > 0){
-            html += `<div class="matrix-info yellow"><small>Missing Recently</small><br>${matrix.missingRecently.map(item => `${item.tag} (${item.id}) by ${item.missedNear.tag} (${item.missedNear.id})`).join(', ')}</div>`;
+            html += `<div class="matrix-info yellow"><small>Missing Near</small><br>${matrix.missingRecently.map(item => `${item.tag} (${item.id}) by ${item.missedNear.tag} (${item.missedNear.id})`).join(', ')}</div>`;
+        }
+        if(matrix.missingRecently && matrix.missingRecently.length > 0){
+            html += `<div class="matrix-info yellow"><small>Missing Recently</small><br>${matrix.missingRecently.map(item => `${item.tag} (${item.id})`).join(', ')}</div>`;
         }
         if(matrix.pose){
             var pose = matrix.pose;
