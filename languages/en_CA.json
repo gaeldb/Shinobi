@@ -1448,6 +1448,7 @@
    "Original Choice": "Original Choice",
    "Legacy Webhook": "Legacy Webhook",
    "eventFilterActionText": "These are the actions that occur from the filter conditions that have succeeded. \"Original Choice\" refers to the option you had chosen in your Monitor's Settings.",
+   "eventFilterEnableNoticeText": "This is an advnaced feature. Ensure you have enabled \"Event Filters\" in your Detector Settings section. If you cannot see this option toggle Simple to Advanced in the bottom right corner of the Monitor Settings.",
    "Telegram": "Telegram",
    "Before": "Before",
    "After": "After",

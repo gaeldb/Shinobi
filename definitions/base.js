@@ -6406,6 +6406,7 @@ module.exports = function(s,config,lang){
               "Saved Filters": {
                  "name": lang["Saved Filters"],
                  "color": "green",
+                 "blockquote": lang.eventFilterEnableNoticeText,
                  "info": [
                      {
                         "field": lang["Monitor"],
