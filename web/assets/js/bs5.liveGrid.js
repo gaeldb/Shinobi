@@ -676,12 +676,12 @@ function loadPreviouslyOpenedLiveGridBlocks(){
         })
         setTimeout(function(){
             sortListMonitors()
-            if(dashboardOptions().switches.jpegMode === 1){
-                mainSocket.f({
-                    f: 'monitor',
-                    ff: 'jpeg_on'
-                })
-            }
+            // if(dashboardOptions().switches.jpegMode === 1){
+            //     mainSocket.f({
+            //         f: 'monitor',
+            //         ff: 'jpeg_on'
+            //     })
+            // }
         },1000)
         drawMonitorGroupList()
     })
@@ -1274,20 +1274,20 @@ $(document).ready(function(e){
                 }
                 showHideSubstreamActiveIcon(monitorId,!!subStreamChannel)
             break;
-            case'mode_jpeg_off':
-                window.jpegModeOn = false
-                $.each(loadedMonitors,function(n,v){
-                    stopJpegStream(v.mid)
-                    resetMonitorCanvas(v.mid)
-                    initiateLiveGridPlayer(v)
-                })
-                $('body').removeClass('jpegMode')
-            break;
-            case'mode_jpeg_on':
-                window.jpegModeOn = true
-                startAllJpegStreams()
-                $('body').addClass('jpegMode')
-            break;
+            // case'mode_jpeg_off':
+            //     window.jpegModeOn = false
+            //     $.each(loadedMonitors,function(n,v){
+            //         stopJpegStream(v.mid)
+            //         resetMonitorCanvas(v.mid)
+            //         initiateLiveGridPlayer(v)
+            //     })
+            //     $('body').removeClass('jpegMode')
+            // break;
+            // case'mode_jpeg_on':
+            //     window.jpegModeOn = true
+            //     startAllJpegStreams()
+            //     $('body').addClass('jpegMode')
+            // break;
             case'detector_trigger':
                 var monitorId = d.id
                 var liveGridElement = liveGridElements[monitorId]
