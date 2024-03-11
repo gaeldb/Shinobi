@@ -65,11 +65,15 @@ module.exports = function (s, config, lang, getSnapshot) {
             ){
                 const optionsPass = userDetails.emailClient_pass || ''
                 const optionsSecure = userDetails.emailClient_secure === '1' ? true : false
+                const optionsUnauth = userDetails.emailClient_unauth === '1' ? false : true
                 const optionsPort = isNaN(userDetails.emailClient_port) ? (optionsSecure ? 465 : 587) : parseInt(userDetails.emailClient_port)
                 const clientOptions = {
                     host: optionsHost,
                     port: optionsPort,
                     secure: optionsSecure,
+                    tls: {
+                        rejectUnauthorized: optionsUnauth,
+                    },
                     auth: {
                         user: optionsUser,
                         pass: optionsPass
@@ -340,6 +344,25 @@ module.exports = function (s, config, lang, getSnapshot) {
                     name: 'detail=emailClient_secure',
                     'form-group-class': 'u_emailClient_input u_emailClient_1',
                     field: lang.Secure,
+                    default: '0',
+                    example: '',
+                    fieldType: 'select',
+                    possible: [
+                        {
+                            name: lang.No,
+                            value: '0',
+                        },
+                        {
+                            name: lang.Yes,
+                            value: '1',
+                        },
+                    ],
+                },
+                {
+                    hidden: true,
+                    name: 'detail=emailClient_unauth',
+                    'form-group-class': 'u_emailClient_input u_emailClient_1',
+                    field: lang.rejectUnauth,
                     default: '0',
                     example: '',
                     fieldType: 'select',
