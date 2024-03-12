@@ -228,6 +228,18 @@ module.exports = (processCwd,config) => {
 
         return s;
     }
+    function setDefaultIfUndefined(config, key, defaultValue) {
+        const mustDoDefault = !config.userHasSubscribed;
+        if (Array.isArray(defaultValue)) {
+            if (config[key] === undefined || mustDoDefault) {
+                config[key] = [...defaultValue]; // Spread operator to clone the array
+            }
+        } else {
+            if (config[key] === undefined || mustDoDefault) {
+                config[key] = defaultValue;
+            }
+        }
+    }
     return {
         parseJSON: parseJSON,
         stringJSON: stringJSON,
@@ -248,5 +260,6 @@ module.exports = (processCwd,config) => {
         asyncSetTimeout: asyncSetTimeout,
         copyFile: copyFile,
         hmsToSeconds,
+        setDefaultIfUndefined,
     }
 }

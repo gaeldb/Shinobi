@@ -53,7 +53,7 @@
     "pixel-change": "^1.1.0",
     "pushover-notifications": "^1.2.2",
     "sat": "^0.7.1",
-    "shinobi-node-moving-things-tracker": "^0.9.1",
+    "shinobi-node-moving-things-tracker": "^0.9.3",
     "shinobi-onvif": "0.1.9",
     "shinobi-sound-detection": "^0.1.13",
     "shinobi-zwave": "^1.0.11",
