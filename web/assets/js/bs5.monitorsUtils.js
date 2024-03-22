@@ -1,5 +1,6 @@
 var monitorGroupSelections = $('#monitor-group-selections')
 var onGetSnapshotByStreamExtensions = []
+var redAlertNotice = null;
 function onGetSnapshotByStream(callback){
     onGetSnapshotByStreamExtensions.push(callback)
 }
@@ -645,6 +646,42 @@ function launchImportMonitorWindow(callback){
         reader.readAsText(f);
     });
 }
+function readAlertNotice(title, text, type) {
+    if (redAlertNotice) {
+        redAlertNotice.update({
+            title: title,
+            text: text,
+            type: type,
+            hide: false,
+            delay: 30000
+        });
+    } else {
+        redAlertNotice = new PNotify({
+            title: title,
+            text: text,
+            type: type,
+            hide: false,
+            delay: 30000
+        });
+        redAlertNotice.on('close', function() {
+            redAlertNotice = null;
+        });
+    }
+}
+function buildPosePoints(bodyParts, x, y){
+    let theArray = []
+    for(const point of bodyParts){
+        theArray.push({
+            tag: point.name,
+            x: x + point.x - 5, // Assuming a 10x10 rectangle for the wrist
+            y: y + point.y - 5,
+            width: 10,
+            height: 10,
+            confidence: point.score,
+        })
+    }
+    return theArray;
+}
 function drawMatrices(event,options){
     var theContainer = options.theContainer
     var height = options.height
@@ -654,15 +691,17 @@ function drawMatrices(event,options){
     var objectTagGroup = event.details.reason === 'motion' ? 'motion' : event.details.name
     theContainer.find(`.stream-detected-object[name="${objectTagGroup}"]`).remove()
     var html = ''
-    $.each(event.details.matrices,function(n,matrix){
+    let moreMatrices = []
+    var monitorId = event.id;
+    function processMatrix(n,matrix){
         html += `<div class="stream-detected-object" name="${objectTagGroup}" style="height:${heightRatio * matrix.height}px;width:${widthRatio * matrix.width}px;top:${heightRatio * matrix.y}px;left:${widthRatio * matrix.x}px;border-color: ${matrix.color};">`
         if(matrix.tag)html += `<span class="tag">${matrix.tag}${!isNaN(matrix.id) ? ` <small class="label label-default">${matrix.id}</small>`: ''}</span>`
         if(matrix.notice)html += `<div class="matrix-info" style="color:yellow">${matrix.notice}</div>`;
         if(matrix.missingNear && matrix.missingNear.length > 0){
             html += `<div class="matrix-info yellow"><small>Missing Near</small><br>${matrix.missingRecently.map(item => `${item.tag} (${item.id}) by ${item.missedNear.tag} (${item.missedNear.id})`).join(', ')}</div>`;
         }
-        if(matrix.missingRecently && matrix.missingRecently.length > 0){
-            html += `<div class="matrix-info yellow"><small>Missing Recently</small><br>${matrix.missingRecently.map(item => `${item.tag} (${item.id})`).join(', ')}</div>`;
+        if(matrix.missingRecentlyNearHands && matrix.missingRecentlyNearHands.length > 0){
+            html += `<div class="matrix-info yellow"><small>Missing Recently</small><br>${matrix.missingRecentlyNearHands.map(item => `${item.tag} (${item.id})`).join(', ')}</div>`;
         }
         if(matrix.pose){
             var pose = matrix.pose;
@@ -674,6 +713,16 @@ function drawMatrices(event,options){
             }
             // if(pose.isPersonTouchingWaistOrHips)html += `<div>Waist or Hips : ${pose.isPersonTouchingWaistOrHips}</div>`;
             html += `</div>`;
+            // console.log(matrix.poseInference)
+        }
+        if(matrix.poseInference)moreMatrices.push(...buildPosePoints(matrix.poseInference.keypoints,matrix.x,matrix.y))
+        if(matrix.nearHands){
+            var leftHand = matrix.nearHands.leftWrist;
+            var rightHand = matrix.nearHands.rightWrist;
+            html += `<div class="matrix-info text-left">`
+                html += `<div><small>Left Interact</small><br>${leftHand.matrices.map(item => `${item.tag} (${item.id})`).join(', ')}</div>`;
+                html += `<div><small>Right Interact</small><br>${rightHand.matrices.map(item => `${item.tag} (${item.id})`).join(', ')}</div>`;
+            html += `</div>`
         }
         if(matrix.nearBy){
             html += `<div class="matrix-info">`
@@ -682,8 +731,14 @@ function drawMatrices(event,options){
             });
             html += `</div>`
         }
+        if(matrix.redAlert){
+            var monitor = loadedMonitors[monitorId]
+            readAlertNotice(`${monitor.name}`,`${matrix.tag} (${matrix.id})<br>${matrix.notice}`,'danger');
+        }
         html += '</div>'
-    })
+    }
+    $.each(event.details.matrices, processMatrix);
+    $.each(moreMatrices, processMatrix);
     theContainer.append(html)
 }
 function setMonitorCountOnUI(){
