@@ -196,7 +196,7 @@ module.exports = function(s,config,lang){
                         var iconImageFile = streamDir + 'icon.jpg'
                         const snapRawFilters = monitor.details.cust_snap_raw
                         if(snapRawFilters)outputOptions.push(snapRawFilters);
-                        var ffmpegCmd = splitForFFMPEG(`-y -loglevel warning ${isDetectorStream ? '-live_start_index 2' : ''} -re ${inputOptions.join(' ')} -i "${url}" ${outputOptions.join(' ')} -f image2 -an -frames:v 1 "${temporaryImageFile}"`)
+                        var ffmpegCmd = splitForFFMPEG(`-y -loglevel warning ${isDetectorStream ? '-live_start_index 2' : ''} -re ${inputOptions.join(' ')} -stimeout 4000000 -i "${url}" ${outputOptions.join(' ')} -f image2 -an -frames:v 1 "${temporaryImageFile}"`)
                         try{
                             await fs.promises.mkdir(streamDir, {recursive: true}, (err) => {s.debugLog(err)})
                         }catch(err){
