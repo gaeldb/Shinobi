@@ -606,7 +606,7 @@ async function unarchiveVideos(videos){
 }
 function buildDefaultVideoMenuItems(file,options){
     var isLocalVideo = !file.videoSet || file.videoSet === 'videos'
-    var href = file.href + `${!isLocalVideo ? `?type=${file.type}` : ''}`
+    var href = getApiHost() + file.href + `${!isLocalVideo ? `?type=${file.type}` : ''}`
     options = options ? options : {play: true}
     return `
     <li><a class="dropdown-item" href="${href}" download>${lang.Download}</a></li>
