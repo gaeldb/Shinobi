@@ -48,8 +48,7 @@ RUN apt-get install -y \
         make \
         g++ \
         gcc \
-        tar \
-        xz-utils
+        tar
 
 RUN sh /home/Shinobi/Docker/install_ffmpeg.sh
 RUN sh /home/Shinobi/Docker/install_mariadb.sh
