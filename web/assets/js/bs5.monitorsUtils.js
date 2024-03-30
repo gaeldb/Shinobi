@@ -1,6 +1,6 @@
 var monitorGroupSelections = $('#monitor-group-selections')
 var onGetSnapshotByStreamExtensions = []
-var redAlertNotice = null;
+var redAlertNotices = {};
 function onGetSnapshotByStream(callback){
     onGetSnapshotByStreamExtensions.push(callback)
 }
@@ -647,6 +647,7 @@ function launchImportMonitorWindow(callback){
     });
 }
 function readAlertNotice(title, text, type) {
+    var redAlertNotice = redAlertNotices[title];
     if (redAlertNotice) {
         redAlertNotice.update({
             title: title,
@@ -656,15 +657,15 @@ function readAlertNotice(title, text, type) {
             delay: 30000
         });
     } else {
-        redAlertNotice = new PNotify({
+        redAlertNotices[title] = new PNotify({
             title: title,
             text: text,
             type: type,
             hide: false,
             delay: 30000
         });
-        redAlertNotice.on('close', function() {
-            redAlertNotice = null;
+        redAlertNotices[title].on('close', function() {
+            redAlertNotices[title] = null;
         });
     }
 }
