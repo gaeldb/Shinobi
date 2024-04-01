@@ -152,6 +152,7 @@ $(document).ready(function(){
             }
             lastDateChecked = new Date();
         }
+        lastDateChecked = new Date();
         return loadedVideosOnTimeStrip
     }
     function selectVideosForCanvas(time, videos){
