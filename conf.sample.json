@@ -14,7 +14,7 @@
       {"name":"second","path":"__DIR__/videos2"}
   ],
   "db": {
-    "host": "127.0.0.1",
+    "host": "localhost",
     "user": "majesticflame",
     "password": "",
     "database": "ccio",
