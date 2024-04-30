@@ -669,6 +669,24 @@ function readAlertNotice(title, text, type) {
         });
     }
 }
+function redAlertNotify(options) {
+    var redAlertNotice = redAlertNotices[title];
+    var notifyOptions = {
+        title: options.title,
+        text: options.text,
+        type: options.type,
+        hide: options.hide === undefined ? false : options.hide,
+        delay: options.delay || 30000
+    };
+    if (redAlertNotice) {
+        redAlertNotice.update(notifyOptions);
+    } else {
+        redAlertNotices[title] = new PNotify(notifyOptions);
+        redAlertNotices[title].on('close', function() {
+            redAlertNotices[title] = null;
+        });
+    }
+}
 function buildPosePoints(bodyParts, x, y){
     let theArray = []
     for(const point of bodyParts){
