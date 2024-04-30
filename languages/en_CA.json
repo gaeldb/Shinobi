@@ -20,6 +20,7 @@
    "Geolocation": "Geolocation",
    "fieldTextGeolocation": "The map coordinates of this camera in the real world. This will plot a point for your camera on the Monitor Map.",
    "playUntilVideoEnd": "Play until video end",
+   "Monitor Saved": "Monitor Saved",
    "Unmute": "Unmute",
    "byUser": "by user",
    "accountDeleted": "Account Deleted",
