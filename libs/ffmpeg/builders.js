@@ -495,7 +495,7 @@ module.exports = (s,config,lang) => {
             const isCudaEnabled = hasCudaEnabled(e)
             const videoFlags = []
             const videoFilters = []
-            const inputMap = buildInputMap(e,e.details.input_map_choices.stream)
+            const inputMap = buildInputMap(e,e.details.input_map_choices.snap)
             const { videoWidth, videoHeight } = validateDimensions(e.details.snap_scale_x,e.details.snap_scale_y)
             if(inputMap)videoFlags.push(inputMap)
             if(e.details.snap_vf)videoFilters.push(e.details.snap_vf)
