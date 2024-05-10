@@ -1,15 +1,15 @@
-const fs = require('fs');
-const URL = require('url');
-const events = require('events');
-const Mp4Frag = require('mp4frag');
-const treekill = require('tree-kill');
-const exec = require('child_process').exec;
-const spawn = require('child_process').spawn;
-const connectionTester = require('connection-tester')
-const SoundDetection = require('shinobi-sound-detection')
-const streamViewerCountTimeouts = {}
-const { createQueueAwaited } = require('../common.js')
 module.exports = (s,config,lang) => {
+    const fs = require('fs');
+    const URL = require('url');
+    const events = require('events');
+    const Mp4Frag = require('mp4frag');
+    const treekill = require('tree-kill');
+    const exec = require('child_process').exec;
+    const spawn = require('child_process').spawn;
+    const connectionTester = require('connection-tester')
+    const SoundDetection = require('shinobi-sound-detection')
+    const streamViewerCountTimeouts = {}
+    const { createQueueAwaited } = require('../common.js')
     const {
         applyPartialToConfiguration,
         getWarningChangesForMonitor,
@@ -498,7 +498,16 @@ module.exports = (s,config,lang) => {
         const groupKey = e.ke
         const monitorId = e.mid || e.id
         const activeMonitor = getActiveMonitor(groupKey,monitorId);
+        const monitorConfig = copyMonitorConfiguration(groupKey,monitorId);
+        const analyzeDuration = (parseInt(monitorConfig.details.aduration) / 1000) || 10000;
+        let initialHeartBeat = setTimeout(() => {
+            resetStreamCheck({
+                ke: groupKey,
+                mid: monitorId,
+            })
+        }, analyzeDuration);
         activeMonitor.spawn_exit = async function(){
+            clearTimeout(initialHeartBeat)
             if(activeMonitor.isStarted === true){
                 if(e.details.loglevel !== 'quiet'){
                     s.userLog(e,{type:lang['Process Unexpected Exit'],msg:{msg:lang.unexpectedExitText,cmd:activeMonitor.ffmpeg}});
@@ -508,7 +517,6 @@ module.exports = (s,config,lang) => {
                     forceCheck: true,
                     checkMax: 2
                 })
-                const monitorConfig = copyMonitorConfiguration(groupKey,monitorId);
                 s.onMonitorUnexpectedExitExtensions.forEach(function(extender){
                     extender(monitorConfig,e)
                 })
