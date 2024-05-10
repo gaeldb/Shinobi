@@ -499,13 +499,17 @@ module.exports = (s,config,lang) => {
         const monitorId = e.mid || e.id
         const activeMonitor = getActiveMonitor(groupKey,monitorId);
         const monitorConfig = copyMonitorConfiguration(groupKey,monitorId);
+        const streamType = monitorConfig.details.stream_type;
         const analyzeDuration = (parseInt(monitorConfig.details.aduration) / 1000) || 10000;
-        let initialHeartBeat = setTimeout(() => {
-            resetStreamCheck({
-                ke: groupKey,
-                mid: monitorId,
-            })
-        }, analyzeDuration);
+        let initialHeartBeat = null
+        if(streamType !== 'useSubstream'){
+            initialHeartBeat = setTimeout(() => {
+                resetStreamCheck({
+                    ke: groupKey,
+                    mid: monitorId,
+                })
+            }, analyzeDuration);
+        }
         activeMonitor.spawn_exit = async function(){
             clearTimeout(initialHeartBeat)
             if(activeMonitor.isStarted === true){
