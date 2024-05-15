@@ -796,6 +796,7 @@ module.exports = function(s,config,lang){
         [
             'auth_socket',
             'get_monitors',
+            'edit_monitors',
             'control_monitors',
             'get_logs',
             'watch_stream',

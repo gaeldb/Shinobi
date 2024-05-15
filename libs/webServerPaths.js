@@ -786,7 +786,7 @@ module.exports = function(s,config,lang,app,io){
                 s.closeJsonResponse(res,[]);
                 return
             }
-            const cannotSeeImportantSettings = (isRestrictedApiKey && apiKeyPermissions.control_monitors_disallowed) || userPermissions.monitor_create_disallowed;
+            const cannotSeeImportantSettings = (isRestrictedApiKey && apiKeyPermissions.edit_monitors_disallowed) || userPermissions.monitor_create_disallowed;
             s.knexQuery({
                 action: "select",
                 columns: "*",

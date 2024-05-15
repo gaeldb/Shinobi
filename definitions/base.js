@@ -5751,6 +5751,10 @@ module.exports = function(s,config,lang){
                                 value: 'get_monitors',
                             },
                             {
+                                name: lang['Can Edit Monitors'],
+                                value: 'edit_monitors',
+                            },
+                            {
                                 name: lang['Can Control Monitors'],
                                 value: 'control_monitors',
                             },
