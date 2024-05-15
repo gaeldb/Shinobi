@@ -42,12 +42,16 @@
 </main>
 
 <script>
-    var monitorSettingsAdditionalInputMapFieldHtml = `<% Object.keys(define["Monitor Settings Additional Input Map"].blocks).forEach(function(blockKey){
-          drawBlock(define["Monitor Settings Additional Input Map"].blocks[blockKey])
-      }) %>`
+    var monitorSettingsAdditionalInputMapFieldHtml = `<% Object.keys(define["Monitor Settings Additional Input Map"].blocks).forEach(function(blockKey){ %>
+          <%- include('drawBlock', {
+                theBlock: define["Monitor Settings Additional Input Map"].blocks[blockKey]
+              }) %>
+     <% }) %>`
 </script>
 <script>
-    var monitorSettingsAdditionalStreamChannelFieldHtml = `<% Object.keys(define["Monitor Settings Additional Stream Channel"].blocks).forEach(function(blockKey){
-          drawBlock(define["Monitor Settings Additional Stream Channel"].blocks[blockKey])
-      }) %>`
+    var monitorSettingsAdditionalStreamChannelFieldHtml = `<% Object.keys(define["Monitor Settings Additional Stream Channel"].blocks).forEach(function(blockKey){ %>
+          <%- include('drawBlock', {
+                theBlock: define["Monitor Settings Additional Stream Channel"].blocks[blockKey]
+              }) %>
+     <% }) %>`
 </script>
