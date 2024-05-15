@@ -31,6 +31,7 @@ module.exports = function(s,config,lang,app,io){
     const {
         spawnSubstreamProcess,
         destroySubstreamProcess,
+        removeSenstiveInfoFromMonitorConfig,
     } = require('./monitor/utils.js')(s,config,lang)
     const {
         sliceVideo,
@@ -771,6 +772,7 @@ module.exports = function(s,config,lang,app,io){
             } = s.getMonitorsPermitted(user.details,monitorId)
             const {
                 isRestricted,
+                userPermissions,
                 isRestrictedApiKey,
                 apiKeyPermissions,
             } = s.checkPermission(user)
@@ -784,6 +786,7 @@ module.exports = function(s,config,lang,app,io){
                 s.closeJsonResponse(res,[]);
                 return
             }
+            const cannotSeeImportantSettings = (isRestrictedApiKey && apiKeyPermissions.control_monitors_disallowed) || userPermissions.monitor_create_disallowed;
             s.knexQuery({
                 action: "select",
                 columns: "*",
@@ -794,6 +797,12 @@ module.exports = function(s,config,lang,app,io){
                 ]
             },(err,r) => {
                 r.forEach(function(v,n){
+                    const monitorId = v.mid;
+                    v.details = JSON.parse(v.details)
+                    var details = v.details;
+                    if(isRestricted && !monitorPermissions[`${monitorId}_monitor_edit`] || cannotSeeImportantSettings){
+                        r[n] = removeSenstiveInfoFromMonitorConfig(v);
+                    }
                     if(s.group[v.ke] && s.group[v.ke].activeMonitors[v.mid]){
                         const activeMonitor = s.group[v.ke].activeMonitors[v.mid]
                         r[n].currentlyWatching = Object.keys(activeMonitor.watch).length
@@ -847,7 +856,6 @@ module.exports = function(s,config,lang,app,io){
                         }
                         return streamURL
                     }
-                    var details = JSON.parse(r[n].details);
                     if(!details.tv_channel_id||details.tv_channel_id==='')details.tv_channel_id = 'temp_'+s.gid(5)
                     if(details.snap==='1'){
                         r[n].snapshot = '/'+req.params.auth+'/jpeg/'+v.ke+'/'+v.mid+'/s.jpg'

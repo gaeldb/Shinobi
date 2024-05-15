@@ -1790,6 +1790,18 @@ module.exports = (s,config,lang) => {
         const streamDir = s.dir.streams + options.ke + '/' + options.mid + '/'
         return streamDir
     }
+    function removeSenstiveInfoFromMonitorConfig(monitorConfig){
+        monitorConfig.protocol = ''
+        monitorConfig.host = ''
+        monitorConfig.path = ''
+        monitorConfig.port = ''
+        monitorConfig.details.muser = ''
+        monitorConfig.details.mpass = ''
+        monitorConfig.details.auto_host = ''
+        delete(monitorConfig.details.input_map_choices)
+        delete(monitorConfig.details.substream)
+        return monitorConfig
+    }
     return {
         monitorStop,
         monitorIdle,
@@ -1821,5 +1833,6 @@ module.exports = (s,config,lang) => {
         getActiveViewerCount: getActiveViewerCount,
         setTimedActiveViewerForHttp: setTimedActiveViewerForHttp,
         attachMainProcessHandlers: attachMainProcessHandlers,
+        removeSenstiveInfoFromMonitorConfig,
     }
 }
