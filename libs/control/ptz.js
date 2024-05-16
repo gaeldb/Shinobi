@@ -389,12 +389,14 @@ module.exports = function(s,config,lang){
         },callback)
     }
     const moveToHomePosition = (options,callback) => {
-        const nonStandardOnvif = s.group[options.ke].rawMonitorConfigurations[options.id].details.onvif_non_standard === '1'
+        const groupKey = options.ke
+        const monitorId = options.mid || options.id
+        const nonStandardOnvif = s.group[groupKey].rawMonitorConfigurations[monitorId].details.onvif_non_standard === '1'
         const profileToken = options.ProfileToken || "__CURRENT_TOKEN"
         return s.runOnvifMethod({
             auth: {
-                ke: options.ke,
-                id: options.id,
+                ke: groupKey,
+                id: monitorId,
                 service: 'ptz',
                 action: 'gotoHomePosition',
             },
@@ -537,5 +539,6 @@ module.exports = function(s,config,lang){
         moveToPresetPosition,
         moveCameraPtzToMatrix,
         setHomePositionPreset,
+        moveToHomePosition,
     }
 }

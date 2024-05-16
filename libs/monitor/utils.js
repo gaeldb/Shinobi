@@ -29,6 +29,7 @@ module.exports = (s,config,lang) => {
     } = require('../events/utils.js')(s,config,lang)
     const {
         setHomePositionPreset,
+        moveToHomePosition,
     } = require('../control/ptz.js')(s,config,lang)
     const {
         scanForOrphanedVideos,
@@ -1719,7 +1720,8 @@ module.exports = (s,config,lang) => {
         activeMonitor.errorFatalCount = 0;
         delete(activeMonitor.childNode)
         if(e.details.detector_ptz_follow === '1'){
-            setHomePositionPreset(e)
+            // setHomePositionPreset(e)
+            moveToHomePosition(e)
         }
         try{
             await launchMonitorProcesses(e)
