@@ -31,7 +31,16 @@ const s = {
 parentPort.on('message',(data) => {
     switch(data.f){
         case'init':
-            initialize()
+            if(multipleSelected){
+                for(aSelection of config.p2pHostMultiSelected){
+                    clearAllTimeouts(aSelection)
+                    initialize(aSelection)
+                }
+            }else{
+                const singleSelection = config.p2pHostSelected;
+                clearAllTimeouts(singleSelection)
+                initialize(singleSelection)
+            }
         break;
         case'exit':
             s.debugLog('Closing P2P Connection...')
@@ -62,7 +71,6 @@ function startConnection(p2pServerAddress,subscriptionId){
     const allMessageHandlers = []
     async function startWebsocketConnection(key,callback){
         s.debugLog(`startWebsocketConnection EXECUTE`,new Error())
-        console.log('P2P : Connecting to Konekta P2P Server...')
         function createWebsocketConnection(){
             return new Promise((resolve,reject) => {
                 try{
@@ -72,6 +80,7 @@ function startConnection(p2pServerAddress,subscriptionId){
                     console.log(err)
                 }
                 tunnelToP2P = new WebSocket(p2pServerAddress);
+                console.log('P2P : Connecting to Konekta P2P Server :', p2pServerAddress)
                 stayDisconnected[p2pServerAddress] = false;
                 tunnelToP2P.on('open', function(){
                     resolve(tunnelToP2P)
@@ -382,14 +391,4 @@ function initialize(p2pHostSelected){
     const p2pServerDetails = p2pServerList[selectedP2PServerId]
     const selectedHost = `${p2pServerDetails.secure ? `wss` : 'ws'}://` + p2pServerDetails.host + ':' + p2pServerDetails.p2pPort
     startConnection(selectedHost,p2pApiKey)
-}
-if(multipleSelected){
-    for(aSelection of config.p2pHostMultiSelected){
-        clearAllTimeouts(aSelection)
-        initialize(aSelection)
-    }
-}else{
-    const singleSelection = config.p2pHostSelected;
-    clearAllTimeouts(singleSelection)
-    initialize(singleSelection)
 }
