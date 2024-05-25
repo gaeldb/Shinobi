@@ -136,6 +136,7 @@ function resetMonitorCanvas(monitorId,initiateAfter,subStreamChannel){
     streamBlock.append(buildStreamElementHtml(streamType))
     attachVideoElementErrorHandler(monitorId)
     if(initiateAfter)initiateLiveGridPlayer(monitor,subStreamChannel)
+    resetLiveGridDimensionsInMemory(monitorId)
 }
 function replaceMonitorInfoInHtml(htmlString,monitor){
     var monitorMutes = dashboardOptions().monitorMutes || {}
@@ -712,12 +713,19 @@ function openLiveGrid(){
     }
 }
 function popOutMonitor(monitorId){
-    var monitorPop = monitorPops[monitorId]
+    var monitorPop = monitorPops[monitorId] || {}
+    if(monitorPop.isOpen){
+        return
+    }
     function finish(img){
-        if(monitorPop){
-            monitorPop.close()
+        monitorPops[monitorId] = window.open(getApiPrefix() + '/embed/' + $user.ke + '/' + monitorId + '/fullscreen|jquery|relative|gui' + `?host=${location.pathname}`,'pop_' + monitorId + $user.auth_token,'height='+img.height+',width='+img.width);
+        monitorPop = monitorPops[monitorId]
+        monitorPop.isOpen = true
+        monitorPop.onload = function(){
+            this.onbeforeunload = function(){
+                monitorPop.isOpen = false
+            }
         }
-        monitorPop = window.open(getApiPrefix() + '/embed/' + $user.ke + '/' + monitorId + '/fullscreen|jquery|relative|gui' + `?host=${location.pathname}`,'pop_' + monitorId + $user.auth_token,'height='+img.height+',width='+img.width);
     }
     if(loadedLiveGrids[monitorId]){
         getSnapshot(loadedMonitors[monitorId],function(url){
@@ -1290,6 +1298,7 @@ $(document).ready(function(e){
             // break;
             case'detector_trigger':
                 var monitorId = d.id
+                var matrices = d.details.matrices
                 var liveGridElement = liveGridElements[monitorId]
                 if(!window.dontShowDetection && liveGridElement){
                     var monitorElement = liveGridElement.monitorItem
@@ -1303,7 +1312,11 @@ $(document).ready(function(e){
                     }else{
                         monitorElement.removeClass('doObjectDetection')
                     }
-                    if(d.details.matrices&&d.details.matrices.length>0){
+                    if(matrices && matrices.length > 0){
+                        console.log({
+                            height: liveGridElement.height,
+                            width: liveGridElement.width,
+                        })
                         drawMatrices(d,{
                             theContainer: liveGridElement.eventObjects,
                             height: liveGridElement.height,
@@ -1329,7 +1342,7 @@ $(document).ready(function(e){
                     }
                     playAudioAlert()
                     var monitorPop = monitorPops[monitorId]
-                    if(window.popLiveOnEvent && (!monitorPop || monitorPop.closed === true)){
+                    if(window.popLiveOnEvent && (!monitorPop || !monitorPop.isOpen)){
                         popOutMonitor(monitorId)
                     }
                     // console.log({
