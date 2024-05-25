@@ -50,7 +50,7 @@ module.exports = (s,config,lang) => {
                    }
                 break;
                 default:
-                    s.systemLog('CRON.js MESSAGE : ',data)
+                    s.debugLog('CRON.js MESSAGE : ',data)
                 break;
             }
         })
