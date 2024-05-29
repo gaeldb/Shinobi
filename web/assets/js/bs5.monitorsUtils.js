@@ -670,9 +670,10 @@ function readAlertNotice(title, text, type) {
     }
 }
 function redAlertNotify(options) {
+    var title = options.title;
     var redAlertNotice = redAlertNotices[title];
     var notifyOptions = {
-        title: options.title,
+        title: title,
         text: options.text,
         type: options.type,
         hide: options.hide === undefined ? false : options.hide,
