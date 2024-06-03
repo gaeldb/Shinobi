@@ -262,6 +262,7 @@ function loadVideoMiniList(monitorId){
 }
 function updateLiveGridElementHeightWidth(monitorId){
     var liveGridElement = liveGridElements[monitorId]
+    liveGridElement.streamElement = liveGridElement.monitorItem.find('.stream-element')
     var streamElement = liveGridElement.streamElement
     liveGridElement.width = streamElement.width()
     liveGridElement.height = streamElement.height()
@@ -1313,10 +1314,6 @@ $(document).ready(function(e){
                         monitorElement.removeClass('doObjectDetection')
                     }
                     if(matrices && matrices.length > 0){
-                        console.log({
-                            height: liveGridElement.height,
-                            width: liveGridElement.width,
-                        })
                         drawMatrices(d,{
                             theContainer: liveGridElement.eventObjects,
                             height: liveGridElement.height,
