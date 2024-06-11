@@ -428,7 +428,7 @@ module.exports = (s,config,lang) => {
             }
             if(!videoCodecisCopy || outputRequiresEncoding){
                 if(videoWidth && videoHeight)streamFlags.push(`-s ${videoWidth}x${videoHeight}`)
-                if(videoFps && streamType === 'mjpeg' || streamType === 'b64'){
+                if(videoFps && streamType === 'mjpeg' || streamType === 'b64' || videoFps && !videoCodecisCopy){
                     streamFilters.push(`fps=${videoFps}`)
                 }
             }
