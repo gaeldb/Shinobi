@@ -1,0 +1,70 @@
+#wallview-container {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.9);
+}
+
+#wallview-canvas {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    flex-grow: 1;
+    overflow: hidden;
+    flex: 1;
+}
+
+#wallview-controls{
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    opacity: 0;
+    transition: 0.2s;
+}
+
+#wallview-controls:hover{
+    opacity: 100%;
+}
+
+#wallview-monitorList i{
+    display: none;
+}
+
+#wallview-monitorList .active i{
+    display: inlin-block;
+}
+
+#wallview-canvas .wallview-video {
+    position: absolute;
+}
+#wallview-canvas .wallview-video .overlay {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    border: 0;
+}
+#wallview-canvas .wallview-video iframe {
+    height: 100%;
+    width: 100%;
+    border: 0;
+}
+
+#wallview-canvas .wallview-video.col-md-4 {
+    height:30vh;
+}
+#wallview-canvas .wallview-video.col-md-6 {
+    height: 40vh;
+}
+#wallview-canvas .wallview-video.col-md-12 {
+    height: 80vh;
+    margin-bottom: 0.5rem !important;
+}
+#wallview-canvas .wallview-video:not(.no-video){
+    background-color: #000!important;
+}
+#wallview-canvas .wallview-video.no-video{
+    display: none;
+}
+#wallview-canvas.show-non-playing .wallview-video.no-video{
+    display: flex;
+}

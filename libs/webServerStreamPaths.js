@@ -415,4 +415,34 @@ module.exports = function(s,config,lang,app){
             },res,req);
         },res,req);
     });
+    /**
+    * Page : Get WallView
+     */
+    app.get(config.webPaths.apiPrefix+':auth/wallview/:ke', function (req,res){
+        s.auth(req.params,function(user){
+            const authKey = req.params.auth
+            const groupKey = req.params.ke
+            if(
+                user.permissions.watch_stream === "0"
+                || user.details.sub
+                && user.details.allmonitors !== '1'
+            ){
+                res.end(user.lang['Not Permitted'])
+                return
+            }
+            s.renderPage(req,res,config.renderPaths.wallview,{
+                forceUrlPrefix: req.query.host || '',
+                data: req.params,
+                protocol: req.protocol,
+                baseUrl: req.protocol + '://' + req.hostname,
+                config: s.getConfigWithBranding(req.hostname),
+                define: s.getDefinitonFile(user.details ? user.details.lang : config.lang),
+                lang: lang,
+                $user: user,
+                authKey: authKey,
+                groupKey: groupKey,
+                originalURL: s.getOriginalUrl(req)
+            });
+        },res,req);
+    });
 }

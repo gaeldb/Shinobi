@@ -54,6 +54,8 @@ module.exports = function(s,config,lang,io){
         if(config.renderPaths.grid === undefined){config.renderPaths.grid='pages/grid'}
         //slick.js (cycle) page
         if(config.renderPaths.cycle === undefined){config.renderPaths.cycle='pages/cycle'}
+        //WallView page
+        if(config.renderPaths.wallview === undefined){config.renderPaths.wallview='pages/wallview'}
     // Use uws/cws
     if(config.useUWebsocketJs === undefined){config.useUWebsocketJs=true}
     if(config.webBlocksPreloaded === undefined){
