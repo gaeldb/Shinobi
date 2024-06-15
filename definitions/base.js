@@ -7701,6 +7701,11 @@ module.exports = function(s,config,lang){
                           addUl: true,
                           ulItems: [
                               {
+                                  label: lang['Open Wall Display'],
+                                  class: 'open-wallview cursor-pointer',
+                                  color: 'blue',
+                              },
+                              {
                                   label: lang['Open All Monitors'],
                                   class: 'open-all-monitors cursor-pointer',
                                   color: 'orange',

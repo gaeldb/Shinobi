@@ -1,9 +1,34 @@
 var loadedMonitors = {}
 var selectedMonitors = {}
+var selectedMonitorsCount = 0
 $(document).ready(function(){
+    PNotify.prototype.options.styling = "fontawesome";
     var wallViewMonitorList = $('#wallview-monitorList')
     var wallViewControls = $('#wallview-controls')
     var wallViewCanvas = $('#wallview-canvas')
+    var wallViewInfoScreen = $('#wallview-info-screen')
+    var lastWindowWidth = $(window).width()
+    var lastWindowHeight = $(window).height()
+    function featureIsActivated(showNotice){
+        if(userHasSubscribed){
+            return true
+        }else{
+            if(showNotice){
+                new PNotify({
+                    title: lang.activationRequired,
+                    text: lang.featureRequiresActivationText,
+                    type: 'warning'
+                })
+            }
+            return false
+        }
+    }
+    function createWallViewWindow(windowName){
+        var el = $(document)
+        var width = el.width()
+        var height = el.height()
+        window.open(getApiPrefix() + '/wallview/' + groupKey + (windowName ? '?window=' + windowName : ''), 'wallview_'+windowName, 'height='+height+',width='+width)
+    }
     function getApiPrefix(innerPart){
         return `${urlPrefix}${authKey}${innerPart ? `/${innerPart}/${groupKey}` : ''}`
     }
@@ -35,8 +60,13 @@ $(document).ready(function(){
 
     function selectMonitor(monitorId, css){
         css = css || {};
+        var numberOfSelected = Object.keys(selectedMonitors)
+        if(numberOfSelected > 3 && !featureIsActivated(true)){
+            return
+        }
+        ++selectedMonitorsCount
         selectedMonitors[monitorId] = Object.assign({}, loadedMonitors[monitorId]);
-        wallViewCanvas.append(`<div class="wallview-video p-0 m-0" live-stream="${monitorId}" style="left:${css.left || 0}px;top:${css.top || 0}px;width:${css.width ? css.width + 'px' : '50vw'};height:${css.height ? css.height + 'px' : '40vh'};"><div class="overlay"></div><iframe src="${getApiPrefix('embed')}/${monitorId}/fullscreen%7Cjquery%7Crelative?host=/"></iframe></div>`)
+        wallViewCanvas.append(`<div class="wallview-video p-0 m-0" live-stream="${monitorId}" style="left:${css.left || 0}px;top:${css.top || 0}px;width:${css.width ? css.width + 'px' : '50vw'};height:${css.height ? css.height + 'px' : '50vh'};"><div class="overlay"></div><iframe src="${getApiPrefix('embed')}/${monitorId}/fullscreen%7Cjquery%7Crelative?host=/"></iframe></div>`)
         wallViewCanvas.find(`[live-stream="${monitorId}"]`)
         .draggable({
             grid: [10, 10],
@@ -48,15 +78,15 @@ $(document).ready(function(){
         })
         .resizable({
             grid: [10, 10],
-            snap: '#wallview-canvas',
-            containment: "window",
+            snap: '#wallview-container',
             stop: function(){
                 saveLayout()
             }
-        })
+        });
         getMonitorListItem(monitorId).addClass('active')
     }
     function deselectMonitor(monitorId){
+        --selectedMonitorsCount
         delete(selectedMonitors[monitorId])
         var monitorItem = wallViewCanvas.find(`[live-stream="${monitorId}"]`);
         monitorItem.find('iframe').attr('src','about:blank')
@@ -70,7 +100,6 @@ $(document).ready(function(){
             var el = $(v)
             var monitorId = el.attr('live-stream')
             var position = el.position()
-            console.log(monitorId,position)
             layout.push({
                 monitorId,
                 css: {
@@ -101,10 +130,48 @@ $(document).ready(function(){
         layout.forEach(function({ monitorId, css }, n){
             selectMonitor(monitorId, css)
         })
+        displayInfoScreen()
+    }
+
+    function displayInfoScreen(){
+        if(selectedMonitorsCount === 0){
+            wallViewInfoScreen.css('display','flex')
+        }else{
+            wallViewInfoScreen.hide()
+        }
+    }
+    function resizeMonitorItem({ monitorId, css }, oldWidth, oldHeight, newWidth, newHeight){
+        var monitorItem = wallViewCanvas.find(`[live-stream="${monitorId}"]`);
+        var newCss = rescaleMatrix(css, oldWidth, oldHeight, newWidth, newHeight)
+        monitorItem.css(newCss)
+    }
+    function rescaleMatrix(matrix, oldWidth, oldHeight, newWidth, newHeight) {
+        const scaleX = newWidth / oldWidth;
+        const scaleY = newHeight / oldHeight;
+
+        return {
+            left: matrix.left * scaleX,
+            top: matrix.top * scaleY,
+            width: matrix.width * scaleX,
+            height: matrix.height * scaleY
+        };
+    }
+    function onWindowResize(){
+        var theWindow = $(window);
+        var currentWindowWidth = theWindow.width()
+        var currentWindowHeight = theWindow.height()
+        var layout = getCurrentLayout();
+        for(item of layout){
+            resizeMonitorItem(item,lastWindowWidth,lastWindowHeight,currentWindowWidth,currentWindowHeight)
+        }
+        lastWindowWidth = currentWindowWidth
+        lastWindowHeight = currentWindowHeight
     }
 
     drawMonitorList().then(loadSavedLayout)
-    $('body').on('click', '[select-monitor]', function(e){
+    $(window).resize(onWindowResize)
+    $('body')
+    .on('click', '[select-monitor]', function(e){
         e.preventDefault()
         var el = $(this);
         var monitorId = el.attr('select-monitor')
@@ -114,6 +181,17 @@ $(document).ready(function(){
         }else{
             selectMonitor(monitorId)
         }
+        displayInfoScreen()
         saveLayout()
+    })
+    .on('click', '.open-wallview', function(e){
+        e.preventDefault()
+        var windowName = getWindowName();
+        if(isNaN(windowName)){
+            windowName = windowName + '2'
+        }else{
+            windowName = `${parseInt(windowName) + 1}`
+        }
+        createWallViewWindow(windowName)
     })
 })

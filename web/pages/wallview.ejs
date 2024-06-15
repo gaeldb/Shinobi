@@ -40,18 +40,27 @@
 <script>window.urlPrefix = "<%- urlPrefix || '' %>";</script>
 <script>window.groupKey = "<%- groupKey || '' %>";</script>
 <script>window.authKey = "<%- authKey || '' %>";</script>
+<script>window.userHasSubscribed = <%- config.userHasSubscribed ? 'true' : 'false' %>;</script>
 <script src="<%- urlPrefix %>assets/vendor/js/socket.io.min.js"></script>
 <script src="<%- urlPrefix %>assets/vendor/js/jquery.min.js"></script>
 <link rel="stylesheet" href="<%- urlPrefix %>assets/vendor/font-awesome/css/font-awesome.min.css">
 <link rel="stylesheet" href="<%- urlPrefix %>assets/vendor/bootstrap5/css/bootstrap.min.css">
 <link rel="stylesheet" href="<%- urlPrefix %>assets/css/bs5.wallview.css">
 <link rel="stylesheet" href="<%- urlPrefix %>assets/vendor/jquery-ui.min.css">
+<link rel="stylesheet" href="<%- urlPrefix %>assets/vendor/pnotify.custom.min.css">
 <div id="wallview-container">
+    <div id="wallview-info-screen" class="justify-content-center align-self-center" style="display:none">
+        <div class="justify-content-center align-self-center text-center col-3 text-white">
+            <i class="fa fa-info-circle fa-5x mb-3"></i>
+            <h4><%- lang.openWallViewInfo %></h4>
+        </div>
+    </div>
     <div id="wallview-canvas">
 
     </div>
     <div id="wallview-controls">
-        <div class="dropdown">
+        <a class="btn btn-primary open-wallview" href="#"><%- lang['New Wall Display'] %></a>
+        <div class="dropdown d-inline-block">
           <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="monitorListButton" data-bs-toggle="dropdown" aria-expanded="false">
             <%- lang.Monitors %>
           </a>
@@ -61,5 +70,6 @@
 </div>
 <!-- <script src="<%- urlPrefix %>assets/js/bs5.embed.utils.js"></script> -->
 <script src="<%- urlPrefix %>assets/vendor/bootstrap5/js/bootstrap.bundle.min.js"></script>
+<script src="<%- urlPrefix %>assets/vendor/js/pnotify.custom.min.js"></script>
 <script src="<%- urlPrefix %>assets/vendor/js/jquery-ui.min.js"></script>
 <script src="<%- urlPrefix %>assets/js/bs5.wallview.js"></script>

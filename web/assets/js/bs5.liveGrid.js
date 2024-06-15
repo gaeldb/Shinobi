@@ -745,6 +745,12 @@ function popOutMonitor(monitorId){
         finish(img)
     }
 }
+function createWallViewWindow(windowName){
+    var el = $(document)
+    var width = el.width()
+    var height = el.height()
+    window.open(getApiPrefix() + '/wallview/' + $user.ke + (windowName ? 'window=' + windowName : ''), 'wallview_'+windowName, 'height='+height+',width='+width)
+}
 function fullScreenLiveGridStream(monitorItem){
     var videoElement = monitorItem.find('.stream-element')
     monitorItem.addClass('fullscreen')
@@ -1100,6 +1106,9 @@ $(document).ready(function(e){
     .on('click','.run-live-grid-monitor-pop',function(){
         var monitorId = $(this).parents('[data-mid]').attr('data-mid')
         popOutMonitor(monitorId)
+    })
+    .on('click','.open-wallview',function(){
+        createWallViewWindow()
     })
     .on('click','.toggle-monitor-substream',function(){
         var monitorId = $(this).parents('[data-mid]').attr('data-mid')

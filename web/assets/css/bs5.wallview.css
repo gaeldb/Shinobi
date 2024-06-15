@@ -1,11 +1,11 @@
 #wallview-container {
-    position: fixed;
+    position: absolute;
     width: 100vw;
     height: 100vh;
     background: rgba(0, 0, 0, 0.9);
 }
 
-#wallview-canvas {
+#wallview-canvas,body {
     position: relative;
     width: 100vw;
     height: 100vh;
@@ -20,10 +20,19 @@
     right: 20px;
     opacity: 0;
     transition: 0.2s;
+    z-index: 11;
 }
 
 #wallview-controls:hover{
     opacity: 100%;
+}
+
+#wallview-info-screen{
+    z-index: 10;
+    background-color: rgba(0,0,0,0.6);
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
 }
 
 #wallview-monitorList i{
