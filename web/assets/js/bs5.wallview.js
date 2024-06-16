@@ -7,8 +7,9 @@ $(document).ready(function(){
     var wallViewControls = $('#wallview-controls')
     var wallViewCanvas = $('#wallview-canvas')
     var wallViewInfoScreen = $('#wallview-info-screen')
-    var lastWindowWidth = $(window).width()
-    var lastWindowHeight = $(window).height()
+    var theWindow = $(window);
+    var lastWindowWidth = theWindow.width()
+    var lastWindowHeight = theWindow.height()
     function featureIsActivated(showNotice){
         if(userHasSubscribed){
             return true
@@ -34,8 +35,8 @@ $(document).ready(function(){
     }
     function getWindowName(){
         const urlParams = new URLSearchParams(window.location.search);
-        const theWindow = urlParams.get('window');
-        return theWindow || '1'
+        const theWindowChoice = urlParams.get('window');
+        return theWindowChoice || '1'
     }
     function drawMonitorListItem(monitor){
         wallViewMonitorList.append(`<li><a class="dropdown-item" select-monitor="${monitor.mid}" href="#"><i class="fa fa-check"></i> ${monitor.name}</a></li>`)
@@ -60,16 +61,18 @@ $(document).ready(function(){
 
     function selectMonitor(monitorId, css){
         css = css || {};
+        var isSelected = selectedMonitors[monitorId]
+        if(isSelected)return;
         var numberOfSelected = Object.keys(selectedMonitors)
         if(numberOfSelected > 3 && !featureIsActivated(true)){
             return
         }
         ++selectedMonitorsCount
         selectedMonitors[monitorId] = Object.assign({}, loadedMonitors[monitorId]);
-        wallViewCanvas.append(`<div class="wallview-video p-0 m-0" live-stream="${monitorId}" style="left:${css.left || 0}px;top:${css.top || 0}px;width:${css.width ? css.width + 'px' : '50vw'};height:${css.height ? css.height + 'px' : '50vh'};"><div class="overlay"></div><iframe src="${getApiPrefix('embed')}/${monitorId}/fullscreen%7Cjquery%7Crelative?host=/"></iframe></div>`)
+        wallViewCanvas.append(`<div class="wallview-video p-0 m-0" live-stream="${monitorId}" style="left:${css.left || 0}px;top:${css.top || 0}px;width:${css.width ? css.width + 'px' : '50vw'};height:${css.height ? css.height + 'px' : '50vh'};"><div class="overlay"><div class="wallview-item-controls text-end"><a class="btn btn-sm btn-outline-danger wallview-item-close"><i class="fa fa-times"></i></a></div></div><iframe src="${getApiPrefix('embed')}/${monitorId}/fullscreen%7Cjquery%7Crelative?host=/"></iframe></div>`)
         wallViewCanvas.find(`[live-stream="${monitorId}"]`)
         .draggable({
-            grid: [10, 10],
+            grid: [40, 40],
             snap: '#wallview-canvas',
             containment: "window",
             stop: function(){
@@ -77,7 +80,7 @@ $(document).ready(function(){
             }
         })
         .resizable({
-            grid: [10, 10],
+            grid: [40, 40],
             snap: '#wallview-container',
             stop: function(){
                 saveLayout()
@@ -115,22 +118,47 @@ $(document).ready(function(){
 
     function saveLayout(){
         var windowName = getWindowName();
+        var layouts = getAllLayouts();
         var layout = getCurrentLayout();
-        localStorage.setItem(`windowLayout_${windowName}`, JSON.stringify(layout))
+        var saveContainer = {
+            layout,
+            windowInnerWidth: window.innerWidth,
+            windowInnerHeight: window.innerHeight,
+        }
+        layouts[windowName] = saveContainer;
+        localStorage.setItem('windowLayouts', JSON.stringify(layouts));
     }
 
-    function getLayout(){
+    function getAllLayouts(){
+        return JSON.parse(localStorage.getItem(`windowLayouts`) || '{}');
+    }
+
+    function getLayout(full){
         var windowName = getWindowName();
-        var layout = JSON.parse(localStorage.getItem(`windowLayout_${windowName}`) || '[]')
+        var saveContainer = getAllLayouts()[windowName]
+        if(full)return saveContainer || { layout: [] };
+        var layout = saveContainer.layout || []
         return layout;
     }
 
+    function resetWindowDimensions(){
+        var saveContainer = getLayout(true);
+        if(saveContainer.windowInnerWidth && saveContainer.windowInnerHeight){
+            var widthDiff = window.outerWidth - window.innerWidth;
+            var heightDiff = window.outerHeight - window.innerHeight;
+            lastWindowWidth = saveContainer.windowInnerWidth
+            lastWindowHeight = saveContainer.windowInnerHeight
+            window.resizeTo(saveContainer.windowInnerWidth + widthDiff, saveContainer.windowInnerHeight + heightDiff);
+        }
+    }
+
     function loadSavedLayout(){
-        var layout = getLayout()
-        layout.forEach(function({ monitorId, css }, n){
-            selectMonitor(monitorId, css)
-        })
-        displayInfoScreen()
+        var saveContainer = getLayout(true);
+        resetWindowDimensions()
+        saveContainer.layout.forEach(function({ monitorId, css }, n){
+            selectMonitor(monitorId, css);
+        });
+        displayInfoScreen();
     }
 
     function displayInfoScreen(){
@@ -156,8 +184,8 @@ $(document).ready(function(){
             height: matrix.height * scaleY
         };
     }
+
     function onWindowResize(){
-        var theWindow = $(window);
         var currentWindowWidth = theWindow.width()
         var currentWindowHeight = theWindow.height()
         var layout = getCurrentLayout();
@@ -168,8 +196,64 @@ $(document).ready(function(){
         lastWindowHeight = currentWindowHeight
     }
 
-    drawMonitorList().then(loadSavedLayout)
-    $(window).resize(onWindowResize)
+    function autoPlaceCurrentMonitorItems() {
+        const wallviewVideos = wallViewCanvas.find('.wallview-video');
+        const totalItems = wallviewVideos.length;
+
+        let numRows, numCols;
+
+        if (totalItems === 6 || totalItems === 5) {
+            numCols = 3;
+            numRows = 2;
+        } else {
+            numRows = Math.ceil(Math.sqrt(totalItems));
+            numCols = Math.ceil(totalItems / numRows);
+        }
+
+        const containerWidth = wallViewCanvas.width();
+        const containerHeight = wallViewCanvas.height();
+        const itemWidth = containerWidth / numCols;
+        const itemHeight = containerHeight / numRows;
+
+        wallviewVideos.each(function(index, element) {
+            const row = Math.floor(index / numCols);
+            const col = index % numCols;
+
+            $(element).css({
+                left: col * itemWidth,
+                top: row * itemHeight,
+                width: itemWidth,
+                height: itemHeight
+            });
+        });
+    }
+
+    function openAllMonitors(){
+        $.each(loadedMonitors,function(monitorId, monitor){
+            selectMonitor(monitorId)
+        })
+        autoPlaceCurrentMonitorItems()
+        displayInfoScreen()
+        saveLayout()
+    }
+
+    function closeAllMonitors(){
+        $.each(loadedMonitors,function(monitorId, monitor){
+            deselectMonitor(monitorId)
+        })
+        displayInfoScreen()
+        saveLayout()
+    }
+
+    drawMonitorList().then(() => {
+        loadSavedLayout()
+        setTimeout(() => {
+            theWindow.resize(() => {
+                onWindowResize()
+                saveLayout()
+            })
+        },500)
+    })
     $('body')
     .on('click', '[select-monitor]', function(e){
         e.preventDefault()
@@ -193,5 +277,23 @@ $(document).ready(function(){
             windowName = `${parseInt(windowName) + 1}`
         }
         createWallViewWindow(windowName)
+    })
+    .on('click', '.wallview-autoplace', function(e){
+        e.preventDefault()
+        autoPlaceCurrentMonitorItems()
+        saveLayout()
+    })
+    .on('click', '.wallview-item-close', function(e){
+        e.preventDefault()
+        var monitorId = $(this).parents('[live-stream]').attr('live-stream')
+        deselectMonitor(monitorId)
+    })
+    .on('click', '.wallview-open-all', function(e){
+        e.preventDefault()
+        openAllMonitors()
+    })
+    .on('click', '.wallview-close-all', function(e){
+        e.preventDefault()
+        closeAllMonitors()
     })
 })
