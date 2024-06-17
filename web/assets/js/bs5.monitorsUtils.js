@@ -702,7 +702,7 @@ function buildPosePoints(bodyParts, x, y){
     }
     return theArray;
 }
-function drawMatrices(event,options){
+function drawMatrices(event, options, autoRemoveTimeout){
     var theContainer = options.theContainer
     var height = options.height
     var width = options.width
@@ -714,8 +714,8 @@ function drawMatrices(event,options){
     let moreMatrices = []
     var monitorId = event.id;
     function processMatrix(n,matrix){
-        html += `<div class="stream-detected-object" name="${objectTagGroup}" style="height:${heightRatio * matrix.height}px;width:${widthRatio * matrix.width}px;top:${heightRatio * matrix.y}px;left:${widthRatio * matrix.x}px;border-color: ${matrix.color};">`
-        if(matrix.tag)html += `<span class="tag">${matrix.tag}${!isNaN(matrix.id) ? ` <small class="label label-default">${matrix.id}</small>`: ''}</span>`
+        html += `<div class="stream-detected-object fresh-detected-object" name="${objectTagGroup}" style="height:${heightRatio * matrix.height}px;width:${widthRatio * matrix.width}px;top:${heightRatio * matrix.y}px;left:${widthRatio * matrix.x}px;border-color: ${matrix.color};">`
+        if(matrix.tag)html += `<span class="tag">${matrix.tag}${!isNaN(matrix.id) ? ` <small class="label label-default">${matrix.id}</small>`: ''} (${matrix.confidence.toFixed(2) || 0})</span>`
         if(matrix.notice)html += `<div class="matrix-info" style="color:yellow">${matrix.notice}</div>`;
         if(matrix.missingNear && matrix.missingNear.length > 0){
             html += `<div class="matrix-info yellow"><small>Missing Near</small><br>${matrix.missingRecently.map(item => `${item.tag} (${item.id}) by ${item.missedNear.tag} (${item.missedNear.id})`).join(', ')}</div>`;
@@ -747,7 +747,7 @@ function drawMatrices(event,options){
         if(matrix.nearBy){
             html += `<div class="matrix-info">`
             matrix.nearBy.forEach((nearMatrix) => {
-                html += `<div class="mb-1">${nearMatrix.tag} <small class="label label-default">${nearMatrix.id}</small> (${nearMatrix.overlapPercent}%)</div>`
+                html += `<div class="mb-1">${nearMatrix.tag} <small class="label label-default">${nearMatrix.id}</small> (${nearMatrix.overlapPercent.toFixed(2)}%)</div>`
             });
             html += `</div>`
         }
@@ -759,7 +759,13 @@ function drawMatrices(event,options){
     }
     $.each(event.details.matrices, processMatrix);
     $.each(moreMatrices, processMatrix);
-    theContainer.append(html)
+    var addedEls = theContainer.append(html)
+    if(autoRemoveTimeout){
+        addedEls = addedEls.find('.fresh-detected-object').removeClass('fresh-detected-object')
+        setTimeout(function(){
+            addedEls.remove()
+        }, autoRemoveTimeout);
+    }
 }
 function setMonitorCountOnUI(){
     $('.cameraCount').text(Object.keys(loadedMonitors).length)
