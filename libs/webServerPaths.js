@@ -1102,6 +1102,36 @@ module.exports = function(s,config,lang,app,io){
         },res,req);
     });
     /**
+    * Page : Get Wall Video View (Wall Timeline)
+     */
+    app.get(config.webPaths.apiPrefix+':auth/wallvideoview/:ke', function (req,res){
+        s.auth(req.params,function(user){
+            const authKey = req.params.auth
+            const groupKey = req.params.ke
+            if(
+                user.permissions.watch_videos === "0"
+                || user.details.sub
+                && user.details.allmonitors !== '1'
+            ){
+                res.end(user.lang['Not Permitted'])
+                return
+            }
+            s.renderPage(req,res,config.renderPaths.wallvideoview,{
+                forceUrlPrefix: req.query.host || '',
+                data: req.params,
+                protocol: req.protocol,
+                baseUrl: req.protocol + '://' + req.hostname,
+                config: s.getConfigWithBranding(req.hostname),
+                define: s.getDefinitonFile(user.details ? user.details.lang : config.lang),
+                lang: lang,
+                $user: user,
+                authKey: authKey,
+                groupKey: groupKey,
+                originalURL: s.getOriginalUrl(req)
+            });
+        },res,req);
+    });
+    /**
     * API : Get Events
      */
     app.get([

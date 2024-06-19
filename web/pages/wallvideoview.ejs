@@ -1,0 +1,82 @@
+<title><%- lang.Shinobi %></title>
+<%
+    var forceUrlPrefix
+    var urlPrefix = ``
+    var targetPort = config.ssl && config.ssl.port && protocol === 'https' ? config.ssl.port : config.port
+    var addonsEnabled = {}
+    var rawAddonList = decodeURI(data.addon || '').split('|');
+    rawAddonList.forEach(function(piece){
+        var pieceParts = piece.split('=');
+        var key = pieceParts[0];
+        var value = pieceParts[1] || true;
+        addonsEnabled[key] = value;
+    });
+    function getAddon(addonTag){
+        return addonsEnabled[addonTag];
+    }
+    var streamWidth = parseInt(getAddon('width')) || 640
+    var streamHeight = parseInt(getAddon('height')) || 480
+    var hasGUI = getAddon('gui')
+    var isFullscreen = getAddon('fullscreen')
+    var isRelativeUrl = getAddon('relative')
+    if(forceUrlPrefix){
+        urlPrefix = forceUrlPrefix
+    }else if(isRelativeUrl){
+        urlPrefix = ''
+    }else if(config.baseURL){
+        urlPrefix = config.baseURL
+    }else if(!targetPort || targetPort === '' || targetPort == 80 || targetPort == 443){
+        urlPrefix = baseUrl
+    }else{
+        urlPrefix = `${baseUrl}:${targetPort}`
+    }
+    if(urlPrefix.endsWith('/') === false){
+        urlPrefix += '/'
+    }
+    var originalURL = `${urlPrefix}`
+    var libURL = config.baseURL;
+    if(!libURL)libURL = originalURL;
+%>
+<%- include('blocks/header-favicon') %>
+<script>window.libURL="<%- libURL %>";</script>
+<script>window.$user=<%- JSON.stringify($user) %>;</script>
+<script>window.lang=<%- JSON.stringify(lang) %>;</script>
+<script>window.definitions=<%- JSON.stringify(define) %>;</script>
+<script>window.urlPrefix = "<%- urlPrefix || '' %>";</script>
+<script>window.groupKey = "<%- groupKey || '' %>";</script>
+<script>window.authKey = "<%- authKey || '' %>";</script>
+<script>window.userHasSubscribed = <%- config.userHasSubscribed ? 'true' : 'false' %>;</script>
+<script src="<%- urlPrefix %>assets/vendor/js/socket.io.min.js"></script>
+<script src="<%- urlPrefix %>assets/vendor/js/jquery.min.js"></script>
+<link rel="stylesheet" href="<%- urlPrefix %>assets/vendor/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="<%- urlPrefix %>assets/vendor/bootstrap5/css/bootstrap.min.css">
+<link rel="stylesheet" href="<%- urlPrefix %>assets/vendor/daterangepicker.css">
+<link rel="stylesheet" href="<%- urlPrefix %>assets/vendor/vis.min.css">
+<link rel="stylesheet" href="<%- urlPrefix %>assets/css/bs5.timeline.css">
+<link rel="stylesheet" href="<%- urlPrefix %>assets/css/dashboard.css">
+<link rel="stylesheet" href="<%- urlPrefix %>assets/vendor/jquery-ui.min.css">
+<link rel="stylesheet" href="<%- urlPrefix %>assets/vendor/pnotify.custom.min.css">
+<body class="bg-darker">
+    <div class="container-fluid">
+        <div class="row">
+            <main id="pageTabContainer" class="col-md-12 ms-sm-auto col-lg-12 px-md-4">
+                <%- include('blocks/home/timeline.ejs') %>
+                <%- include('blocks/confirm.ejs') %>
+            </main>
+        </div>
+    </div>
+</body>
+<div style="display:none" id="temp"></div>
+<a id="floating-back-button" class="go-back" style="display:none"><i class="fa fa-arrow-left"></i></a>
+<script src="<%- urlPrefix %>assets/vendor/moment-with-locales.js"></script>
+<script src="<%- urlPrefix %>assets/vendor/js/daterangepicker.js"></script>
+<script src="<%- urlPrefix %>assets/vendor/bootstrap5/js/bootstrap.bundle.min.js"></script>
+<script src="<%- urlPrefix %>assets/vendor/js/pnotify.custom.min.js"></script>
+<script src="<%- urlPrefix %>assets/vendor/js/jquery-ui.min.js"></script>
+<script src="<%- urlPrefix %>assets/vendor/js/vis.min.js" async></script>
+<script src="<%- urlPrefix %>assets/js/bs5.dashboard-base.js"></script>
+<script src="<%- urlPrefix %>assets/js/bs5.zipAndDownload.js"></script>
+<script src="<%- urlPrefix %>assets/js/bs5.monitorsUtils.js"></script>
+<script src="<%- urlPrefix %>assets/js/bs5.videos.js"></script>
+<script src="<%- urlPrefix %>assets/js/bs5.confirm.js"></script>
+<script src="<%- urlPrefix %>assets/js/bs5.wallvideoview.js"></script>

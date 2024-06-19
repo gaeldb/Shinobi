@@ -56,6 +56,8 @@ module.exports = function(s,config,lang,io){
         if(config.renderPaths.cycle === undefined){config.renderPaths.cycle='pages/cycle'}
         //WallView page
         if(config.renderPaths.wallview === undefined){config.renderPaths.wallview='pages/wallview'}
+        //WallVideoView page
+        if(config.renderPaths.wallvideoview === undefined){config.renderPaths.wallvideoview='pages/wallvideoview'}
     // Use uws/cws
     if(config.useUWebsocketJs === undefined){config.useUWebsocketJs=true}
     if(config.webBlocksPreloaded === undefined){

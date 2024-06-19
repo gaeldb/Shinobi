@@ -9200,6 +9200,12 @@ module.exports = function(s,config,lang){
                               <div class="btn-group">
                                   <a class="btn btn-sm btn-primary" id="timeline-date-selector" title="${lang.Date}"><i class="fa fa-calendar"></i></a>
                               </div>
+                              <div class="btn-group">
+                                  <button type="button" class="btn btn-primary btn-sm dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                      <i class="fa fa-video-camera"></i>
+                                  </button>
+                                  <ul class="dropdown-menu px-3 bg-dark" id="timeline-monitor-list"></ul>
+                              </div>
                           </div>
                           `,
                       },
