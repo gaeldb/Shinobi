@@ -1,16 +1,37 @@
+const {
+    scanStatus,
+    runOnvifScanner,
+    stopOnvifScanner,
+} = require('./scanners/utils.js')
 module.exports = function(s,config,lang,app,io){
     const {
         ffprobe,
     } = require('./ffmpeg/utils.js')(s,config,lang)
-    const {
-        runOnvifScanner,
-    } = require('./scanners/utils.js')(s,config,lang)
     const onWebSocketConnection = async (cn) => {
         const tx = function(z){if(!z.ke){z.ke=cn.ke;};cn.emit('f',z);}
         cn.on('f',(d) => {
             switch(d.f){
+                case'onvif_scan_reconnect':
+                    tx({f: 'onvif_scan_current', devices: scanStatus.current, isScanning: scanStatus.isActive})
+                break;
+                case'onvif_stop':
+                    stopOnvifScanner()
+                    tx({f: 'onvif_scan_stopped'})
+                break;
                 case'onvif':
-                    runOnvifScanner(d,tx)
+                    if(!scanStatus.isActive)scanStatus.current = [];
+                    const groupKey = `${cn.ke}`
+                    runOnvifScanner(d, (data) => {
+                        const response = { f: 'onvif', ...data }
+                        s.tx(response, 'GRP_' + cn.ke)
+                        scanStatus.current.push({ f: 'onvif', ...data })
+                    }, (data) => {
+                        const response = { f: 'onvif', ff: 'failed_capture', ...data }
+                        s.tx(response, 'GRP_' + cn.ke)
+                        scanStatus.current.push({ f: 'onvif', ff: 'failed_capture', ...data })
+                    }).then((responseList) => {
+                        s.tx({ f: 'onvif_scan_complete', devices: responseList }, 'GRP_' + cn.ke)
+                    })
                 break;
             }
         })

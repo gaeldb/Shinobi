@@ -6635,8 +6635,13 @@ module.exports = function(s,config,lang){
                             {
                                 "fieldType": "btn",
                                 "forForm": true,
-                                "class": `btn-block btn-success`,
-                                "btnContent": `${lang['Search']}<span class="_loading" style="display:none"> &nbsp; <i class="fa fa-pulse fa-spinner"></i></span>`,
+                                "class": `btn-success start-scan`,
+                                "btnContent": `${lang['Search']}`,
+                            },
+                            {
+                                "fieldType": "btn",
+                                "class": `btn-danger stop-scan d-none`,
+                                "btnContent": `${lang['Stop']}`,
                             },
                             {
                                 "fieldType": "btn",
@@ -6653,22 +6658,11 @@ module.exports = function(s,config,lang){
                "section-pre-class": "col-md-8",
                "info": [
                    {
-                       "fieldType": "div",
-                       "class": "onvif_result row",
+                       "fieldType": "table",
+                       "class": "onvif_result",
                    }
                ]
-           },
-           "Other Devices": {
-              "name": lang['Other Devices'],
-              "color": "danger",
-              "section-pre-class": "col-md-12",
-              "info": [
-                  {
-                      "fieldType": "div",
-                      "class": "onvif_result_error row",
-                  }
-              ]
-          },
+           }
          }
        },
      "Camera Probe": {

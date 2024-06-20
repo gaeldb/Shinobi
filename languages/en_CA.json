@@ -1434,6 +1434,7 @@
    "Select atleast one monitor to delete": "Select atleast one monitor to delete.",
    "Use Built-In": "Use Built-In",
    "Add Cameras": "Add Cameras",
+   "addAllCamerasText": "You are about to add 9001 cameras to your system.",
    "Add Camera": "Add Camera",
    "Delete Camera": "Delete Camera",
    "Event Rules": "Event Rules",

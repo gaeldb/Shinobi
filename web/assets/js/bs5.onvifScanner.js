@@ -4,6 +4,8 @@ $(document).ready(function(e){
     var loadedResultsByIp = {}
     var monitorEditorWindow = $('#tab-monitorSettings')
     var onvifScannerWindow = $('#tab-onvifScanner')
+    var onvifScannerStartButton = onvifScannerWindow.find('.start-scan')
+    var onvifScannerStopButton = onvifScannerWindow.find('.stop-scan')
     var onvifScannerResultPane = onvifScannerWindow.find('.onvif_result')
     var onvifScannerErrorResultPane = onvifScannerWindow.find('.onvif_result_error')
     var scanForm = onvifScannerWindow.find('form');
@@ -30,85 +32,88 @@ $(document).ready(function(e){
         var html = buildSubMenuItems(allFound)
         sideMenuList.html(html)
     }
-    var setAsLoading = function(appearance){
+    var showStopButton = function(appearance){
         if(appearance){
-            onvifScannerWindow.find('._loading').show()
-            onvifScannerWindow.find('[type="submit"]').prop('disabled',true)
+            onvifScannerStartButton.addClass('d-none')
+            onvifScannerStopButton.removeClass('d-none')
         }else{
-            onvifScannerWindow.find('._loading').hide()
-            onvifScannerWindow.find('[type="submit"]').prop('disabled',false)
+            onvifScannerStartButton.removeClass('d-none')
+            onvifScannerStopButton.addClass('d-none')
         }
     }
-    function drawProbeResult(options){
-        if(!options.error){
-            var currentUsername = onvifScannerWindow.find('[name="user"]').val()
-            var currentPassword = onvifScannerWindow.find('[name="pass"]').val()
-            var tempID = generateId()
-            var info = options.info ? jsonToHtmlBlock(options.info) : ''
-            var streamUrl = ''
-            var launchWebPage = `target="_blank" href="http${options.port == 443 ? 's' : ''}://${options.ip}:${options.port}"`
-            if(options.uri){
-                streamUrl = options.uri
-            }
-            var theLocation = getLocationFromUri(options.uri)
-            var pathLocation = theLocation.location
-            var monitorConfigPartial = {
-                name: pathLocation.hostname,
-                mid: tempID + `${options.port}`,
-                host: pathLocation.hostname,
-                port: pathLocation.port,
-                path: pathLocation.pathname + (pathLocation.search && pathLocation.search !== '?' ? pathLocation.search : ''),
-                protocol: theLocation.protocol,
-                details: {
-                    auto_host: addCredentialsToUri(streamUrl,currentUsername,currentPassword),
-                    muser: currentUsername,
-                    mpass: currentPassword,
-                    is_onvif: '1',
-                    onvif_port: options.port,
-                },
-            }
-            if(options.isPTZ){
-                monitorConfigPartial.details = Object.assign(monitorConfigPartial.details,{
-                    control: '1',
-                    control_url_method: 'ONVIF',
-                    control_stop: '1',
-                })
-            }
-            var monitorAlreadyAdded = isOnvifRowAlreadyALoadedMonitor(monitorConfigPartial)
-            if(monitorAlreadyAdded){
-                monitorConfigPartial.mid = monitorAlreadyAdded.mid;
-            }
-            var monitorId = monitorConfigPartial.mid
-            loadedResults[monitorId] = monitorConfigPartial;
-            loadedResultsByIp[monitorConfigPartial.host] = monitorConfigPartial;
-            onvifScannerResultPane.append(`
-                <div class="col-md-4 mb-3" onvif_row="${monitorId}" id="onvif-result-${monitorId}">
-                    <div style="display:block" class="card shadow btn-default copy">
-                        <div class="preview-image card-header" style="background-image:url(${options.snapShot ? 'data:image/png;base64,' + options.snapShot : placeholder.getData(placeholder.plcimg({text: ' ', fsize: 25, bgcolor:'#1f80f9'}))})"></div>
-                        <div class="card-body" style="min-height:190px">
-                            <div>${info}</div>
-                            <div class="url">${streamUrl}</div>
-                        </div>
-                        <div class="card-footer">${options.ip}:${options.port}</div>
-                    </div>
-                </div>
-            `)
-            onvifScannerWindow.find('._notfound').remove()
-            setAsLoading(false)
-            drawFoundCamerasSubMenu()
+
+    function drawDeviceTableRow(device, gotAccess){
+        var ip = device.ip;
+        var el = onvifScannerResultPane.find(`[scan-item="${ip}"]`)
+        var hasError = !!device.error;
+        var uriText = !hasError ? device.uri : device.error;
+        var statusColor = hasError ? 'red' : 'green';
+        var snapShot = device.snapShot;
+        // console.log(ip, device.error, hasError)
+        if(gotAccess)loadMonitorConfigFromResult(device)
+        if(el.length === 0){
+            var html = `<tr scan-item="${ip}">
+                <td><i class="fa fa-circle" style="color:${statusColor}"></i></td>
+                <td><img class="scan-item-img copy" src='data:image/jpeg;base64,${snapShot}' onerror="replaceBrokenImage(this)"></td>
+                <td>${ip}<br><small class="uri">${uriText}</small></td>
+                <td class="text-center copy-button">${!hasError ? makeButton({text: lang.Copy, class:'copy', color: 'primary'}) : ''}</td>
+             </tr>`
+             onvifScannerResultPane.append(html)
         }else{
-            if(!loadedResultsByIp[options.ip]){
-                onvifScannerErrorResultPane.append(`
-                    <div onvif_error_row="${options.ip}" class="d-flex flex-row">
-                        <div class="py-2 px-1" style="min-width:170px"><b>${options.ip}:${options.port}</b></div>
-                        <div class="py-2 px-1 flex-grow-1">${options.error}</div>
-                        <div class="py-2 px-1 text-right">
-                            <a target="_blank" class="btn btn-sm btn-secondary" href="http://${options.ip}:${options.port}"><i class="fa fa-external-link"></i></a>
-                        </div>
-                    </div>
-                `)
+            var copyButton = el.find('.copy-button');
+            var imgEl = el.find('.scan-item-img');
+            if(hasError){
+                copyButton.empty()
+                imgEl.removeClass('copy cursor-pointer')
+            }else{
+                copyButton.html(makeButton({text: lang.Copy, class:'copy', color: 'primary'}))
+                imgEl.addClass('copy cursor-pointer')
             }
+            imgEl.text(snapShot)
+            el.find('.uri').text(uriText)
+            el.find('.fa-circle').css('color', statusColor)
         }
+    }
+    function loadMonitorConfigFromResult(options){
+        var monitorId = removeSpecialCharacters(options.ip)
+        var currentUsername = options.user
+        var currentPassword = options.pass
+        var streamUrl = ''
+        var launchWebPage = `target="_blank" href="http${options.port == 443 ? 's' : ''}://${options.ip}:${options.port}"`
+        if(options.uri){
+            streamUrl = options.uri
+        }
+        var theLocation = getLocationFromUri(options.uri)
+        var pathLocation = theLocation.location
+        var monitorConfigPartial = {
+            name: pathLocation.hostname,
+            mid: monitorId,
+            host: pathLocation.hostname,
+            port: pathLocation.port,
+            path: pathLocation.pathname + (pathLocation.search && pathLocation.search !== '?' ? pathLocation.search : ''),
+            protocol: theLocation.protocol,
+            details: {
+                auto_host: addCredentialsToUri(streamUrl,currentUsername,currentPassword),
+                muser: currentUsername,
+                mpass: currentPassword,
+                is_onvif: '1',
+                onvif_port: options.port,
+            },
+        }
+        if(options.isPTZ){
+            monitorConfigPartial.details = Object.assign(monitorConfigPartial.details,{
+                control: '1',
+                control_url_method: 'ONVIF',
+                control_stop: '1',
+            })
+        }
+        var monitorAlreadyAdded = isOnvifRowAlreadyALoadedMonitor(monitorConfigPartial)
+        if(monitorAlreadyAdded){
+            monitorConfigPartial.mid = monitorAlreadyAdded.mid;
+        }
+        loadedResults[monitorId] = monitorConfigPartial;
+        loadedResultsByIp[monitorConfigPartial.host] = monitorConfigPartial;
+        return monitorConfigPartial
     }
     function isOnvifRowAlreadyALoadedMonitor(onvifRow){
         var matches = null;
@@ -174,7 +179,7 @@ $(document).ready(function(e){
         var form = el.serializeObject();
         onvifScannerResultPane.empty();
         onvifScannerErrorResultPane.empty();
-        setAsLoading(true)
+        showStopButton(true)
         mainSocket.f({
             f: 'onvif',
             ip: form.ip,
@@ -184,34 +189,84 @@ $(document).ready(function(e){
         });
         clearTimeout(checkTimeout)
         checkTimeout = setTimeout(function(){
-            if(onvifScannerResultPane.find('.card').length === 0){
-                setAsLoading(false)
+            if(onvifScannerResultPane.find('[scan-item]').length === 0){
+                showStopButton(false)
                 onvifScannerResultPane.append(`<div class="p-2 text-center ${definitions.Theme.isDark ? 'text-white' : ''} _notfound text-white epic-text">${lang.sorryNothingWasFound}</div>`)
             }
         },5000)
         return false;
     });
-    onvifScannerWindow.on('click','.copy',function(){
+    onvifScannerWindow.on('click','.copy',function(e){
+        e.preventDefault()
         openMonitorEditorPage()
-        var el = $(this).parents('[onvif_row]');
-        var id = el.attr('onvif_row');
-        var onvifRecord = loadedResults[id];
+        var el = $(this).parents('[scan-item]');
+        var id = el.attr('scan-item');
+        var onvifRecord = loadedResultsByIp[id];
         var streamURL = onvifRecord.details.auto_host
         writeToMonitorSettingsWindow(onvifRecord)
     })
     onvifScannerWindow.on('click','.add-all',function(){
         filterOutMonitorsThatAreAlreadyAdded(loadedResults,function(importableCameras){
-            $.each(importableCameras,function(n,camera){
-                // console.log(camera)
-                postMonitor(camera)
-            })
+            const numberOfCameras = importableCameras.length
+            if(numberOfCameras === 0){
+                new PNotify({
+                    title: lang["ONVIF Scanner"],
+                    text: lang.sorryNothingWasFound,
+                    type: 'danger',
+                })
+            }else{
+                $.confirm.create({
+                    title: lang['Add Cameras'],
+                    body: `<p>${lang.addAllCamerasText.replace('9001', numberOfCameras)}</p><ul>${importableCameras.map(item => `<li>${item.host}</li>`).join('')}</ul>`,
+                    clickOptions: {
+                        class: 'btn-success',
+                        title: lang.Add,
+                    },
+                    clickCallback: function(){
+                        $.each(importableCameras,function(n,camera){
+                            // console.log(camera)
+                            postMonitor(camera)
+                        })
+                    }
+                })
+            }
         })
     })
+    onvifScannerWindow.on('click','.stop-scan',function(){
+        mainSocket.f({ f: 'onvif_stop' });
+    })
+
     loadLocalOptions()
+    onInitWebsocket(function (){
+        mainSocket.f({ f: 'onvif_scan_reconnect' });
+    })
     onWebSocketEvent(function (d){
         switch(d.f){
             case'onvif':
-                drawProbeResult(d)
+                try{
+                    drawDeviceTableRow(d, d.ff !== 'failed_capture' && !d.failedConnection);
+                }catch(err){
+                    console.error(err)
+                }
+            break;
+            case'onvif_scan_current':
+                console.log(d)
+                if(d.isScanning){
+                    showStopButton(true)
+                }else{
+                    showStopButton(false)
+                }
+                d.devices.forEach(device => {
+                    console.log('onvif_scan_current', device)
+                    drawDeviceTableRow(device, !device.error && !d.failedConnection)
+                });
+            break;
+            case'onvif_scan_complete':
+                showStopButton(false)
+                d.devices.forEach(device => {
+                    console.log('onvif_scan_complete',device)
+                    drawDeviceTableRow(device, !device.error && !d.failedConnection)
+                });
             break;
         }
     })

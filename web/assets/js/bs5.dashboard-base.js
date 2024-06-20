@@ -1096,3 +1096,9 @@ function featureIsActivated(showNotice){
         return false
     }
 }
+function makeButton({ color, link, text, class: classes}){
+    return `<a class="btn btn-sm d-block btn-${color} ${classes}" ${link ? `href="${link}" target="_blank"` : ''}>${text}</a>`
+}
+function replaceBrokenImage(_this){
+    $(_this).attr('src', `${libURL}/libs/img/bg.jpg`)
+}

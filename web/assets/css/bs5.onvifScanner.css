@@ -12,3 +12,11 @@
 #tab-onvifScanner .onvif_result {
     padding-top:2rem;
 }
+#tab-onvifScanner .onvif_result td {
+    border: 0;
+    padding-bottom: 1rem;
+}
+#tab-onvifScanner .scan-item-img {
+    max-width: 150px;
+    border-radius: 7px;
+}
