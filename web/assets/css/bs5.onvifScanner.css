@@ -3,20 +3,22 @@
     background-size: cover;
     height: 100px;
 }
-#tab-onvifScanner .onvif_result .card {
+/* #tab-onvifScanner .onvif_result .card {
     cursor: pointer;
-}
+} */
 #tab-onvifScanner .onvif_result .card-body {
     min-height: auto;
 }
 #tab-onvifScanner .onvif_result {
-    padding-top:2rem;
+    padding-top: 0.5rem;
 }
-#tab-onvifScanner .onvif_result td {
-    border: 0;
-    padding-bottom: 1rem;
+#tab-onvifScanner .onvif_result .uri{
+    word-break: break-word;
 }
 #tab-onvifScanner .scan-item-img {
-    max-width: 150px;
+    width: 100px;
     border-radius: 7px;
+    height: 100px;
+    background-size: cover;
+    background-color: #1f80f9;
 }

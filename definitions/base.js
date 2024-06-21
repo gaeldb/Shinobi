@@ -6610,7 +6610,7 @@ module.exports = function(s,config,lang){
                      {
                         "name": "ip",
                         "field": lang['IP Address'],
-                        "description": lang[lang["fieldTextIp"]],
+                        "description": lang.fieldTextIp,
                         "example": "10.1.100.1-10.1.100.254",
                      },
                      {
@@ -6622,11 +6622,13 @@ module.exports = function(s,config,lang){
                      {
                         "name": "user",
                         "field": lang['Camera Username'],
+                        "description": lang.fieldTextOnvifScanCameraUsername,
                         "placeholder": "Can be left blank.",
                      },
                      {
                         "name": "pass",
                         "field": lang['Camera Password'],
+                        "description": lang.fieldTextOnvifScanCameraPassword,
                         "fieldType": "password",
                      },
                      {
@@ -6658,8 +6660,8 @@ module.exports = function(s,config,lang){
                "section-pre-class": "col-md-8",
                "info": [
                    {
-                       "fieldType": "table",
-                       "class": "onvif_result",
+                       "fieldType": "div",
+                       "class": "onvif_result row",
                    }
                ]
            }

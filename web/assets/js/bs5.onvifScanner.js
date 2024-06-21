@@ -46,18 +46,20 @@ $(document).ready(function(e){
         var ip = device.ip;
         var el = onvifScannerResultPane.find(`[scan-item="${ip}"]`)
         var hasError = !!device.error;
-        var uriText = !hasError ? device.uri : device.error;
+        var uriText = !hasError ? device.uri ? device.uri.split('?')[0] : '' : device.error;
         var statusColor = hasError ? 'red' : 'green';
         var snapShot = device.snapShot;
         // console.log(ip, device.error, hasError)
         if(gotAccess)loadMonitorConfigFromResult(device)
         if(el.length === 0){
-            var html = `<tr scan-item="${ip}">
-                <td><i class="fa fa-circle" style="color:${statusColor}"></i></td>
-                <td><img class="scan-item-img copy" src='data:image/jpeg;base64,${snapShot}' onerror="replaceBrokenImage(this)"></td>
-                <td>${ip}<br><small class="uri">${uriText}</small></td>
-                <td class="text-center copy-button">${!hasError ? makeButton({text: lang.Copy, class:'copy', color: 'primary'}) : ''}</td>
-             </tr>`
+            var html = `<div scan-item="${ip}" class="col-md-6">
+                 <div class="card btn-default d-flex flex-row align-items-center p-2 mb-3 mx-2" style="border:none;border-left: 3px solid;border-color: ${statusColor}">
+                    <div class="pr-2"><i class="fa fa-square" style="color:${statusColor}"></i></div>
+                    <div class="pr-2"><div class="scan-item-img copy ${snapShot ? `cursor-pointer` : ''}" style="${snapShot ? `background-image:url(data:image/jpeg;base64,${snapShot})` : 'background-color:${statusColor};'}"></div></div>
+                    <div class="pr-2 flex-grow-1">${ip}<br><small class="uri">${uriText}</small></div>
+                    <div class="text-center copy-button pr-2">${!hasError ? makeButton({text: lang.Copy, class:'copy', color: 'primary'}) : ''}</div>
+                 </div>
+             </div>`
              onvifScannerResultPane.append(html)
         }else{
             var copyButton = el.find('.copy-button');
@@ -69,8 +71,14 @@ $(document).ready(function(e){
                 copyButton.html(makeButton({text: lang.Copy, class:'copy', color: 'primary'}))
                 imgEl.addClass('copy cursor-pointer')
             }
-            imgEl.text(snapShot)
+            if(snapShot){
+                imgEl.css('background-image', `url("data:image/jpeg;base64,${snapShot}")`)
+            }else{
+                imgEl.css('background-image', '')
+            }
+            imgEl.css('background-color', statusColor)
             el.find('.uri').text(uriText)
+            el.find('.card').css('border-color', statusColor)
             el.find('.fa-circle').css('color', statusColor)
         }
     }
@@ -263,10 +271,6 @@ $(document).ready(function(e){
             break;
             case'onvif_scan_complete':
                 showStopButton(false)
-                d.devices.forEach(device => {
-                    console.log('onvif_scan_complete',device)
-                    drawDeviceTableRow(device, !device.error && !d.failedConnection)
-                });
             break;
         }
     })
