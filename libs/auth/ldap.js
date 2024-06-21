@@ -150,8 +150,8 @@ module.exports = (s,config,lang,app) => {
         alternateLoginsFieldList[alternateLoginsFieldList.length - 1].btns.push({
            "class": `btn-info ldap-sign-in`,
            "btnContent": `<i class="fa fa-group"></i> &nbsp; ${lang['Link LDAP Account']}`,
-        })
-        s.customAutoLoadTree['LibsJs'].push(`dash2.ldapSignIn.js`)
+        });
+        s.customAutoLoadTree['AssetsJs'].push(`bs5.ldapSignIn.js`)
     })
     /**
     * API : Add Token Window (Sign-In to LDAP) (GET)
