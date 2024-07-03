@@ -58,4 +58,60 @@ module.exports = function(s,config,lang,app,io){
             })
         },res,req);
     })
+    /**
+    * API : ONVIF Scanner RUN
+     */
+    app.get(config.webPaths.apiPrefix+':auth/onvifScanner/:ke/scan',function (req,res){
+        s.auth(req.params,function(user){
+            const {
+                isRestricted,
+                isRestrictedApiKey,
+                apiKeyPermissions,
+            } = s.checkPermission(user);
+            if(
+                isRestrictedApiKey && apiKeyPermissions.control_monitors_disallowed
+            ){
+                s.closeJsonResponse(res,{
+                    ok: false,
+                    msg: lang['Not Authorized']
+                });
+                return
+            }
+            const groupKey = req.params.ke;
+            stopOnvifScanner()
+            s.closeJsonResponse(res, { ok: true });
+        },res,req);
+    })
+    /**
+    * API : ONVIF Scanner STOP
+     */
+    app.get(config.webPaths.apiPrefix+':auth/onvifScanner/:ke/scan/stop',function (req,res){
+        s.auth(req.params,function(user){
+            const {
+                isRestricted,
+                isRestrictedApiKey,
+                apiKeyPermissions,
+            } = s.checkPermission(user);
+            if(
+                isRestrictedApiKey && apiKeyPermissions.control_monitors_disallowed
+            ){
+                s.closeJsonResponse(res,{
+                    ok: false,
+                    msg: lang['Not Authorized']
+                });
+                return
+            }
+            const groupKey = req.params.ke;
+            runOnvifScanner(d, (data) => {
+                const response = { f: 'onvif', ...data }
+                s.tx(response, 'GRP_' + groupKey)
+            }, (data) => {
+                const response = { f: 'onvif', ff: 'failed_capture', ...data }
+                s.tx(response, 'GRP_' + groupKey)
+            }).then((responseList) => {
+                s.tx({ f: 'onvif_scan_complete' }, 'GRP_' + groupKey)
+                s.closeJsonResponse(res, responseList)
+            })
+        },res,req);
+    })
 }
