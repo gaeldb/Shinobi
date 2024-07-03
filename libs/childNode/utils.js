@@ -179,7 +179,7 @@ module.exports = function(s,config,lang,app,io){
                 }
                 s.insertDatabaseRow(monitorConfig,insert)
                 s.insertCompletedVideoExtensions.forEach(function(extender){
-                    extender(monitorConfig,insert)
+                    extender(activeMonitor, monitorConfig, insert)
                 })
                 //purge over max
                 s.purgeDiskForGroup(data.ke)
