@@ -424,7 +424,6 @@ module.exports = function(s,config,lang,app){
             const groupKey = req.params.ke
             if(
                 user.permissions.watch_stream === "0"
-                || user.details.sub
                 && user.details.allmonitors !== '1'
             ){
                 res.end(user.lang['Not Permitted'])
