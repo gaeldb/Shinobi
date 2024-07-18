@@ -1327,7 +1327,7 @@ $(document).ready(function(e){
                             theContainer: liveGridElement.eventObjects,
                             height: liveGridElement.height,
                             width: liveGridElement.width,
-                        })
+                        }, null, true)
                     }
                     if(d.details.confidence){
                         var eventConfidence = d.details.confidence
