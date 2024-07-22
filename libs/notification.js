@@ -18,11 +18,11 @@ module.exports = function(s,config,lang){
     ){
         require('./notifications/email.js')(s,config,lang,getSnapshot)
     }
+    require('./notifications/webhook.js')(s,config,lang,getSnapshot)
     require('./notifications/emailByUser.js')(s,config,lang,getSnapshot)
     require('./notifications/discordBot.js')(s,config,lang,getSnapshot)
     require('./notifications/telegram.js')(s,config,lang,getSnapshot)
     require('./notifications/pushover.js')(s,config,lang,getSnapshot)
-    require('./notifications/webhook.js')(s,config,lang,getSnapshot)
     require('./notifications/mqtt.js')(s,config,lang,getSnapshot)
     require('./notifications/matrix.js')(s,config,lang,getSnapshot)
 }
