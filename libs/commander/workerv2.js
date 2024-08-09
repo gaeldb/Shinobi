@@ -8,6 +8,9 @@ let config = workerData.config
 let lang = workerData.lang
 let sslInfo = config.ssl || {}
 let remoteConnectionPort = config.easyRemotePort || (sslInfo && sslInfo.port && (sslInfo.enabled !== false) ? sslInfo.port : config.port || 8080)
+const multipleSelected = config.p2pHostMultiSelected instanceof Array && config.p2pHostMultiSelected.length > 0;
+const p2pApiKey = config.p2pApiKey;
+const p2pServerList = config.p2pServerList;
 const net = require("net")
 const bson = require('bson')
 const WebSocket = require('cws')
@@ -28,7 +31,16 @@ const s = {
 parentPort.on('message',(data) => {
     switch(data.f){
         case'init':
-            initialize()
+            if(multipleSelected){
+                for(aSelection of config.p2pHostMultiSelected){
+                    clearAllTimeouts(aSelection)
+                    initialize(aSelection)
+                }
+            }else{
+                const singleSelection = config.p2pHostSelected;
+                clearAllTimeouts(singleSelection)
+                initialize(singleSelection)
+            }
         break;
         case'exit':
             s.debugLog('Closing P2P Connection...')
@@ -36,11 +48,11 @@ parentPort.on('message',(data) => {
         break;
     }
 })
-var socketCheckTimer = null
-var heartbeatTimer = null
-var heartBeatCheckTimout = null
-var onClosedTimeout = null
-let stayDisconnected = false
+var socketCheckTimer = {}
+var heartbeatTimer = {}
+var heartBeatCheckTimout = {}
+var onClosedTimeout = {}
+let stayDisconnected = {}
 const requestConnections = {}
 const requestConnectionsData = {}
 function getRequestConnection(requestId){
@@ -48,29 +60,28 @@ function getRequestConnection(requestId){
         write: () => {}
     }
 }
-function clearAllTimeouts(){
-    clearInterval(heartbeatTimer)
-    clearTimeout(heartBeatCheckTimout)
-    clearTimeout(onClosedTimeout)
+function clearAllTimeouts(p2pServerAddress){
+    clearInterval(heartbeatTimer[p2pServerAddress])
+    clearTimeout(heartBeatCheckTimout[p2pServerAddress])
+    clearTimeout(onClosedTimeout[p2pServerAddress])
 }
 function startConnection(p2pServerAddress,subscriptionId){
     let tunnelToP2P
-    stayDisconnected = false
+    stayDisconnected[p2pServerAddress] = false
     const allMessageHandlers = []
     async function startWebsocketConnection(key,callback){
         s.debugLog(`startWebsocketConnection EXECUTE`,new Error())
-        console.log('P2P : Connecting to Konekta P2P Server...')
         function createWebsocketConnection(){
-            clearAllTimeouts()
             return new Promise((resolve,reject) => {
                 try{
-                    stayDisconnected = true
+                    stayDisconnected[p2pServerAddress] = true
                     if(tunnelToP2P)tunnelToP2P.close()
                 }catch(err){
                     console.log(err)
                 }
                 tunnelToP2P = new WebSocket(p2pServerAddress);
-                stayDisconnected = false;
+                console.log('P2P : Connecting to Konekta P2P Server :', p2pServerAddress)
+                stayDisconnected[p2pServerAddress] = false;
                 tunnelToP2P.on('open', function(){
                     resolve(tunnelToP2P)
                 })
@@ -81,7 +92,7 @@ function startConnection(p2pServerAddress,subscriptionId){
                 })
                 tunnelToP2P.on('close', () => {
                     console.log(`P2P Connection Closed!`)
-                    clearAllTimeouts()
+                    clearAllTimeouts(p2pServerAddress)
                     // onClosedTimeout = setTimeout(() => {
                     //     disconnectedConnection();
                     // },5000)
@@ -95,8 +106,8 @@ function startConnection(p2pServerAddress,subscriptionId){
                     })
                 }
 
-                clearInterval(socketCheckTimer)
-                socketCheckTimer = setInterval(() => {
+                clearInterval(socketCheckTimer[p2pServerAddress])
+                socketCheckTimer[p2pServerAddress] = setInterval(() => {
                     // s.debugLog('Tunnel Ready State :',tunnelToP2P.readyState)
                     if(tunnelToP2P.readyState !== 1){
                         s.debugLog('Tunnel NOT Ready! Reconnecting...')
@@ -106,10 +117,10 @@ function startConnection(p2pServerAddress,subscriptionId){
             })
         }
         function disconnectedConnection(code,reason){
-            s.debugLog('stayDisconnected',stayDisconnected)
+            s.debugLog('stayDisconnected',stayDisconnected[p2pServerAddress])
             clearAllTimeouts()
             s.debugLog('DISCONNECTED!')
-            if(stayDisconnected)return;
+            if(stayDisconnected[p2pServerAddress])return;
             s.debugLog('RESTARTING!')
             setTimeout(() => {
                 if(tunnelToP2P && tunnelToP2P.readyState !== 1)startWebsocketConnection()
@@ -122,8 +133,8 @@ function startConnection(p2pServerAddress,subscriptionId){
             subscriptionId: subscriptionId,
             restrictedTo: config.p2pRestrictedTo || [],
         })
-        clearInterval(heartbeatTimer)
-        heartbeatTimer = setInterval(() => {
+        clearInterval(heartbeatTimer[p2pServerAddress])
+        heartbeatTimer[p2pServerAddress] = setInterval(() => {
             sendDataToTunnel({
                 f: 'ping',
             })
@@ -158,7 +169,7 @@ function startConnection(p2pServerAddress,subscriptionId){
         //     remotesocket.off('close')
         //     requestConnections[requestId].end()
         // }
-        const responseTunnel = await getResponseTunnel(requestId)
+        const responseTunnel = await getResponseTunnel(requestId, p2pServerAddress)
         let remotesocket = new net.Socket();
         remotesocket.on('ready',() => {
             remotesocket.write(initData.buffer)
@@ -196,8 +207,8 @@ function startConnection(p2pServerAddress,subscriptionId){
         }
     }
     function refreshHeartBeatCheck(){
-        clearTimeout(heartBeatCheckTimout)
-        heartBeatCheckTimout = setTimeout(() => {
+        clearTimeout(heartBeatCheckTimout[p2pServerAddress])
+        heartBeatCheckTimout[p2pServerAddress] = setTimeout(() => {
             startWebsocketConnection()
         },1000 * 10 * 1.5)
     }
@@ -304,15 +315,16 @@ function startConnection(p2pServerAddress,subscriptionId){
     onIncomingMessage('disconnect',function(data,requestId){
         console.log(`FAILED LICENSE CHECK ON P2P`)
         const retryLater = data && data.retryLater;
-        stayDisconnected = !retryLater
+        stayDisconnected[p2pServerAddress] = !retryLater
         if(retryLater)console.log(`Retrying P2P Later...`)
     })
+    return tunnelToP2P;
 }
 const responseTunnels = {}
-async function getResponseTunnel(originalRequestId){
-    return responseTunnels[originalRequestId] || await createResponseTunnel(originalRequestId)
+async function getResponseTunnel(originalRequestId, p2pServerAddress){
+    return responseTunnels[originalRequestId] || await createResponseTunnel(originalRequestId, p2pServerAddress)
 }
-function createResponseTunnel(originalRequestId){
+function createResponseTunnel(originalRequestId, p2pServerAddress){
     const responseTunnelMessageHandlers = []
     function onMessage(key,callback){
         responseTunnelMessageHandlers.push({
@@ -321,7 +333,7 @@ function createResponseTunnel(originalRequestId){
         })
     }
     return new Promise((resolve,reject) => {
-        const responseTunnel = new WebSocket(config.selectedHost);
+        const responseTunnel = new WebSocket(p2pServerAddress);
         function sendToResponseTunnel(data){
             responseTunnel.send(
                 bson.serialize(data)
@@ -374,10 +386,9 @@ function closeResponseTunnel(originalRequestId){
         s.debugLog('closeResponseTunnel',err)
     }
 }
-function initialize(){
-    const selectedP2PServerId = config.p2pServerList[config.p2pHostSelected] ? config.p2pHostSelected : Object.keys(config.p2pServerList)[0]
-    const p2pServerDetails = config.p2pServerList[selectedP2PServerId]
+function initialize(p2pHostSelected){
+    const selectedP2PServerId = p2pServerList[p2pHostSelected] ? p2pHostSelected : Object.keys(p2pServerList)[0]
+    const p2pServerDetails = p2pServerList[selectedP2PServerId]
     const selectedHost = `${p2pServerDetails.secure ? `wss` : 'ws'}://` + p2pServerDetails.host + ':' + p2pServerDetails.p2pPort
-    config.selectedHost = selectedHost
-    startConnection(selectedHost,config.p2pApiKey)
+    startConnection(selectedHost,p2pApiKey)
 }

@@ -1,0 +1,89 @@
+#wallview-container {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.9);
+}
+
+#wallview-canvas,body {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    flex-grow: 1;
+    overflow: hidden;
+    flex: 1;
+}
+
+#wallview-controls{
+    position: absolute;
+    width: 100%;
+    top: 0;
+    padding: 5px;
+    opacity: 0;
+    transition: 0.2s;
+    z-index: 11;
+}
+
+#wallview-controls:hover{
+    opacity: 100%;
+    background: rgba(0,0,0,0.2)
+}
+
+#wallview-info-screen{
+    z-index: 10;
+    background-color: rgba(0,0,0,0.6);
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+}
+
+#wallview-monitorList i{
+    display: none;
+}
+
+#wallview-monitorList .active i{
+    display: inlin-block;
+}
+
+#wallview-canvas .wallview-video {
+    position: absolute;
+}
+#wallview-canvas .wallview-video .overlay {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    border: 0;
+}
+#wallview-canvas .wallview-video iframe {
+    height: 100%;
+    width: 100%;
+    border: 0;
+}
+
+#wallview-canvas .wallview-video.col-md-4 {
+    height:30vh;
+}
+#wallview-canvas .wallview-video.col-md-6 {
+    height: 40vh;
+}
+#wallview-canvas .wallview-video.col-md-12 {
+    height: 80vh;
+    margin-bottom: 0.5rem !important;
+}
+#wallview-canvas .wallview-video:not(.no-video){
+    background-color: #000!important;
+}
+#wallview-canvas .wallview-video.no-video{
+    display: none;
+}
+#wallview-canvas.show-non-playing .wallview-video.no-video{
+    display: flex;
+}
+#wallview-canvas .wallview-video .wallview-item-controls{
+    width: 100%;
+    padding: 5px;
+    opacity: 0;
+}
+#wallview-canvas .wallview-video:hover .wallview-item-controls{
+    opacity: 0.5;
+}

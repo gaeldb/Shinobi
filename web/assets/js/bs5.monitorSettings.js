@@ -1150,8 +1150,8 @@ editorForm.find('[name="type"]').change(function(e){
         setCosmeticMonitorInfo(newMonitorData)
         drawMonitorGroupList()
         if(!d.silenceNote){
-            new PNotify({
-                title: 'Monitor Saved',
+            redAlertNotify({
+                title: lang['Monitor Saved'],
                 text: '<b>'+newMonitorData.name+'</b> <small>'+newMonitorData.mid+'</small> has been saved.',
                 type: 'success'
             })

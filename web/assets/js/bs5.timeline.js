@@ -8,6 +8,7 @@ $(document).ready(function(){
     var timeStripObjectSearchInput = $('#timeline-video-object-search');
     var dateSelector = $('#timeline-date-selector');
     var sideMenuList = $(`#side-menu-link-timeline ul`)
+    var monitorList = $(`#timeline-monitor-list`)
     var playToggles = timeStripControls.find('[timeline-action="playpause"]')
     var speedButtons = timeStripControls.find('[timeline-action="speed"]')
     var gridSizeButtons = timeStripControls.find('[timeline-action="gridSize"]')
@@ -50,6 +51,8 @@ $(document).ready(function(){
     var dateRangeChanging = false
     var lastDateChecked = new Date(0)
     var monitorSelectionElements = []
+    var sideMenuListMissing = sideMenuList.length === 0;
+    var selectingMonitorList = (sideMenuListMissing ? monitorList : sideMenuList);
     function setLoadingMask(turnOn){
         if(turnOn){
             if(theWindow.find('.loading-mask').length === 0){
@@ -441,7 +444,7 @@ $(document).ready(function(){
     function setVideoInCanvas(newVideo){
         var monitorId = newVideo.mid
         var container = getVideoContainerInCanvas(newVideo)
-        .removeClass('no-video').find('.film').html(`<video muted src="${newVideo.href}"></video>`)
+        .removeClass('no-video').find('.film').html(`<video muted src="${getApiPrefix('videos')}/${monitorId}/${newVideo.filename}"></video>`)
         var vidEl = getVideoElInCanvas(newVideo)
         var objectContainer = getObjectContainerInCanvas(newVideo)
         vidEl.playbackRate = timelineSpeed
@@ -821,15 +824,16 @@ $(document).ready(function(){
             })
         })
         var html = buildSubMenuItems(allFound)
-        sideMenuList.html(html)
-        monitorSelectionElements = sideMenuList.find('.timeline-selectMonitor')
+        if(!sideMenuListMissing)sideMenuList.html(html)
+        monitorList.html(html)
+        monitorSelectionElements = selectingMonitorList.find('.timeline-selectMonitor')
     }
     async function setSideMenuMonitorVisualSelection(){
         var getForAllMonitors = timeStripSelectedMonitors.length === 0;
         monitorSelectionElements.find('.dot').removeClass('dot-green')
         if(!getForAllMonitors){
             timeStripSelectedMonitors.forEach((monitorId) => {
-                sideMenuList.find(`[data-mid="${monitorId}"] .dot`).addClass('dot-green')
+                selectingMonitorList.find(`[data-mid="${monitorId}"] .dot`).addClass('dot-green')
             })
         }
     }
@@ -928,7 +932,7 @@ $(document).ready(function(){
             refreshTimeline()
         }
     }
-    sideMenuList.on('click','[timeline-menu-action]',function(){
+    function monitorSelectorController(){
         var el = $(this)
         var type = el.attr('timeline-menu-action')
         switch(type){
@@ -957,7 +961,9 @@ $(document).ready(function(){
                 }
             break;
         }
-    })
+    }
+    monitorList.on('click','[timeline-menu-action]', monitorSelectorController)
+    sideMenuList.on('click','[timeline-menu-action]', monitorSelectorController)
     timelineActionButtons.click(function(){
         var el = $(this)
         var type = el.attr('timeline-action')

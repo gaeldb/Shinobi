@@ -7,7 +7,6 @@ $(document).ready(function(){
     var remoteDashboardLinkButton = easyRemoteAccessTab.find('.remote-dashboard-link')
     var loadingRegistration = false
     var statusConnections = {}
-    var currentlyRegisteredP2PServer = currentlySelectedP2PServerId ? currentlySelectedP2PServerId + '' : undefined
     function copyToClipboard(str) {
         const el = document.createElement('textarea');
         el.value = str;
@@ -72,36 +71,10 @@ $(document).ready(function(){
         loadingRegistration = false
         easyRemoteAccessTab.find('.remote-dashboard-link').html(`<i class="fa fa-external-link"></i> ` + lang['Open Remote Dashboard'])
         easyRemoteAccessTab.find('.remote-dashboard-link-copy').html(`<i class="fa fa-copy"></i> ` + lang['Copy Remote Link'])
-        displayCurrentlySelectedInternally()
-    }
-    function displayCurrentlySelectedInternally(){
-        var selectedServer = p2pServerList[currentlyRegisteredP2PServer]
-        if(selectedServer){
-            var key = selectedServer.key
-            var cardEl = easyRemoteAccessTab.find(`[drawn-id="${key}"]`)
-            easyRemoteAccessTab.find(`[drawn-id].selected`).removeClass('selected')
-            cardEl.addClass('selected')
-            setCurrentRemoteLink()
-        }
     }
     function makeHostLink(selectedServer,apiKey){
         var href = `https://${selectedServer.host}:${selectedServer.webPort == 80 ? 443 : selectedServer.webPort}/s/${apiKey}/`
         return href
-    }
-    function setCurrentRemoteLink(){
-        var apiKey = easyRemoteAccessForm.find('[name="p2pApiKey"]').val()
-        var selectedServer = p2pServerList[currentlyRegisteredP2PServer]
-        console.log(selectedServer,currentlySelectedP2PServerId,p2pServerList)
-        if(selectedServer && selectedServer.host){
-            var href = makeHostLink(selectedServer,apiKey)
-            remoteDashboardLinkButton.attr('href',href)
-        }else{
-            new PNotify({
-                type: 'warning',
-                title: lang['P2P Server Not Selected'],
-                text: lang.p2pServerNotSelectedText,
-            })
-        }
     }
     function beginAllStatusConnections(){
         $.each(p2pServerList,function(key,server){
@@ -127,6 +100,14 @@ $(document).ready(function(){
             toggleAffected.hide()
         }
     }
+    function getSelectedServers(){
+        var theArray = [];
+        $(`[drawn-id].active`).each(function(){
+            var theKey = $(this).attr('drawn-id')
+            theArray.push(theKey)
+        })
+        return theArray
+    }
     p2pEnabledSwitch.change(setVisibilityForList)
     easyRemoteAccessTab.find('.submit').click(function(){
         easyRemoteAccessForm.submit()
@@ -135,39 +116,51 @@ $(document).ready(function(){
         e.preventDefault()
         var formValues = $(this).serializeObject()
         disableForm()
-        formValues.p2pHostSelected = currentlySelectedP2PServerId
+        // formValues.p2pHostSelected = currentlySelectedP2PServerId
+        formValues.p2pHostMultiSelected = getSelectedServers()
         console.log(formValues)
         $.post(superApiPrefix + $user.sessionKey + '/p2p/save',{
             data: JSON.stringify(formValues)
         },function(data){
             console.log(data)
             if(data.ok){
-                currentlyRegisteredP2PServer = currentlySelectedP2PServerId + ''
                 new PNotify({
                     type: 'success',
                     title: lang['P2P Settings Applied'],
                     text: lang.p2pSettingsText1,
                 })
-                setCurrentRemoteLink()
                 setTimeout(enableForm,5000)
             }
         })
         return false
     })
-    easyRemoteAccessForm.on('click','[drawn-id]',function(){
+    easyRemoteAccessTab.on('click','.activate-remote-selection',function(e){
+        e.preventDefault()
         var el = $(this)
-        var p2pServerId = el.attr('drawn-id')
-        easyRemoteAccessForm.find('[drawn-id]').removeClass('active')
-        el.addClass('active')
-        currentlySelectedP2PServerId = p2pServerId
+        var parent = el.parents('[drawn-id]')
+        var drawnId = parent.attr('drawn-id')
+        var alreadyActive = parent.hasClass('active')
+        var selectedServer = p2pServerList[drawnId]
+        var isWss = selectedServer.p2pPort == 443
+        console.log(selectedServer)
+        if(alreadyActive){
+            parent.removeClass('active')
+        }else{
+            parent.addClass('active')
+            const drawnIdToDisable = isWss ? drawnId.replace('-ssl','') : `${drawnId}-ssl`
+            console.log(drawnIdToDisable)
+            easyRemoteAccessTab.find(`[drawn-id="${drawnIdToDisable}"]`).removeClass('active')
+        }
+        return false;
     })
     easyRemoteAccessTab.on('click','.remote-dashboard-link-copy',function(e){
         e.preventDefault()
         if(!loadingRegistration){
+            var parent = $(this).parents('[drawn-id]')
+            var drawnId = parent.attr('drawn-id')
             var apiKey = easyRemoteAccessForm.find('[name="p2pApiKey"]').val()
-            var selectedServer = p2pServerList[currentlyRegisteredP2PServer]
-            console.log(selectedServer,currentlySelectedP2PServerId,p2pServerList)
-            if(selectedServer && selectedServer.host){
+            var selectedServer = p2pServerList[drawnId]
+            if(parent.hasClass('active') && selectedServer && selectedServer.host){
                 var href = makeHostLink(selectedServer,apiKey)
                 copyToClipboard(href)
                 new PNotify({
@@ -183,8 +176,24 @@ $(document).ready(function(){
                 })
             }
         }
+        e.stopPropagation()
+        return false;
+    })
+    easyRemoteAccessTab.on('click','.remote-dashboard-link',function(e){
+        e.preventDefault()
+        if(!loadingRegistration){
+            var parent = $(this).parents('[drawn-id]')
+            var drawnId = parent.attr('drawn-id')
+            var apiKey = easyRemoteAccessForm.find('[name="p2pApiKey"]').val()
+            var selectedServer = p2pServerList[drawnId]
+            console.log(selectedServer,parent.hasClass('active'),parent.length)
+            if(parent.hasClass('active') && selectedServer && selectedServer.host){
+                var href = makeHostLink(selectedServer,apiKey)
+                window.open(href, '_blank').focus();
+            }
+        }
+        e.stopPropagation()
         return false;
     })
     setVisibilityForList()
-    displayCurrentlySelectedInternally()
 })

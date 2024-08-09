@@ -83,6 +83,7 @@ module.exports = (s,config,lang) => {
             && detailString.matrices[0]
             && detailString.matrices[0].tag;
         newString = newString
+            .replace(/{{CONFIDENCE}}/g,d.details.confidence)
             .replace(/{{TIME}}/g,d.currentTimestamp)
             .replace(/{{REGION_NAME}}/g,d.details.name)
             .replace(/{{SNAP_PATH}}/g,s.dir.streams+d.ke+'/'+d.id+'/s.jpg')

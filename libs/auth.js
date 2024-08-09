@@ -106,6 +106,8 @@ module.exports = function(s,config,lang){
                             permissions: {}
                         })
                         callback(err,user,true)
+                    }else{
+                        callback(lang['Not Authorized'],null,false)
                     }
                 })
             }

@@ -35,6 +35,12 @@
 #easyRemoteAccess .card.active .fa {
     color: #6ee068;
 }
+#easyRemoteAccess .card .remote-dashboard-link {
+    display: none!important;
+}
+#easyRemoteAccess .card.active .remote-dashboard-link {
+    display: block!important;
+}
 #easyRemoteAccess .card .selected-badge {
     display: none;
     color: #fff!important;
@@ -55,4 +61,8 @@
 }
 #p2pServerList .card .d-flex.flex-row:nth-of-type(odd) {
     background: rgba(0,0,0,0.1)
+}
+
+#easyRemoteAccess .active .activate-remote-selection .fa-check:before {
+    content: "\f00d"!important;
 }

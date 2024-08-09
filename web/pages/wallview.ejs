@@ -1,0 +1,78 @@
+<title><%- lang.Shinobi %></title>
+<%
+    var forceUrlPrefix
+    var urlPrefix = ``
+    var targetPort = config.ssl && config.ssl.port && protocol === 'https' ? config.ssl.port : config.port
+    var addonsEnabled = {}
+    var rawAddonList = decodeURI(data.addon || '').split('|');
+    rawAddonList.forEach(function(piece){
+        var pieceParts = piece.split('=');
+        var key = pieceParts[0];
+        var value = pieceParts[1] || true;
+        addonsEnabled[key] = value;
+    });
+    function getAddon(addonTag){
+        return addonsEnabled[addonTag];
+    }
+    var streamWidth = parseInt(getAddon('width')) || 640
+    var streamHeight = parseInt(getAddon('height')) || 480
+    var hasGUI = getAddon('gui')
+    var isFullscreen = getAddon('fullscreen')
+    var isRelativeUrl = getAddon('relative')
+    if(forceUrlPrefix){
+        urlPrefix = forceUrlPrefix
+    }else if(isRelativeUrl){
+        urlPrefix = ''
+    }else if(config.baseURL){
+        urlPrefix = config.baseURL
+    }else if(!targetPort || targetPort === '' || targetPort == 80 || targetPort == 443){
+        urlPrefix = baseUrl
+    }else{
+        urlPrefix = `${baseUrl}:${targetPort}`
+    }
+    if(urlPrefix.endsWith('/') === false){
+        urlPrefix += '/'
+    }
+    var originalURL = `${urlPrefix}`
+%>
+<%- include('blocks/header-favicon') %>
+<script>window.$user=<%- JSON.stringify($user) %>;</script>
+<script>window.urlPrefix = "<%- urlPrefix || '' %>";</script>
+<script>window.groupKey = "<%- groupKey || '' %>";</script>
+<script>window.authKey = "<%- authKey || '' %>";</script>
+<script>window.userHasSubscribed = <%- config.userHasSubscribed ? 'true' : 'false' %>;</script>
+<script src="<%- urlPrefix %>assets/vendor/js/socket.io.min.js"></script>
+<script src="<%- urlPrefix %>assets/vendor/js/jquery.min.js"></script>
+<link rel="stylesheet" href="<%- urlPrefix %>assets/vendor/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="<%- urlPrefix %>assets/vendor/bootstrap5/css/bootstrap.min.css">
+<link rel="stylesheet" href="<%- urlPrefix %>assets/css/bs5.wallview.css">
+<link rel="stylesheet" href="<%- urlPrefix %>assets/vendor/jquery-ui.min.css">
+<link rel="stylesheet" href="<%- urlPrefix %>assets/vendor/pnotify.custom.min.css">
+<div id="wallview-container">
+    <div id="wallview-info-screen" class="justify-content-center align-self-center" style="display:none">
+        <div class="justify-content-center align-self-center text-center col-3 text-white">
+            <i class="fa fa-info-circle fa-5x mb-3"></i>
+            <h4><%- lang.openWallViewInfo %></h4>
+        </div>
+    </div>
+    <div id="wallview-canvas">
+
+    </div>
+    <div id="wallview-controls" class="text-end">
+        <a class="btn btn-primary wallview-open-all" href="#"><%- lang['Open All'] %></a>
+        <a class="btn btn-danger wallview-close-all" href="#"><%- lang['Close All'] %></a>
+        <a class="btn btn-success wallview-autoplace" href="#"><%- lang['Auto Placement'] %></a>
+        <a class="btn btn-primary open-wallview" href="#"><%- lang['New Wall Display'] %></a>
+        <div class="dropdown d-inline-block">
+          <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="monitorListButton" data-bs-toggle="dropdown" aria-expanded="false">
+            <%- lang.Monitors %>
+          </a>
+          <ul id="wallview-monitorList" class="dropdown-menu" aria-labelledby="monitorListButton"></ul>
+        </div>
+    </div>
+</div>
+<!-- <script src="<%- urlPrefix %>assets/js/bs5.embed.utils.js"></script> -->
+<script src="<%- urlPrefix %>assets/vendor/bootstrap5/js/bootstrap.bundle.min.js"></script>
+<script src="<%- urlPrefix %>assets/vendor/js/pnotify.custom.min.js"></script>
+<script src="<%- urlPrefix %>assets/vendor/js/jquery-ui.min.js"></script>
+<script src="<%- urlPrefix %>assets/js/bs5.wallview.js"></script>

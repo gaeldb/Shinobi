@@ -66,10 +66,17 @@ module.exports = (s,config,lang) => {
                 const videosDirectory = s.getVideoDirectory(monitor)
                 const tempDirectory = s.getStreamsDirectory(monitor)
                 // const findCmd = [videosDirectory].concat(options.flags || ['-maxdepth','1'])
-                fs.writeFileSync(
-                    tempDirectory + 'orphanCheck.sh',
-                    `find "${s.checkCorrectPathEnding(videosDirectory,true)}" -maxdepth 1 -type f -exec stat -c "%n" {} + | sort -r | head -n ${options.checkMax}`
-                );
+                try{
+                    fs.writeFileSync(
+                        tempDirectory + 'orphanCheck.sh',
+                        `find "${s.checkCorrectPathEnding(videosDirectory,true)}" -maxdepth 1 -type f -exec stat -c "%n" {} + | sort -r | head -n ${options.checkMax}`
+                    );
+                }catch(err){
+                    console.log('Failed scanForOrphanedVideos', monitor.ke, monitor.mid)
+                    response.err = err.toString()
+                    resolve(response)
+                    return
+                }
                 let listing = spawn('sh',[tempDirectory + 'orphanCheck.sh'])
                 // const onData = options.onData ? options.onData : () => {}
                 const onError = options.onError ? options.onError : s.systemLog

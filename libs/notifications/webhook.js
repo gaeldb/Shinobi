@@ -25,41 +25,33 @@ module.exports = function(s,config,lang,getSnapshot){
                 })
             })
         }
-        const doPostMethod = s.group[groupKey].init.global_webhook_method === 'post';
+        const doPostMethod = s.group[groupKey].init.global_webhook_method === 'POST';
         // const includeSnapshot = s.group[groupKey].init.global_webhook_include_image === '1';
         const webhookInfoData = {
             info: sendBody,
             files: [],
         }
-        if(files){
-            const formData = new FormData();
+        const formData = new FormData();
+        if(files && doPostMethod){
             files.forEach(async (file,n) => {
+                const fileName = file.name
                 switch(file.type){
                     case'video':
                         // video cannot be sent this way unless POST
-                        if(doPostMethod){
-                            const fileName = file.name
-                            formData.append(`file${n + 1}`, file.attachment, {
-                              contentType: 'video/mp4',
-                              name: fileName,
-                              filename: fileName,
-                            });
-                            webhookInfoData.files.push(fileName)
-                        }
+                        formData.append(`file${n + 1}`, file.attachment, {
+                          contentType: 'video/mp4',
+                          name: fileName,
+                          filename: fileName,
+                        });
+                        webhookInfoData.files.push(fileName)
                     break;
                     case'photo':
-                        if(doPostMethod){
-                            const fileName = file.name
-                            formData.append(`file${n + 1}`, file.attachment, {
-                              contentType: 'image/jpeg',
-                              name: fileName,
-                              filename: fileName,
-                            });
-                            webhookInfoData.files.push(fileName)
-                        }else{
-                            const base64StringofImage = file.attachment.toString('base64')
-                            webhookInfoData.files.push(base64StringofImage)
-                        }
+                        formData.append(`file${n + 1}`, file.attachment, {
+                          contentType: 'image/jpeg',
+                          name: fileName,
+                          filename: fileName,
+                        });
+                        webhookInfoData.files.push(fileName)
                     break;
                 }
             })
