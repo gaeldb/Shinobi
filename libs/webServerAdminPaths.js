@@ -311,7 +311,7 @@ module.exports = function(s,config,lang,app){
             } = s.checkPermission(user)
             if(
                 userPermissions.monitor_create_disallowed ||
-                isRestrictedApiKey && apiKeyPermissions.control_monitors_disallowed ||
+                isRestrictedApiKey && apiKeyPermissions.edit_monitors_disallowed ||
                 isRestricted && !monitorPermissions[`${monitorId}_monitor_edit`]
             ){
                 s.closeJsonResponse(res,{ok: false, msg: lang['Not Authorized']});

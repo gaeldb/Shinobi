@@ -1,15 +1,15 @@
-const fs = require('fs');
-const URL = require('url');
-const events = require('events');
-const Mp4Frag = require('mp4frag');
-const treekill = require('tree-kill');
-const exec = require('child_process').exec;
-const spawn = require('child_process').spawn;
-const connectionTester = require('connection-tester')
-const SoundDetection = require('shinobi-sound-detection')
-const streamViewerCountTimeouts = {}
-const { createQueueAwaited } = require('../common.js')
 module.exports = (s,config,lang) => {
+    const fs = require('fs');
+    const URL = require('url');
+    const events = require('events');
+    const Mp4Frag = require('mp4frag');
+    const treekill = require('tree-kill');
+    const exec = require('child_process').exec;
+    const spawn = require('child_process').spawn;
+    const connectionTester = require('connection-tester')
+    const SoundDetection = require('shinobi-sound-detection')
+    const streamViewerCountTimeouts = {}
+    const { createQueueAwaited } = require('../common.js')
     const {
         applyPartialToConfiguration,
         getWarningChangesForMonitor,
@@ -29,6 +29,7 @@ module.exports = (s,config,lang) => {
     } = require('../events/utils.js')(s,config,lang)
     const {
         setHomePositionPreset,
+        moveToHomePosition,
     } = require('../control/ptz.js')(s,config,lang)
     const {
         scanForOrphanedVideos,
@@ -498,7 +499,20 @@ module.exports = (s,config,lang) => {
         const groupKey = e.ke
         const monitorId = e.mid || e.id
         const activeMonitor = getActiveMonitor(groupKey,monitorId);
+        const monitorConfig = copyMonitorConfiguration(groupKey,monitorId);
+        const streamType = monitorConfig.details.stream_type;
+        const analyzeDuration = (parseInt(monitorConfig.details.aduration) / 1000) || 10000;
+        let initialHeartBeat = null
+        if(streamType !== 'useSubstream'){
+            initialHeartBeat = setTimeout(() => {
+                resetStreamCheck({
+                    ke: groupKey,
+                    mid: monitorId,
+                })
+            }, analyzeDuration);
+        }
         activeMonitor.spawn_exit = async function(){
+            clearTimeout(initialHeartBeat)
             if(activeMonitor.isStarted === true){
                 if(e.details.loglevel !== 'quiet'){
                     s.userLog(e,{type:lang['Process Unexpected Exit'],msg:{msg:lang.unexpectedExitText,cmd:activeMonitor.ffmpeg}});
@@ -508,7 +522,6 @@ module.exports = (s,config,lang) => {
                     forceCheck: true,
                     checkMax: 2
                 })
-                const monitorConfig = copyMonitorConfiguration(groupKey,monitorId);
                 s.onMonitorUnexpectedExitExtensions.forEach(function(extender){
                     extender(monitorConfig,e)
                 })
@@ -1707,7 +1720,8 @@ module.exports = (s,config,lang) => {
         activeMonitor.errorFatalCount = 0;
         delete(activeMonitor.childNode)
         if(e.details.detector_ptz_follow === '1'){
-            setHomePositionPreset(e)
+            // setHomePositionPreset(e)
+            moveToHomePosition(e)
         }
         try{
             await launchMonitorProcesses(e)
@@ -1778,6 +1792,36 @@ module.exports = (s,config,lang) => {
         const streamDir = s.dir.streams + options.ke + '/' + options.mid + '/'
         return streamDir
     }
+    function removeSenstiveInfoFromMonitorConfig(monitorConfig){
+        monitorConfig.protocol = ''
+        monitorConfig.host = ''
+        monitorConfig.path = ''
+        monitorConfig.port = ''
+        monitorConfig.details.muser = ''
+        monitorConfig.details.mpass = ''
+        monitorConfig.details.auto_host = ''
+        monitorConfig.details.rtmp_key = ''
+        monitorConfig.details.notes = ''
+        monitorConfig.details.tv_channel_id = ''
+        monitorConfig.details.tv_channel_group_title = ''
+        monitorConfig.details.control_base_url = ''
+        monitorConfig.details.cust_input = ''
+        monitorConfig.details.cust_stream = ''
+        monitorConfig.details.cust_snap = ''
+        monitorConfig.details.cust_snap_raw = ''
+        monitorConfig.details.cust_record = ''
+        monitorConfig.details.cust_record = ''
+        monitorConfig.details.cust_detect = ''
+        monitorConfig.details.cust_detect_object = ''
+        monitorConfig.details.cust_sip_record = ''
+        monitorConfig.details.custom_output = ''
+        monitorConfig.details.detector_cascades = ''
+        monitorConfig.details.stream_channels = ''
+        monitorConfig.details.input_maps = ''
+        delete(monitorConfig.details.input_map_choices)
+        delete(monitorConfig.details.substream)
+        return monitorConfig
+    }
     return {
         monitorStop,
         monitorIdle,
@@ -1809,5 +1853,6 @@ module.exports = (s,config,lang) => {
         getActiveViewerCount: getActiveViewerCount,
         setTimedActiveViewerForHttp: setTimedActiveViewerForHttp,
         attachMainProcessHandlers: attachMainProcessHandlers,
+        removeSenstiveInfoFromMonitorConfig,
     }
 }

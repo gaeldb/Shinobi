@@ -136,6 +136,7 @@ function resetMonitorCanvas(monitorId,initiateAfter,subStreamChannel){
     streamBlock.append(buildStreamElementHtml(streamType))
     attachVideoElementErrorHandler(monitorId)
     if(initiateAfter)initiateLiveGridPlayer(monitor,subStreamChannel)
+    resetLiveGridDimensionsInMemory(monitorId)
 }
 function replaceMonitorInfoInHtml(htmlString,monitor){
     var monitorMutes = dashboardOptions().monitorMutes || {}
@@ -261,6 +262,7 @@ function loadVideoMiniList(monitorId){
 }
 function updateLiveGridElementHeightWidth(monitorId){
     var liveGridElement = liveGridElements[monitorId]
+    liveGridElement.streamElement = liveGridElement.monitorItem.find('.stream-element')
     var streamElement = liveGridElement.streamElement
     liveGridElement.width = streamElement.width()
     liveGridElement.height = streamElement.height()
@@ -712,12 +714,19 @@ function openLiveGrid(){
     }
 }
 function popOutMonitor(monitorId){
-    var monitorPop = monitorPops[monitorId]
+    var monitorPop = monitorPops[monitorId] || {}
+    if(monitorPop.isOpen){
+        return
+    }
     function finish(img){
-        if(monitorPop){
-            monitorPop.close()
+        monitorPops[monitorId] = window.open(getApiPrefix() + '/embed/' + $user.ke + '/' + monitorId + '/fullscreen|jquery|relative|gui' + `?host=${location.pathname}`,'pop_' + monitorId + $user.auth_token,'height='+img.height+',width='+img.width);
+        monitorPop = monitorPops[monitorId]
+        monitorPop.isOpen = true
+        monitorPop.onload = function(){
+            this.onbeforeunload = function(){
+                monitorPop.isOpen = false
+            }
         }
-        monitorPop = window.open(getApiPrefix() + '/embed/' + $user.ke + '/' + monitorId + '/fullscreen|jquery|relative|gui' + `?host=${location.pathname}`,'pop_' + monitorId + $user.auth_token,'height='+img.height+',width='+img.width);
     }
     if(loadedLiveGrids[monitorId]){
         getSnapshot(loadedMonitors[monitorId],function(url){
@@ -735,6 +744,12 @@ function popOutMonitor(monitorId){
         }
         finish(img)
     }
+}
+function createWallViewWindow(windowName){
+    var el = $(document)
+    var width = el.width()
+    var height = el.height()
+    window.open(getApiPrefix() + '/wallview/' + $user.ke + (windowName ? 'window=' + windowName : ''), 'wallview_'+windowName, 'height='+height+',width='+width)
 }
 function fullScreenLiveGridStream(monitorItem){
     var videoElement = monitorItem.find('.stream-element')
@@ -1092,6 +1107,9 @@ $(document).ready(function(e){
         var monitorId = $(this).parents('[data-mid]').attr('data-mid')
         popOutMonitor(monitorId)
     })
+    .on('click','.open-wallview',function(){
+        createWallViewWindow()
+    })
     .on('click','.toggle-monitor-substream',function(){
         var monitorId = $(this).parents('[data-mid]').attr('data-mid')
         toggleSubStream(monitorId)
@@ -1290,6 +1308,7 @@ $(document).ready(function(e){
             // break;
             case'detector_trigger':
                 var monitorId = d.id
+                var matrices = d.details.matrices
                 var liveGridElement = liveGridElements[monitorId]
                 if(!window.dontShowDetection && liveGridElement){
                     var monitorElement = liveGridElement.monitorItem
@@ -1303,12 +1322,12 @@ $(document).ready(function(e){
                     }else{
                         monitorElement.removeClass('doObjectDetection')
                     }
-                    if(d.details.matrices&&d.details.matrices.length>0){
+                    if(matrices && matrices.length > 0){
                         drawMatrices(d,{
                             theContainer: liveGridElement.eventObjects,
                             height: liveGridElement.height,
                             width: liveGridElement.width,
-                        })
+                        }, null, true)
                     }
                     if(d.details.confidence){
                         var eventConfidence = d.details.confidence
@@ -1329,7 +1348,7 @@ $(document).ready(function(e){
                     }
                     playAudioAlert()
                     var monitorPop = monitorPops[monitorId]
-                    if(window.popLiveOnEvent && (!monitorPop || monitorPop.closed === true)){
+                    if(window.popLiveOnEvent && (!monitorPop || !monitorPop.isOpen)){
                         popOutMonitor(monitorId)
                     }
                     // console.log({

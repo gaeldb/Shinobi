@@ -1,3 +1,9 @@
+⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
+# OUTDATED, Newest Docker method here :
+https://gitlab.com/Shinobi-Systems/ShinobiDocker
+⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
+
+
 # Install Shinobi with Docker
 
 **Warning :** It is recommended that you have a dedicated machine for Shinobi even if you intend to use Docker. If you are willing to install directly on the operating system please consider installing Ubuntu 22.04 and using the Ninja Way.

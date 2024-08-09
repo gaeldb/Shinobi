@@ -25,7 +25,7 @@ module.exports = (config) => {
         getConfiguration: () => {
             return new Promise((resolve,reject) => {
                 const configPath = config.thisIsDocker ? "/config/conf.json" : s.location.config;
-                
+
                 fs.readFile(configPath, 'utf8', (err, data) => {
                     resolve(JSON.parse(data))
                 });
@@ -33,11 +33,11 @@ module.exports = (config) => {
         },
         modifyConfiguration: (postBody) => {
             return new Promise((resolve, reject) => {
-                console.log(s.location.config)
-                
+                console.log(config)
+
                 const configPath = config.thisIsDocker ? "/config/conf.json" : s.location.config;
                 const configData = JSON.stringify(postBody,null,3);
-                
+
                 fs.writeFile(configPath, configData, resolve);
             });
         },

@@ -669,6 +669,25 @@ function readAlertNotice(title, text, type) {
         });
     }
 }
+function redAlertNotify(options) {
+    var title = options.title;
+    var redAlertNotice = redAlertNotices[title];
+    var notifyOptions = {
+        title: title,
+        text: options.text,
+        type: options.type,
+        hide: options.hide === undefined ? false : options.hide,
+        delay: options.delay || 30000
+    };
+    if (redAlertNotice) {
+        redAlertNotice.update(notifyOptions);
+    } else {
+        redAlertNotices[title] = new PNotify(notifyOptions);
+        redAlertNotices[title].on('close', function() {
+            redAlertNotices[title] = null;
+        });
+    }
+}
 function buildPosePoints(bodyParts, x, y){
     let theArray = []
     for(const point of bodyParts){
@@ -683,7 +702,7 @@ function buildPosePoints(bodyParts, x, y){
     }
     return theArray;
 }
-function drawMatrices(event,options){
+function drawMatrices(event, options, autoRemoveTimeout, drawTrails){
     var theContainer = options.theContainer
     var height = options.height
     var width = options.width
@@ -695,8 +714,11 @@ function drawMatrices(event,options){
     let moreMatrices = []
     var monitorId = event.id;
     function processMatrix(n,matrix){
-        html += `<div class="stream-detected-object" name="${objectTagGroup}" style="height:${heightRatio * matrix.height}px;width:${widthRatio * matrix.width}px;top:${heightRatio * matrix.y}px;left:${widthRatio * matrix.x}px;border-color: ${matrix.color};">`
-        if(matrix.tag)html += `<span class="tag">${matrix.tag}${!isNaN(matrix.id) ? ` <small class="label label-default">${matrix.id}</small>`: ''}</span>`
+        const newWidth = widthRatio * matrix.width;
+        const newHeight = heightRatio * matrix.height;
+        if(drawTrails)html += `<div class="stream-detected-object fresh-detected-trail" style="height:2px;width:2px;top:${heightRatio * matrix.y + (newHeight / 2)}px;left:${widthRatio * matrix.x + (newWidth / 2)}px;border-color: green;"></div>`
+        html += `<div class="stream-detected-object fresh-detected-object" name="${objectTagGroup}" style="height:${newHeight}px;width:${newWidth}px;top:${heightRatio * matrix.y}px;left:${widthRatio * matrix.x}px;border-color: ${matrix.color};">`
+        if(matrix.tag)html += `<span class="tag">${matrix.tag}${!isNaN(matrix.id) ? ` <small class="label label-default">${matrix.id}</small>`: ''} (${matrix.confidence.toFixed(2) || 0})</span>`
         if(matrix.notice)html += `<div class="matrix-info" style="color:yellow">${matrix.notice}</div>`;
         if(matrix.missingNear && matrix.missingNear.length > 0){
             html += `<div class="matrix-info yellow"><small>Missing Near</small><br>${matrix.missingRecently.map(item => `${item.tag} (${item.id}) by ${item.missedNear.tag} (${item.missedNear.id})`).join(', ')}</div>`;
@@ -728,7 +750,7 @@ function drawMatrices(event,options){
         if(matrix.nearBy){
             html += `<div class="matrix-info">`
             matrix.nearBy.forEach((nearMatrix) => {
-                html += `<div class="mb-1">${nearMatrix.tag} <small class="label label-default">${nearMatrix.id}</small> (${nearMatrix.overlapPercent}%)</div>`
+                html += `<div class="mb-1">${nearMatrix.tag} <small class="label label-default">${nearMatrix.id}</small> (${nearMatrix.overlapPercent.toFixed(2)}%)</div>`
             });
             html += `</div>`
         }
@@ -740,7 +762,19 @@ function drawMatrices(event,options){
     }
     $.each(event.details.matrices, processMatrix);
     $.each(moreMatrices, processMatrix);
-    theContainer.append(html)
+    var addedEls = theContainer.append(html)
+    if(autoRemoveTimeout){
+        addedEls = addedEls.find('.fresh-detected-object').removeClass('fresh-detected-object')
+        setTimeout(function(){
+            addedEls.remove()
+        }, autoRemoveTimeout);
+    }
+    if(drawTrails){
+        var addedTrails = theContainer.find('.fresh-detected-trail').removeClass('fresh-detected-trail')
+        setTimeout(function(){
+            addedTrails.remove()
+        }, 5000);
+    }
 }
 function setMonitorCountOnUI(){
     $('.cameraCount').text(Object.keys(loadedMonitors).length)

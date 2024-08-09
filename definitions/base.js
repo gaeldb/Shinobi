@@ -5751,6 +5751,10 @@ module.exports = function(s,config,lang){
                                 value: 'get_monitors',
                             },
                             {
+                                name: lang['Can Edit Monitors'],
+                                value: 'edit_monitors',
+                            },
+                            {
                                 name: lang['Can Control Monitors'],
                                 value: 'control_monitors',
                             },
@@ -6606,7 +6610,7 @@ module.exports = function(s,config,lang){
                      {
                         "name": "ip",
                         "field": lang['IP Address'],
-                        "description": lang[lang["fieldTextIp"]],
+                        "description": lang.fieldTextIp,
                         "example": "10.1.100.1-10.1.100.254",
                      },
                      {
@@ -6618,11 +6622,13 @@ module.exports = function(s,config,lang){
                      {
                         "name": "user",
                         "field": lang['Camera Username'],
+                        "description": lang.fieldTextOnvifScanCameraUsername,
                         "placeholder": "Can be left blank.",
                      },
                      {
                         "name": "pass",
                         "field": lang['Camera Password'],
+                        "description": lang.fieldTextOnvifScanCameraPassword,
                         "fieldType": "password",
                      },
                      {
@@ -6631,8 +6637,13 @@ module.exports = function(s,config,lang){
                             {
                                 "fieldType": "btn",
                                 "forForm": true,
-                                "class": `btn-block btn-success`,
-                                "btnContent": `${lang['Search']}<span class="_loading" style="display:none"> &nbsp; <i class="fa fa-pulse fa-spinner"></i></span>`,
+                                "class": `btn-success start-scan`,
+                                "btnContent": `${lang['Search']}`,
+                            },
+                            {
+                                "fieldType": "btn",
+                                "class": `btn-danger stop-scan d-none`,
+                                "btnContent": `${lang['Stop']}`,
                             },
                             {
                                 "fieldType": "btn",
@@ -6653,18 +6664,7 @@ module.exports = function(s,config,lang){
                        "class": "onvif_result row",
                    }
                ]
-           },
-           "Other Devices": {
-              "name": lang['Other Devices'],
-              "color": "danger",
-              "section-pre-class": "col-md-12",
-              "info": [
-                  {
-                      "fieldType": "div",
-                      "class": "onvif_result_error row",
-                  }
-              ]
-          },
+           }
          }
        },
      "Camera Probe": {
@@ -7696,6 +7696,11 @@ module.exports = function(s,config,lang){
                           pageOpen: 'liveGrid',
                           addUl: true,
                           ulItems: [
+                              {
+                                  label: lang['Open Wall Display'],
+                                  class: 'open-wallview cursor-pointer',
+                                  color: 'blue',
+                              },
                               {
                                   label: lang['Open All Monitors'],
                                   class: 'open-all-monitors cursor-pointer',
@@ -9190,6 +9195,12 @@ module.exports = function(s,config,lang){
                               </div>
                               <div class="btn-group">
                                   <a class="btn btn-sm btn-primary" id="timeline-date-selector" title="${lang.Date}"><i class="fa fa-calendar"></i></a>
+                              </div>
+                              <div class="btn-group">
+                                  <button type="button" class="btn btn-primary btn-sm dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                      <i class="fa fa-video-camera"></i>
+                                  </button>
+                                  <ul class="dropdown-menu px-3 bg-dark" id="timeline-monitor-list"></ul>
                               </div>
                           </div>
                           `,
