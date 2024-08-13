@@ -787,14 +787,28 @@ module.exports = function(s,config,lang,app,io){
                 return
             }
             const cannotSeeImportantSettings = (isRestrictedApiKey && apiKeyPermissions.edit_monitors_disallowed) || userPermissions.monitor_create_disallowed;
+            const whereQuery = [
+                ['ke','=',groupKey],
+                monitorRestrictions
+            ];
+            if(!!req.query.search){
+                const searchQuery = req.query.search.split(',');
+                const whereQuerySearch = []
+                for(item of searchQuery){
+                    if(item){
+                        whereQuerySearch.push(
+                            whereQuerySearch.length === 0 ? ['name','LIKE',`%${item.trim()}%`] : ['or', 'name','LIKE',`%${item}%`],
+                            ['or','mid','LIKE',`%${item.trim()}%`]
+                        );
+                    }
+                }
+                whereQuery.push(whereQuerySearch)
+            }
             s.knexQuery({
                 action: "select",
                 columns: "*",
                 table: "Monitors",
-                where: [
-                    ['ke','=',groupKey],
-                    monitorRestrictions
-                ]
+                where: whereQuery
             },(err,r) => {
                 r.forEach(function(v,n){
                     const monitorId = v.mid;
