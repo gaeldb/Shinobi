@@ -218,6 +218,13 @@ module.exports = function(s,config,lang){
             onFail()
         }
     }
+    s.authPromise = function(params,res,req){
+        return new Promise((resolve) => {
+            s.auth(params, (user) => {
+                resolve(user)
+            },res,req)
+        })
+    }
     //super user authentication handler
     s.superAuth = function(params,callback,res,req){
         var userFound = false
