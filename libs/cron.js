@@ -28,6 +28,9 @@ module.exports = (s,config,lang) => {
                 case's.deleteVideo':
                     s.deleteVideo(data.file)
                 break;
+                case's.deleteCloudVideo':
+                    s.deleteVideo(data.file)
+                break;
                 case's.deleteFileBinEntry':
                     s.deleteFileBinEntry(data.file)
                 break;
