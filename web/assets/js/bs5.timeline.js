@@ -911,9 +911,25 @@ $(document).ready(function(){
         onSelectedMonitorChange()
         refreshTimeline()
     }
+    window.resetTimelineWithMonitors = function(monitorIds, start = new Date(), end = new Date(), tickTime){
+        setTimeout(() => {
+            timeStripSelectedMonitors = monitorIds || [];
+            onSelectedMonitorChange()
+            setLoadingMask(true)
+            dateRangeChanging = true
+            setTimestripDate(start, end)
+            setTimeout(() => {
+                dateRangeChanging = false
+                refreshTimeline()
+                var newTickPosition = tickTime || getTimeBetween(start,end,50);
+                setTickDate(newTickPosition)
+            },2000)
+        },1000)
+        openTab('timeline')
+    }
     function refreshTimelineOnAgree(){
         var askToLoad = isAllMonitorsSelected(50)
-        if(askToLoad){
+        if(!window.skipTimelineAgree && askToLoad){
             $.confirm.create({
                 title: lang.tooManyMonitorsSelected,
                 body: lang.performanceMayBeAffected,
@@ -931,6 +947,7 @@ $(document).ready(function(){
         }else{
             refreshTimeline()
         }
+        window.skipTimelineAgree = false;
     }
     function monitorSelectorController(){
         var el = $(this)

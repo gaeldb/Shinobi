@@ -656,6 +656,11 @@ function closeLiveGridPlayer(monitorId,killElement){
         console.log(err)
     }
 }
+function closeLiveGridPlayers(monitors, killElement){
+    $.each(monitors,function(n,v){
+        monitorWatchOnLiveGrid(v.mid, killElement)
+    })
+}
 function monitorWatchOnLiveGrid(monitorId, watchOff){
     return mainSocket.f({f:'monitor',ff:watchOff ? 'watch_off' : 'watch_on',id: monitorId})
 }
@@ -664,12 +669,19 @@ function monitorsWatchOnLiveGrid(monitorIds, watchOff){
         monitorWatchOnLiveGrid(monitorId, watchOff)
     })
 }
-function callMonitorToLiveGrid(v){
+function callMonitorToLiveGrid(v, justTry){
     var watchedOn = dashboardOptions().watch_on || {}
-    if(watchedOn[v.ke] && watchedOn[v.ke][v.mid] === 1 && loadedMonitors[v.mid] && loadedMonitors[v.mid].mode !== 'stop'){
+    if(justTry || watchedOn[v.ke] && watchedOn[v.ke][v.mid] === 1 && loadedMonitors[v.mid] && loadedMonitors[v.mid].mode !== 'stop'){
         mainSocket.f({f:'monitor',ff:'watch_on',id:v.mid})
         if(tabTree.name !== 'monitorSettings')openLiveGrid()
+        console.log('loaded',v.name)
     }
+}
+function callMonitorsToLiveGrid(monitors, justTry){
+    $.each(monitors,function(n,v){
+        console.log('loading',v.name)
+        callMonitorToLiveGrid(v, justTry)
+    })
 }
 function loadPreviouslyOpenedLiveGridBlocks(){
     $.getJSON(getApiPrefix(`monitor`),function(data){
@@ -1279,8 +1291,8 @@ $(document).ready(function(e){
                 var monitorId = d.mid || d.id
                 var loadedMonitor = loadedMonitors[monitorId]
                 var subStreamChannel = d.subStreamChannel
-                var monitorsPerRow = cycleLiveOptions ? cycleLiveOptions.monitorsPerRow : null;
-                var monitorHeight = cycleLiveOptions ? cycleLiveOptions.monitorHeight : null;
+                var monitorsPerRow = null;
+                var monitorHeight = null;
                 if(!loadedMonitor.subStreamChannel && loadedMonitor.details.stream_type === 'useSubstream'){
                     toggleSubStream(monitorId,function(){
                         drawLiveGridBlock(loadedMonitors[monitorId],subStreamChannel,monitorsPerRow,monitorHeight)
@@ -1428,4 +1440,9 @@ $(document).ready(function(e){
         })
     }
     dashboardSwitchCallbacks.jpegMode = toggleJpegMode
+    window.openLiveGrid = openLiveGrid;
+    window.callMonitorToLiveGrid = callMonitorToLiveGrid;
+    window.monitorsWatchOnLiveGrid = monitorsWatchOnLiveGrid;
+    window.closeAllLiveGridPlayers = closeAllLiveGridPlayers;
+    window.closeLiveGridPlayers = closeLiveGridPlayers;
 })
