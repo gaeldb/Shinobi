@@ -550,10 +550,9 @@ module.exports = function(s,config,lang){
         var endData = {
             ok: false
         }
-        if(!form.mid){
-            endData.msg = lang['No Monitor ID Present in Form']
+        if(!form.mid || !s.timeReady){
+            endData.msg = !s.timeReady ? lang.notReadyYet : lang['No Monitor ID Present in Form']
             if(callback)callback(endData);
-            resolve(endData)
             return
         }
         form.mid = form.mid.replace(/[^\w\s]/gi,'').replace(/ /g,'')
@@ -569,6 +568,7 @@ module.exports = function(s,config,lang){
         const monitorExists = selectResponse.rows && selectResponse.rows[0];
         const systemMax = canAddMoreMonitors();
         const groupMax = isGroupBelowMaxMonitorCount(form.ke);
+        const canDoTheDo = systemMax && groupMax;
         var affectMonitor = false
         var monitorQuery = {}
         var txData = {
@@ -616,7 +616,7 @@ module.exports = function(s,config,lang){
                 ]
             })
             affectMonitor = true
-        }else if(systemMax && groupMax){
+        }else if(canDoTheDo){
             txData.new = true
             Object.keys(form).forEach(function(v){
                 if(form[v] && form[v] !== ''){
@@ -656,10 +656,12 @@ module.exports = function(s,config,lang){
         }
         s.tx(txData,'GRP_'+form.ke)
         if(callback)callback(!endData.ok,endData);
-        let monitorConfig = copyMonitorConfiguration(form.ke,form.mid)
-        s.onMonitorSaveExtensions.forEach(function(extender){
-            extender(monitorConfig,form,endData)
-        })
+        if(monitorExists || canDoTheDo){
+            let monitorConfig = copyMonitorConfiguration(form.ke,form.mid)
+            s.onMonitorSaveExtensions.forEach(function(extender){
+                extender(monitorConfig,form,endData)
+            })
+        }
         return endData
     }
     s.camera = async (selectedMode,e,cn) => {

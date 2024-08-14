@@ -674,6 +674,8 @@ module.exports = (s,config,lang) => {
                     mid: monitorId,
                 });
             }
+            delete(s.group[groupKey].activeMonitors[monitorId]);
+            delete(s.group[groupKey].rawMonitorConfigurations[monitorId]);
             response.msg = `${lang.monitorDeleted} ${lang.byUser} : ${userId}`
         }catch(err){
             response.ok = false

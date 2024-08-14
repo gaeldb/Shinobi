@@ -1162,6 +1162,7 @@
    "startUpText3": "waiting to give unfinished video check some time. 3 seconds.",
    "startUpText4": "Starting Monitors... Please Wait...",
    "startUpText5": "Shinobi is ready.",
+   "notReadyYet": "Shinobi is not ready yet to do this.",
    "startUpText6": "Orphaned Videos Found and Inserted",
    "Migrator": "Migrator",
    "Thumbnail": "Thumbnail",
