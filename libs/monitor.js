@@ -27,8 +27,12 @@ module.exports = function(s,config,lang){
         getMonitorConfiguration,
         copyMonitorConfiguration,
         checkObjectsInMonitorDetails,
-        isGroupBelowMaxMonitorCount,
     } = require('./monitor/utils.js')(s,config,lang)
+    const {
+        canAddMoreMonitors,
+        sanitizeMonitorConfig,
+        isGroupBelowMaxMonitorCount,
+    } = require('./checker/utils.js')(s,config,lang)
     s.initiateMonitorObject = function(e){
         if(!s.group[e.ke]){s.group[e.ke]={}};
         if(!s.group[e.ke].activeMonitors){s.group[e.ke].activeMonitors={}}
@@ -563,6 +567,8 @@ module.exports = function(s,config,lang){
             ]
         });
         const monitorExists = selectResponse.rows && selectResponse.rows[0];
+        const systemMax = canAddMoreMonitors();
+        const groupMax = isGroupBelowMaxMonitorCount(form.ke);
         var affectMonitor = false
         var monitorQuery = {}
         var txData = {
@@ -579,7 +585,12 @@ module.exports = function(s,config,lang){
             probeStreams,
         } = await getWarningChangesForMonitor(form)
         applyPartialToConfiguration(form,configPartial)
-        form = s.cleanMonitorObjectForDatabase(form)
+        const { sanitized: sanitizedForm, error: formErrors } = sanitizeMonitorConfig(form);
+        if(formErrors.length > 0)s.userLog(sanitizedForm, {
+            type: 's.addOrEditMonitor : monitorConfig sanitization error',
+            msg : formErrors
+        });
+        form = sanitizedForm
         //
         if(monitorExists){
             txData.new = false
@@ -610,7 +621,7 @@ module.exports = function(s,config,lang){
                 ]
             })
             affectMonitor = true
-        }else if(isGroupBelowMaxMonitorCount(form.ke)){
+        }else if(systemMax && groupMax){
             txData.new = true
             Object.keys(form).forEach(function(v){
                 if(form[v] && form[v] !== ''){
@@ -631,7 +642,7 @@ module.exports = function(s,config,lang){
         }else{
             txData.f = 'monitor_edit_failed'
             txData.ff = 'max_reached'
-            endData.msg = user.lang.monitorEditFailedMaxReached
+            endData.msg = !systemMax ? user.lang.monitorEditFailedMaxReachedUnactivated : user.lang.monitorEditFailedMaxReached
         }
         if(affectMonitor === true){
             form.details = JSON.parse(form.details)

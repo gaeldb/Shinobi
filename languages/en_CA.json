@@ -635,6 +635,7 @@
    "NoVideosFoundForDateRange": "No Videos found in this date range. Try setting the start date further back.",
    "NoLogsFoundForDateRange": "No Logs found in this date range. Try widening the date range.",
    "monitorEditFailedMaxReached": "Your account has reached the maximum number of cameras that can be created. Speak to an administrator if you would like this changed.",
+   "monitorEditFailedMaxReachedUnactivated": "Your system has reached the maximum number of cameras that can be created. You must activate your installation to create more.",
    "Sub-Accounts": "Sub-Accounts",
    "Stream in Background": "Stream in Background",
    "Carousel in Background": "Carousel in Background",
