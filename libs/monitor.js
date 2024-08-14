@@ -585,7 +585,7 @@ module.exports = function(s,config,lang){
             probeStreams,
         } = await getWarningChangesForMonitor(form)
         applyPartialToConfiguration(form,configPartial)
-        const { sanitized: sanitizedForm, error: formErrors } = sanitizeMonitorConfig(form);
+        const { sanitized: sanitizedForm, errors: formErrors } = sanitizeMonitorConfig(form);
         if(formErrors.length > 0)s.userLog(sanitizedForm, {
             type: 's.addOrEditMonitor : monitorConfig sanitization error',
             msg : formErrors

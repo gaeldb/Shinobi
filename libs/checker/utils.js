@@ -1,6 +1,6 @@
 const fetch  = require('node-fetch');
 const { AbortController } = require('node-abort-controller')
-module.exports = (s,app,lang,config) => {
+module.exports = (s,config,lang) => {
     const fetchTimeout = (url, ms, { signal, ...options } = {}) => {
         const controller = new AbortController();
         const promise = fetch(url, { signal: controller.signal, ...options });
@@ -26,12 +26,14 @@ module.exports = (s,app,lang,config) => {
     }
     function getTotalMonitorCount() {
         let monitorCount = 0;
-
-        for (const groupKey in s.group) {
-            const monitorIds = Object.keys(s.group[groupKey].rawMonitorConfigurations);
-            monitorCount += monitorIds.length;
+        try{
+            for (const groupKey in s.group) {
+                const monitorIds = Object.keys(s.group[groupKey].rawMonitorConfigurations);
+                monitorCount += monitorIds.length;
+            }
+        }catch(err){
+            s.debugLog(err)
         }
-
         return monitorCount;
     }
     function sanitizeMonitorConfig(monitorConfig){
