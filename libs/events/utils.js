@@ -79,11 +79,9 @@ module.exports = (s,config,lang) => {
         var newString = string + ''
         var d = Object.assign(eventData,addOps)
         var detailString = s.stringJSON(d.details)
-        var tag = detailString.matrices
-            && detailString.matrices[0]
-            && detailString.matrices[0].tag;
+        var firstMatrix = d.details.matrices ? d.details.matrices[0] : null;
+        var tag = firstMatrix ? firstMatrix.tag : '';
         newString = newString
-            .replace(/{{CONFIDENCE}}/g,d.details.confidence)
             .replace(/{{TIME}}/g,d.currentTimestamp)
             .replace(/{{REGION_NAME}}/g,d.details.name)
             .replace(/{{SNAP_PATH}}/g,s.dir.streams+d.ke+'/'+d.id+'/s.jpg')
@@ -91,18 +89,16 @@ module.exports = (s,config,lang) => {
             .replace(/{{MONITOR_NAME}}/g,s.group[d.ke].rawMonitorConfigurations[d.id].name)
             .replace(/{{GROUP_KEY}}/g,d.ke)
             .replace(/{{DETAILS}}/g,detailString);
-        if(tag){
+        if(firstMatrix){
             newString = newString.replace(/{{TAG}}/g,tag)
         }
-        if(d.details.confidence){
+        if(d.details.confidence || firstMatrix){
             newString = newString
-            .replace(/{{CONFIDENCE}}/g,d.details.confidence)
+            .replace(/{{CONFIDENCE}}/g,d.details.confidence || firstMatrix.confidence)
         }
-        if(newString.includes("REASON")) {
-          if(d.details.reason) {
+        if(d.details.reason && newString.includes("REASON")) {
             newString = newString
             .replace(/{{REASON}}/g, d.details.reason)
-          }
         }
         return newString
     }
