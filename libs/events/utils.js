@@ -43,7 +43,7 @@ module.exports = (s,config,lang) => {
         const eventTime = options.time
         const objectsFound = options.matrices
         const monitorConfig = Object.assign({id: monitorId},s.group[groupKey].rawMonitorConfigurations[monitorId])
-        const timelapseRecordingDirectory = s.getTimelapseFrameDirectory({mid: monitorId, ke: groupKey})
+        const timelapseRecordingDirectory = s.getTimelapseFrameDirectory(monitorConfig)
         const currentDate = s.formattedTime(eventTime,'YYYY-MM-DD')
         const filename = s.formattedTime(eventTime) + '.jpg'
         const location = timelapseRecordingDirectory + currentDate + '/'
