@@ -83,6 +83,7 @@ module.exports = (s,config,lang) => {
         var firstMatrix = d.details.matrices ? d.details.matrices[0] : null;
         var tag = firstMatrix ? firstMatrix.tag : '';
         newString = newString
+            .replace(/{{CONFIDENCE}}/g,d.details.confidence)
             .replace(/{{TIME}}/g,d.currentTimestamp)
             .replace(/{{REGION_NAME}}/g,d.details.name)
             .replace(/{{SNAP_PATH}}/g,s.dir.streams+d.ke+'/'+d.id+'/s.jpg')
