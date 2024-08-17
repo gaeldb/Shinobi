@@ -26,16 +26,20 @@ $(document).ready(function(e){
             return href
         }
     }
-    function loadFramesForVideosInView(){
-        videosTableDrawArea.find('.video-thumbnail').each(async (n,imgEl) => {
-            const el = $(imgEl)
-            const monitorId = el.attr('data-mid')
-            const startDate = el.attr('data-time')
-            const endDate = el.attr('data-end')
-            const imgBlock = el.find('.video-thumbnail-img-block')
-            const href = await getSnapshotFromVideoTimeFrame(monitorId,startDate,endDate)
-            imgBlock.find('img').attr('src',href)
-        })
+    //Lazy Load Thumbnails
+    function loadFramesForVideosInView() {
+    videosTableDrawArea.find('.video-thumbnail').each(async (n, imgEl) => {
+        const el = $(imgEl);
+        const monitorId = el.attr('data-mid');
+        const startDate = el.attr('data-time');
+        const endDate = el.attr('data-end');
+        const imgBlock = el.find('.video-thumbnail-img-block');
+        
+        if (el.is(':visible')) {  // Only load if visible
+            const href = await getSnapshotFromVideoTimeFrame(monitorId, startDate, endDate);
+            imgBlock.find('img').attr('src', href);
+        }
+    });
     }
     window.openVideosTableView = function(monitorId){
         drawMonitorListToSelector(monitorsList,null,null,true)
@@ -45,143 +49,169 @@ $(document).ready(function(e){
     }
     loadDateRangePicker(dateSelector,{
         onChange: function(start, end, label) {
+	    videosTableDrawArea.bootstrapTable('destroy');
             drawVideosTableViewElements()
         }
     })
-    monitorsList.change(function(){
-        drawVideosTableViewElements()
-    })
-    objectTagSearchField.change(function(){
-        drawVideosTableViewElements()
-    })
-    cloudVideoCheckSwitch.change(function(){
-        drawVideosTableViewElements()
-    })
-    async function drawVideosTableViewElements(usePreloadedData){
-        var dateRange = getSelectedTime(dateSelector)
-        var searchQuery = objectTagSearchField.val() || null
-        var startDate = dateRange.startDate
-        var endDate = dateRange.endDate
-        var monitorId = monitorsList.val()
-        var wantsArchivedVideo = getVideoSetSelected() === 'archive'
-        var wantCloudVideo = wantCloudVideos()
-        var frameIconsHtml = ''
-        if(!usePreloadedData){
-            loadedVideosTable = (await getVideos({
-                monitorId,
-                startDate,
-                endDate,
-                searchQuery,
-                archived: wantsArchivedVideo,
-                customVideoSet: wantCloudVideo ? 'cloudVideos' : null,
-            })).videos;
-            $.each(loadedVideosTable,function(n,v){
-                loadedVideosInMemory[`${monitorId}${v.time}${v.type}`]
-            })
-        }
-        // for (let i = 0; i < loadedVideosTable.length; i++) {
-        //     const file = loadedVideosTable[i]
-        //     const frameUrl = await getSnapshotFromVideoTimeFrame(file.mid,file.time,file.end);
-        //     file.frameUrl = frameUrl
-        // }
-        videosTableDrawArea.bootstrapTable('destroy')
-        videosTableDrawArea.bootstrapTable({
-            onPostBody: loadFramesForVideosInView,
-            onPageChange: () => {
-                setTimeout(() => {
-                    loadFramesForVideosInView()
-                },500)
+    function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+    }
+
+    monitorsList.change(debounce(function(){
+        videosTableDrawArea.bootstrapTable('destroy');    
+	drawVideosTableViewElements();
+    }, 300));
+
+    objectTagSearchField.change(debounce(function(){
+    	videosTableDrawArea.bootstrapTable('destroy');
+	drawVideosTableViewElements();
+    }, 300));
+
+    cloudVideoCheckSwitch.change(debounce(function(){
+    	videosTableDrawArea.bootstrapTable('destroy');
+	drawVideosTableViewElements();
+    }, 300));
+
+    // Event listener for the Refresh link styled as a button
+    $('.refresh-data').click(function(e) {
+        e.preventDefault();
+	videosTableDrawArea.bootstrapTable('destroy');
+        drawVideosTableViewElements();
+    });
+
+    async function drawVideosTableViewElements(pageNumber, pageSize, usePreloadedData) {
+    // Set default values if pageNumber and pageSize are not provided
+    pageNumber = pageNumber || 1;
+    pageSize = pageSize || 10;
+
+    var dateRange = getSelectedTime(dateSelector);
+    var searchQuery = objectTagSearchField.val() || null;
+    var startDate = dateRange.startDate;
+    var endDate = dateRange.endDate;
+    var monitorId = monitorsList.val();
+    var wantsArchivedVideo = getVideoSetSelected() === 'archive';
+    var wantCloudVideo = wantCloudVideos();
+
+    if (!usePreloadedData) {
+        var result = await getVideos({
+            monitorId,
+            startDate,
+            endDate,
+            searchQuery,
+            archived: wantsArchivedVideo,
+            customVideoSet: wantCloudVideo ? 'cloudVideos' : null,
+            pageSize: pageSize, // Pass pageSize to server
+            currentPage: pageNumber // Pass currentPage to server
+        });
+        loadedVideosTable = result.videos;
+    }
+
+    //videosTableDrawArea.bootstrapTable('destroy');
+    videosTableDrawArea.bootstrapTable({
+        pagination: true,
+        search: true,
+        pageList: [10, 25, 50, 100, 1000, 2000],
+        pageSize: pageSize, // Ensure the current page size is maintained
+        pageNumber: pageNumber, // Ensure the current page number is maintained
+        totalRows: result.total, // Reflect total number of videos
+        onPostBody: loadFramesForVideosInView,
+        onPageChange: (newPageNumber, newPageSize) => {
+            drawVideosTableViewElements(newPageNumber, newPageSize);
+            setTimeout(() => {
+                loadFramesForVideosInView();
+            }, 500);
+        },
+        columns: [
+            {
+                field: 'mid',
+                title: '',
+                checkbox: true,
+                formatter: () => {
+                    return {
+                        checked: false
+                    };
+                },
             },
-            pagination: true,
-            search: true,
-            pageList: [10, 25, 50, 100, 1000, 2000],
-            columns: [
-                  {
-                    field: 'mid',
-                    title: '',
-                    checkbox: true,
-                    formatter: () => {
-                        return {
-                            checked: false
-                        }
-                    },
-                  },
-                  {
-                    field: 'image',
-                    title: '',
-                  },
-                  {
-                    field: 'Monitor',
-                    title: '',
-                  },
-                  {
-                    field: 'time',
-                    title: lang['Time'],
-                  },
-                  {
-                    field: 'objects',
-                    title: lang['Objects Found']
-                  },
-                  {
-                    field: 'tags',
-                    title: ''
-                  },
-                  {
-                    field: 'size',
-                    title: ''
-                  },
-                  {
-                    field: 'buttons',
-                    title: ''
-                  }
-            ],
-            data: loadedVideosTable.map((file) => {
-                var isLocalVideo = !wantCloudVideo
-                var href = file.href + `${!isLocalVideo ? `?type=${file.type}` : ''}`
-                var loadedMonitor = loadedMonitors[file.mid]
-                return {
-                    image: `<div class="video-thumbnail" data-mid="${file.mid}" data-ke="${file.ke}" data-time="${file.time}" data-end="${file.end}" data-filename="${file.filename}">
-                        <div class="video-thumbnail-img-block">
-                            <img class="pop-image cursor-pointer" style="min-width: 100px;min-height: 75px;">
-                        </div>
-                        <div class="video-thumbnail-buttons d-flex">
-                            <a class="video-thumbnail-button-cell open-snapshot p-3">
-                                <i class="fa fa-camera"></i>
-                            </a>
-                            <a class="video-thumbnail-button-cell preview-video p-3" href="${href}" title="${lang.Play}">
-                                <i class="fa fa-play"></i>
-                            </a>
-                        </div>
-                    </div>`,
-                    Monitor: loadedMonitor && loadedMonitor.name ? loadedMonitor.name : file.mid,
-                    mid: file.mid,
-                    time: `
-                           <div>${timeAgo(file.time)}</div>
-                           <div><small><b>${lang.Start} :</b> ${formattedTime(file.time, 'DD-MM-YYYY hh:mm:ss AA')}</small></div>
-                           <div><small><b>${lang.End} :</b> ${formattedTime(file.end, 'DD-MM-YYYY hh:mm:ss AA')}</small></div>`,
-                    objects: file.objects,
-                    tags: `
-                        ${file.ext ? `<span class="badge badge-${file.ext ==='webm' ? `primary` : 'danger'}">${file.ext}</span>` : ''}
-                        ${!isLocalVideo ? `<span class="badge badge-success">${file.type}</span>` : ''}
-                    `,
-                    size: convertKbToHumanSize(file.size),
-                    buttons: `
-                    <div class="row-info btn-group" data-mid="${file.mid}" data-ke="${file.ke}" data-time="${file.time}" data-filename="${file.filename}" data-status="${file.status}" data-type="${file.type}">
-                        <a class="btn btn-sm btn-default btn-monitor-status-color open-video" href="${href}" title="${lang.Play}"><i class="fa fa-play"></i></a>
-                        ${isLocalVideo && permissionCheck('video_delete',file.mid) ? `<a class="btn btn-sm btn-${file.archive === 1 ? `success status-archived` : `default`} archive-video" title="${lang.Archive}"><i class="fa fa-${file.archive === 1 ? `lock` : `unlock-alt`}"></i></a>` : ''}
-                        <div class="dropdown d-inline-block">
-                            <a class="btn btn-sm btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
-                              <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                            </a>
-                            <ul class="dropdown-menu ${definitions.Theme.isDark ? 'dropdown-menu-dark bg-dark' : ''} shadow-lg">
-                                ${buildDefaultVideoMenuItems(file)}
-                            </ul>
-                        </div>
+            {
+                field: 'image',
+                title: '',
+            },
+            {
+                field: 'Monitor',
+                title: '',
+            },
+            {
+                field: 'time',
+                title: lang['Time'],
+            },
+            {
+                field: 'objects',
+                title: lang['Objects Found']
+            },
+            {
+                field: 'tags',
+                title: ''
+            },
+            {
+                field: 'size',
+                title: ''
+            },
+            {
+                field: 'buttons',
+                title: ''
+            }
+        ],
+        data: loadedVideosTable.map((file) => {
+            var isLocalVideo = !wantCloudVideo;
+            var href = file.href + `${!isLocalVideo ? `?type=${file.type}` : ''}`;
+            var loadedMonitor = loadedMonitors[file.mid];
+            return {
+                image: `<div class="video-thumbnail" data-mid="${file.mid}" data-ke="${file.ke}" data-time="${file.time}" data-end="${file.end}" data-filename="${file.filename}">
+                            <div class="video-thumbnail-img-block">
+                                <img class="pop-image cursor-pointer" style="min-width: 100px;min-height: 75px;">
+                            </div>
+                            <div class="video-thumbnail-buttons d-flex">
+                                <a class="video-thumbnail-button-cell open-snapshot p-3">
+                                    <i class="fa fa-camera"></i>
+                                </a>
+                                <a class="video-thumbnail-button-cell preview-video p-3" href="${href}" title="${lang.Play}">
+                                    <i class="fa fa-play"></i>
+                                </a>
+                            </div>
+                        </div>`,
+                Monitor: loadedMonitor && loadedMonitor.name ? loadedMonitor.name : file.mid,
+                mid: file.mid,
+                time: `
+                       <div>${timeAgo(file.time)}</div>
+                       <div><small><b>${lang.Start} :</b> ${formattedTime(file.time, 'DD-MM-YYYY hh:mm:ss AA')}</small></div>
+                       <div><small><b>${lang.End} :</b> ${formattedTime(file.end, 'DD-MM-YYYY hh:mm:ss AA')}</small></div>`,
+                objects: file.objects,
+                tags: `
+                    ${file.ext ? `<span class="badge badge-${file.ext ==='webm' ? `primary` : 'danger'}">${file.ext}</span>` : ''}
+                    ${!isLocalVideo ? `<span class="badge badge-success">${file.type}</span>` : ''}
+                `,
+                size: convertKbToHumanSize(file.size),
+                buttons: `
+                <div class="row-info btn-group" data-mid="${file.mid}" data-ke="${file.ke}" data-time="${file.time}" data-filename="${file.filename}" data-status="${file.status}" data-type="${file.type}">
+                    <a class="btn btn-sm btn-default btn-monitor-status-color open-video" href="${href}" title="${lang.Play}"><i class="fa fa-play"></i></a>
+                    ${isLocalVideo && permissionCheck('video_delete',file.mid) ? `<a class="btn btn-sm btn-${file.archive === 1 ? `success status-archived` : `default`} archive-video" title="${lang.Archive}"><i class="fa fa-${file.archive === 1 ? `lock` : `unlock-alt`}"></i></a>` : ''}
+                    <div class="dropdown d-inline-block">
+                        <a class="btn btn-sm btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
+                          <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                        </a>
+                        <ul class="dropdown-menu ${definitions.Theme.isDark ? 'dropdown-menu-dark bg-dark' : ''} shadow-lg">
+                            ${buildDefaultVideoMenuItems(file)}
+                        </ul>
                     </div>
-                    `,
-                }
-            })
+                </div>
+                `,
+            }
         })
+    })
     }
     function drawPreviewVideo(href){
         videosTablePreviewArea.html(`<video class="video_video" style="width:100%" autoplay controls preload loop src="${href}"></video>`)
