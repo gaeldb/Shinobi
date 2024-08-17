@@ -1,0 +1,96 @@
+* [33mea1e63c5[m[33m ([m[1;31morigin/dev[m[33m)[m Clean up monitor save/delete actions and prevent save during startup
+* [33m7fa8ff28[m undo new sanitizer, it was bad
+* [33m879196c6[m fix syntax for export
+* [33meb746793[m Update snapshot ffmpeg command (fixes use for most cameras)
+* [33m005a0c1e[m Update sanity check for monitorConfig on db insert and count check
+* [33m66dca708[m add s.authPromise wrapper for s.auth
+* [33m57f4031d[m add notice in logs when conf.json is malformed
+* [33mf5c1a0b7[m add s.deleteCloudVideo capability to cron
+* [33md7d14f1e[m add "search" query param to monitors api
+* [33m971e2b91[m disable liveGrid keyboard actions and remove crappy cycle view
+* [33m11690afc[m prepare timeline and liveGrid for automated controls
+* [33mb552d920[m make webhook notification happen before others
+* [33m4a33ce6c[m re-add {{CONFIDENCE}} to event string
+* [33m393c17d9[m fix some spelling
+* [33m3a80d4dc[m Draw Object Trails in UI
+* [33m777a2bf7[m Allow Sub-Account to use Wall View and Wall Timeline
+* [33m91a2a224[m Create downloadPlugins.js script for command line
+* [33m2c3f7cfd[m fix childNode Utils cloud video extender action
+* [33m5743c170[m change log in modifyConfiguration function
+* [33ma483ccf5[m add ONVIF Scanner HTTP Endpoints
+* [33mc547f86e[m Fix LDAP Login prompt
+* [33m78045523[m Update ONVIF Scanner appearance and performance
+* [33m56f3934e[m update ONVIF Scanner with KingProx changes
+* [33m126c3939[m Add Wall Video View (Wall Timeline)
+* [33m553f8950[m better drawing of matrices in ui
+* [33m52ea9300[m Allow Poseidon Websocket in Embed
+* [33m1d770327[m Wall Viewer touch ups
+* [33m61a3cf74[m Controls to Open Wall Display from UI and some QoL tweaks
+* [33m3a7a2b3a[m error event handling for orphan check
+* [33m5e37b8b3[m Add Wall View API Endpoint
+* [33m21c44fcc[m fix missing fps in encoded stream
+* [33m605e3b2f[m fix detection draw on tab change and return to live grid
+[31m|[m *   [33m947de85a[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge branch 'dev' into 'master'
+[31m|[m [32m|[m[33m\[m  
+[31m|[m [32m|[m * [33m419927dbd[m Fragrant Foliage
+[31m|[m [32m|[m[32m/[m  
+[31m|[m [32m|[m * [33m1da9547a[m[33m ([m[1;31morigin/plugins-allow-selecting-specific-detector[m[33m)[m allow selecting detector plugin per monitor
+[31m|[m [32m|[m[31m/[m  
+[31m|[m[31m/[m[32m|[m   
+* [32m|[m [33m05df08b0[m fix notify title use in monitorUtils
+* [32m|[m   [33mc3e34abb[m Merge branch 'dev' of https://gitlab.com/Shinobi-Systems/Shinobi into dev
+[35m|[m[36m\[m [32m\[m  
+[35m|[m * [32m\[m   [33m8edc44ff[m Merge branch 'updates-onvif' into 'dev'
+[35m|[m [1;31m|[m[1;32m\[m [32m\[m  
+[35m|[m [1;31m|[m * [32m|[m [33m97fe8c75[m Update ONVIF to verstion 0.7.1
+[35m|[m [1;31m|[m[1;31m/[m [32m/[m  
+* [1;31m|[m [32m|[m [33m3b03e442[m Allow Multiple P2P Connections at once+
+* [1;31m|[m [32m|[m [33m6b9d533a[m Monitor Pop on Event fix reloading when popup open and event happen again
+* [1;31m|[m [32m|[m [33mc260bc13[m make generic cron message appear only in debugLog
+* [1;31m|[m [32m|[m [33mc10efb12[m Allow Multiple P2P Connections at once
+[1;31m|[m[1;31m/[m [32m/[m  
+* [32m|[m [33m19448311[m update some dependencies
+* [32m|[m [33mfe1bd112[m on monitor start if auto ptz on go to home instead of set home
+* [32m|[m [33mc6d70695[m hide more sensitive monitor information in /monitor/ api call for sub
+* [32m|[m [33m3d4514ef[m fix auth failure response on api requests
+* [32m|[m [33m88b57e45[m Add "Can Edit Monitors" to API restrictions instead of re-using "Can Control"
+* [32m|[m [33mf946769c[m some cleanup
+* [32m|[m [33m842a5e36[m fix drawing Input Map
+* [32m|[m [33md6884147[m hide sensitive monitor information in /monitor/ api call for sub accounts
+* [32m|[m [33m0a6a6761[m Update ONVIF scanner to see /onvif/media2_service devices
+* [32m|[m [33me614e0b5[m fix webhook invalid GET and broken POST
+* [32m|[m [33meb870569[m initialHeartBeat only if not useSubstream
+* [32m|[m   [33me0aa025c[m Merge branch 'dev' of https://gitlab.com/Shinobi-Systems/Shinobi into dev
+[1;33m|[m[1;34m\[m [32m\[m  
+[1;33m|[m * [32m\[m   [33m2578e13f[m Merge branch 'more-onvif-events' into 'dev'
+[1;33m|[m [1;35m|[m[1;36m\[m [32m\[m  
+[1;33m|[m [1;35m|[m * [32m|[m [33me217493b[m more onvif events e.g. person detection trigger recording
+* [1;35m|[m [1;36m|[m [32m|[m [33me7732355[m do a stream check on monitor process start even if no first frame arrives
+[1;35m|[m[1;35m/[m [1;36m/[m [32m/[m  
+* [1;36m|[m [32m|[m [33m8e061eeb[m Disable auto builds of old docker image
+* [1;36m|[m [32m|[m [33ma0e5711a[m Update README.md
+* [1;36m|[m [32m|[m [33me72e482f[m Add tool to mass change bitrate of cameras by json
+[1;36m|[m[1;36m/[m [32m/[m  
+* [32m|[m [33ma57cd4fc[m #513 fix
+[1;36m|[m [32m|[m *   [33m2bc7c37b[m[33m ([m[1;31morigin/action-chain[m[33m)[m Merge branch 'dev' into action-chain
+[1;36m|[m [32m|[m [31m|[m[1;36m\[m  
+[1;36m|[m [32m|[m[1;36m_[m[31m|[m[1;36m/[m  
+[1;36m|[m[1;36m/[m[32m|[m [31m|[m   
+* [32m|[m [31m|[m [33m33b3e73e[m add redAlertNotify function to bs5.monitorUtils
+* [32m|[m [31m|[m [33m00cbed60[m change stimeout to timeout
+* [32m|[m [31m|[m [33m0cec22d6[m some language use fix
+[32m|[m[32m/[m [31m/[m  
+* [31m|[m [33m1fba3ffc[m undo Doomsdayrs-master-patch-84456
+* [31m|[m   [33m74f9d542[m Merge branch 'dev' of https://gitlab.com/Shinobi-Systems/Shinobi into dev
+[33m|[m[34m\[m [31m\[m  
+[33m|[m * [31m\[m   [33m065bfe5b[m Merge branch 'master' into 'dev'
+[33m|[m [35m|[m[36m\[m [31m\[m  
+[33m|[m [35m|[m * [31m|[m [33m2cdf93ba[m Revert "Merge branch 'master' into 'master'"
+[33m|[m [35m|[m * [31m|[m   [33mc25df150[m Merge branch 'master' into 'master'
+[33m|[m [35m|[m [1;31m|[m[1;32m\[m [31m\[m  
+[33m|[m [35m|[m [1;31m|[m * [31m|[m [33m507abe0b[m Update G++ and GCC from 8 to 9
+* [35m|[m [1;31m|[m [1;32m|[m [31m|[m [33m6a3f77f9[m Update .gitlab-ci.yml
+[35m|[m[35m/[m [1;31m/[m [1;32m/[m [31m/[m  
+* [1;31m|[m [1;32m|[m [31m|[m [33mbac9c556[m part of Doomsdayrs-master-patch-84456
+* [1;31m|[m [1;32m|[m [31m|[m   [33m30753c07[m Merge branch 'Doomsdayrs-master-patch-84456' into 'dev'
+[1;33m|[m[1;34m\[m [1;31m\[m [1;32m\[m [31m\[m  
