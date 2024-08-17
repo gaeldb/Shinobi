@@ -79,24 +79,33 @@ function createVideoLinks(video,options){
     video.details = details
     return video
 }
-function applyDataListToVideos(videos,events,keyName,reverseList){
-    var updatedVideos = videos.concat([])
-    var currentEvents = events.concat([])
-    updatedVideos.forEach(function(video){
-        var videoEvents = []
-        currentEvents.forEach(function(theEvent,index){
-            var startTime = new Date(video.time)
-            var endTime = new Date(video.end)
-            var eventTime = new Date(theEvent.time)
-            if(theEvent.mid === video.mid && eventTime >= startTime && eventTime <= endTime){
-                videoEvents.push(theEvent)
-                currentEvents.splice(index, 1)
-            }
-        })
-        if(reverseList)videoEvents = videoEvents.reverse()
-        video[keyName || 'events'] = videoEvents
-    })
-    return updatedVideos
+function applyDataListToVideos(videos, events, keyName, reverseList) {
+    const eventMap = new Map();
+
+    // Build a map of events by monitor ID
+    events.forEach(event => {
+        if (!eventMap.has(event.mid)) {
+            eventMap.set(event.mid, []);
+        }
+        eventMap.get(event.mid).push(event);
+    });
+
+    // Attach events to videos
+    videos.forEach(video => {
+        const videoEvents = eventMap.get(video.mid) || [];
+        const matchedEvents = videoEvents.filter(event => {
+            const startTime = new Date(video.time);
+            const endTime = new Date(video.end);
+            const eventTime = new Date(event.time);
+            return eventTime >= startTime && eventTime <= endTime;
+        });
+
+        if (reverseList) matchedEvents.reverse();
+
+        video[keyName || 'events'] = matchedEvents;
+    });
+
+    return videos;
 }
 function applyTimelapseFramesListToVideos(videos,events,keyName,reverseList){
     var thisApiPrefix = getApiPrefix() + '/timelapse/' + $user.ke + '/'
