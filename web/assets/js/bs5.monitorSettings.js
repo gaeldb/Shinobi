@@ -62,6 +62,7 @@ function generateDefaultMonitorSettings(){
            "hwaccel": "auto",
            "hwaccel_vcodec": "",
            "hwaccel_device": "",
+	   "hwaccel_format": "",
            "use_coprocessor": null,
            "stream_type": "hls",
            "stream_flv_type": "http",
@@ -274,6 +275,7 @@ function generateDefaultMonitorSettings(){
                     "hwaccel": null,
                     "hwaccel_vcodec": "",
                     "hwaccel_device": "",
+		    "hwaccel_format": "",
                     "cust_input": ""
                 },
                 "output": {
@@ -412,6 +414,7 @@ var copyMonitorSettingsToSelected = function(monitorConfig){
             monitor.details.hwaccel = monitorDetails.hwaccel
             monitor.details.hwaccel_vcodec = monitorDetails.hwaccel_vcodec
             monitor.details.hwaccel_device = monitorDetails.hwaccel_device
+            monitor.details.hwaccel_format = monitorDetails.hwaccel_format
         }else{
             monitor = Object.assign({},loadedMonitors[id]);
         }
