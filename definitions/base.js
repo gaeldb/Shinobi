@@ -725,6 +725,15 @@ module.exports = function(s,config,lang){
                          "form-group-class": "h_gpud_input h_gpud_1",
                          "possible": ""
                      },
+                    {
+                         "name": "detail=hwaccel_format",
+                         "field": lang.hwaccel_format,
+                         "description": "Hardware Acceleration Format",
+                         "default": "",
+                         "example": "vaapi",
+                         "form-group-class": "h_gpud_input h_gpud_1",
+                         "possible": ""
+                     },
                 ]
              },
              "Input Maps": {

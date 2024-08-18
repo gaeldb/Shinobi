@@ -1269,6 +1269,7 @@
    "hwaccel": "Acceleration Engine",
    "hwaccel_vcodec": "Video Decoder",
    "hwaccel_device": "HWAccel Device",
+   "hwaccel_format": "HWAccel Format",
    "Get Logs to Client": "Get Logs to Client",
    "Hardware Accelerated": "Hardware Accelerated",
    "Accelerator": "Accelerator",
