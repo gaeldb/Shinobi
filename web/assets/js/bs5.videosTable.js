@@ -34,7 +34,7 @@ $(document).ready(function(e){
         const startDate = el.attr('data-time');
         const endDate = el.attr('data-end');
         const imgBlock = el.find('.video-thumbnail-img-block');
-        
+
         if (el.is(':visible')) {  // Only load if visible
             const href = await getSnapshotFromVideoTimeFrame(monitorId, startDate, endDate);
             imgBlock.find('img').attr('src', href);
@@ -62,7 +62,7 @@ $(document).ready(function(e){
     }
 
     monitorsList.change(debounce(function(){
-        videosTableDrawArea.bootstrapTable('destroy');    
+        videosTableDrawArea.bootstrapTable('destroy');
 	drawVideosTableViewElements();
     }, 300));
 
@@ -419,6 +419,7 @@ $(document).ready(function(e){
                         delete(loadedVideosInMemory[`${data.mid}${data.time}${data.type}`])
                         clearTimeout(redrawTimeout)
                         redrawTimeout = setTimeout(function(){
+			    videosTableDrawArea.bootstrapTable('destroy');
                             drawVideosTableViewElements(true)
                         },2000)
                     }
