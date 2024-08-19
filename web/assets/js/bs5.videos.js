@@ -107,16 +107,41 @@ function applyDataListToVideos(videos, events, keyName, reverseList) {
 
     return videos;
 }
-function applyTimelapseFramesListToVideos(videos,events,keyName,reverseList){
-    var thisApiPrefix = getApiPrefix() + '/timelapse/' + $user.ke + '/'
-    var newVideos = applyDataListToVideos(videos,events,keyName,reverseList)
-    newVideos.forEach(function(video){
-        video.timelapseFrames.forEach(function(row){
-            var apiURL = thisApiPrefix + row.mid
-            row.href = libURL + apiURL + '/' + row.filename.split('T')[0] + '/' + row.filename
-        })
-    })
-    return newVideos
+function applyTimelapseFramesListToVideos(videos, events, keyName, reverseList) {
+    const thisApiPrefix = `${getApiPrefix()}/timelapse/${$user.ke}/`;
+    const eventMap = new Map();
+
+    // Build a map of events by monitor ID
+    events.forEach(event => {
+        if (!eventMap.has(event.mid)) {
+            eventMap.set(event.mid, []);
+        }
+        eventMap.get(event.mid).push(event);
+    });
+
+    // Attach timelapse frames to videos
+    videos.forEach(video => {
+        const videoEvents = eventMap.get(video.mid) || [];
+        const matchedEvents = videoEvents.filter(event => {
+            const startTime = new Date(video.time);
+            const endTime = new Date(video.end);
+            const eventTime = new Date(event.time);
+            return eventTime >= startTime && eventTime <= endTime;
+        });
+
+        if (reverseList) matchedEvents.reverse();
+
+        // Assigning matched events to video
+        video[keyName || 'timelapseFrames'] = matchedEvents.map(row => {
+            const apiURL = `${thisApiPrefix}${row.mid}`;
+            return {
+                ...row,
+                href: `${libURL}${apiURL}/${row.filename.split('T')[0]}/${row.filename}`
+            };
+        });
+    });
+
+    return videos;
 }
 function getFrameOnVideoRow(percentageInward, video) {
     var startTime = video.time;
