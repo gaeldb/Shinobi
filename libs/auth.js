@@ -169,7 +169,7 @@ module.exports = function(s,config,lang){
                 activeSession &&
                 (
                     activeSession.ip.indexOf('0.0.0.0') > -1 ||
-                    params.ip.indexOf(activeSession.ip) > -1
+                    params.ip && (params.ip.indexOf(activeSession.ip) > -1)
                 )
             ){
                 if(!user.lang){
