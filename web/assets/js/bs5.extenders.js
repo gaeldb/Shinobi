@@ -1,3 +1,18 @@
+const on = {};
+const dashboardExtensions = {};
+async function addExtender(extenderContainer){
+    dashboardExtensions[extenderContainer] = [];
+    on[extenderContainer] = function(...extender){
+        dashboardExtensions[extenderContainer].push(...extender)
+    };
+}
+async function executeExtender(extenderContainer, args){
+    console.log('Running', extenderContainer)
+    for(extender of dashboardExtensions[extenderContainer]){
+        await extender(...args)
+    }
+}
+
 var accountSettings = {
     onLoadFieldsExtensions: [],
     onLoadFields: function(...extender){

@@ -1,7 +1,7 @@
+var loadedMap;
 $(document).ready(function(){
     var theBlock = $('#tab-monitorMap')
     var theMap = $('#monitor-map-canvas')
-    var loadedMap;
     function loadPopupVideoList(monitor){
         var groupKey = monitor.ke
         var monitorId = monitor.mid

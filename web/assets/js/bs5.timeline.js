@@ -110,7 +110,7 @@ $(document).ready(function(){
         async function loopOnGaps(monitorId){
             for (let i = 0; i < gaps.length; i++) {
                 var range = gaps[i]
-                videos.push(...(await getVideos({
+                var videosFound = (await getVideos({
                     monitorId,
                     startDate: range[0],
                     endDate: range[1],
@@ -118,7 +118,9 @@ $(document).ready(function(){
                     searchQuery,
                     // archived: false,
                     // customVideoSet: wantCloudVideo ? 'cloudVideos' : null,
-                },null,dontShowDetectionOnTimeline)).videos);
+                },null,dontShowDetectionOnTimeline)).videos;
+                videos.push(...videosFound);
+                executeExtender('timelineGetVideosByMonitor', [monitorId, videosFound])
             }
         }
         if(monitorIds && monitorIds.length > 0){
@@ -148,6 +150,7 @@ $(document).ready(function(){
                 setLoadingMask(true)
                 timeStripListOfQueries.push(...gaps)
                 var videos = await getVideosInGaps(gaps,timeStripSelectedMonitors)
+                executeExtender('timelineGetVideos', [videos])
                 videos = addVideoBeforeAndAfter(videos)
                 loadedVideosOnTimeStrip.push(...videos)
                 if(currentVideosLength !== loadedVideosOnTimeStrip.length)addTimelineItems(loadedVideosOnTimeStrip);
@@ -293,6 +296,7 @@ $(document).ready(function(){
             timeStripActionWithPausePlay().then((timeChanging) => {
                 if(!timeChanging){
                     resetTimeline(clickTime)
+                    executeExtender('timelineTimeChange', [clickTime])
                 }
             })
         });
@@ -313,6 +317,7 @@ $(document).ready(function(){
                 setTimeout(() => {
                     timeChanging = false
                     getAndDrawVideosToTimeline(clickTime)
+                    executeExtender('timelineRangeChanged', [properties.start, properties.end, getTimestripDate()])
                 },500)
             },300)
         })
@@ -641,6 +646,7 @@ $(document).ready(function(){
                 addition += (msSpeed * timelineSpeed);
                 newTime = new Date(currentDate + addition)
                 setTickDate(newTime);
+                executeExtender('timelineTimeChange', [newTime])
                 // setTimeOfCanvasVideos(newTime)
             }, msSpeed)
             timeStripVisTickMovementIntervalSecond = setInterval(function() {
@@ -1089,4 +1095,8 @@ $(document).ready(function(){
     if(currentOptions.dontShowDetectionOnTimeline === '1'){
         timeStripDontShowDetectionToggle()
     }
+    addExtender('timelineTimeChange')
+    addExtender('timelineRangeChanged')
+    addExtender('timelineGetVideos')
+    addExtender('timelineGetVideosByMonitor')
 })
