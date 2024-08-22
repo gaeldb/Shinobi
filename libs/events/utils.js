@@ -89,7 +89,7 @@ module.exports = (s,config,lang) => {
             .replace(/{{MONITOR_NAME}}/g,s.group[d.ke].rawMonitorConfigurations[d.id].name)
             .replace(/{{GROUP_KEY}}/g,d.ke)
             .replace(/{{DETAILS}}/g,detailString);
-        if(firstMatrix){
+        if(firstMatrix && tag){
             newString = newString.replace(/{{TAG}}/g,tag)
         }
         if(d.details.confidence || firstMatrix){
