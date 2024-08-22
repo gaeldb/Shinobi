@@ -725,6 +725,15 @@ module.exports = function(s,config,lang){
                          "form-group-class": "h_gpud_input h_gpud_1",
                          "possible": ""
                      },
+                    {
+                         "name": "detail=hwaccel_format",
+                         "field": lang.hwaccel_format,
+                         "description": "Hardware Acceleration Format",
+                         "default": "",
+                         "example": "vaapi",
+                         "form-group-class": "h_gpud_input h_gpud_1",
+                         "possible": ""
+                     },
                 ]
              },
              "Input Maps": {
@@ -4931,26 +4940,6 @@ module.exports = function(s,config,lang){
                         "placeholder": "3",
                         attribute:'localStorage="montage"',
                     },
-                    {
-                        "field": lang['Cycle Monitors per row'],
-                        "placeholder": "2",
-                        attribute:'localStorage="cycleLivePerRow"',
-                    },
-                    {
-                        "field": lang['Number of Cycle Monitors'],
-                        "placeholder": "4",
-                        attribute:'localStorage="cycleLiveNumberOfMonitors"',
-                    },
-                    {
-                        "field": lang['Cycle Monitor Height'],
-                        "placeholder": "4",
-                        attribute:'localStorage="cycleLiveMonitorHeight"',
-                    },
-                    {
-                        "field": lang['Cycle Interval'],
-                        "placeholder": "30000",
-                        attribute:'localStorage="cycleLiveTimerAmount"',
-                    },
                 ]
             },
              "Preferences": {
@@ -7721,12 +7710,6 @@ module.exports = function(s,config,lang){
                                   label: lang['Mute Audio'],
                                   class: 'cursor-pointer',
                                   attributes: 'shinobi-switch="monitorMuteAudio" ui-change-target=".dot" on-class="dot-green" off-class="dot-grey"',
-                                  color: 'grey',
-                              },
-                              {
-                                  label: lang['Cycle Monitors'],
-                                  class: 'cursor-pointer',
-                                  attributes: 'shinobi-switch="cycleLiveGrid" ui-change-target=".dot" on-class="dot-green" off-class="dot-grey"',
                                   color: 'grey',
                               },
                               // {

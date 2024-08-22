@@ -219,7 +219,7 @@ module.exports = (s,config,lang) => {
                 })
             }
             const temporaryImageFile = streamDir + s.gid(5) + '.jpg'
-            const ffmpegCmd = splitForFFMPEG(`-y -loglevel warning -re ${inputOptions.join(' ')} -i "${url}" ${outputOptions.join(' ')} -f image2 -an -frames:v 1 "${temporaryImageFile}"`)
+            const ffmpegCmd = splitForFFMPEG(`-y -loglevel warning -re ${inputOptions.join(' ')} -i "${url}" ${outputOptions.join(' ')} -f mjpeg -an -frames:v 1 "${temporaryImageFile}"`)
             const snapProcess = spawn('ffmpeg',ffmpegCmd,{detached: true})
             snapProcess.stderr.on('data',function(data){
                 // s.debugLog(data.toString())
@@ -674,6 +674,8 @@ module.exports = (s,config,lang) => {
                     mid: monitorId,
                 });
             }
+            delete(s.group[groupKey].activeMonitors[monitorId]);
+            delete(s.group[groupKey].rawMonitorConfigurations[monitorId]);
             response.msg = `${lang.monitorDeleted} ${lang.byUser} : ${userId}`
         }catch(err){
             response.ok = false

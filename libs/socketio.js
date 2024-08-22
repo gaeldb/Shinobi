@@ -568,55 +568,64 @@ module.exports = function(s,config,lang,io){
                                         if(!d.videoEndDate&&d.endDate){
                                             d.videoEndDate = stringToSqlTime(d.endDate)
                                         }
-                                         var getVideos = function(callback){
-                                            var videoWhereQuery = [
-                                                ['ke','=',cn.ke],
-                                            ]
-                                            if(d.videoStartDate || d.videoEndDate){
-                                                if(!d.videoStartDateOperator||d.videoStartDateOperator==''){
-                                                    d.videoStartDateOperator='>='
-                                                }
-                                                if(!d.videoEndDateOperator||d.videoEndDateOperator==''){
-                                                    d.videoEndDateOperator='<='
-                                                }
-                                                switch(true){
-                                                    case(d.videoStartDate && d.videoStartDate !== '' && d.videoEndDate && d.videoEndDate !== ''):
-                                                        videoWhereQuery.push(['time',d.videoStartDateOperator,d.videoStartDate])
-                                                        videoWhereQuery.push(['end',d.videoEndDateOperator,d.videoEndDate])
-                                                    break;
-                                                    case(d.videoStartDate && d.videoStartDate !== ''):
-                                                        videoWhereQuery.push(['time',d.videoStartDateOperator,d.videoStartDate])
-                                                    break;
-                                                    case(d.videoEndDate && d.videoEndDate !== ''):
-                                                        videoWhereQuery.push(['end',d.videoEndDateOperator,d.videoEndDate])
-                                                    break;
-                                                }
-                                            }
-                                            if(monitorRestrictions.length > 0){
-                                                videoWhereQuery.push(monitorRestrictions)
-                                            }
-                                            s.knexQuery({
-                                                action: "select",
-                                                columns: "*",
-                                                table: videoSet === 'cloud' ? `Cloud Videos` : "Videos",
-                                                where: videoWhereQuery,
-                                                orderBy: ['time','desc'],
-                                                limit: d.videoLimit || '100'
-                                            },(err,r) => {
-                                                if(err){
-                                                    console.error(err)
-                                                    setTimeout(function(){
-                                                        callback({total:0,limit:d.videoLimit,videos:[]})
-                                                    },2000)
-                                                }else{
-                                                    s.buildVideoLinks(r,{
-                                                        videoParam :  videoSet === 'cloud' ? `cloudVideos` : "videos",
-                                                        auth : cn.auth
-                                                    })
-                                                    callback({total:r.length,limit:d.videoLimit,videos:r})
-                                                }
-                                            })
-                                        }
+					var getVideos = function(callback) {
+					    var videoWhereQuery = [
+					        ['ke','=',cn.ke],
+					    ];
+
+				    	// Add filtering logic here (startDate, endDate, etc.)
+					if(d.videoStartDate || d.videoEndDate) {
+				        if(!d.videoStartDateOperator || d.videoStartDateOperator == '') {
+				            d.videoStartDateOperator = '>='
+				        }
+				        if(!d.videoEndDateOperator || d.videoEndDateOperator == '') {
+				            d.videoEndDateOperator = '<='
+				        }
+				        switch(true) {
+				            case(d.videoStartDate && d.videoStartDate !== '' && d.videoEndDate && d.videoEndDate !== ''):
+				                videoWhereQuery.push(['time', d.videoStartDateOperator, d.videoStartDate])
+				                videoWhereQuery.push(['end', d.videoEndDateOperator, d.videoEndDate])
+				                break;
+				            case(d.videoStartDate && d.videoStartDate !== ''):
+				                videoWhereQuery.push(['time', d.videoStartDateOperator, d.videoStartDate])
+				                break;
+				            case(d.videoEndDate && d.videoEndDate !== ''):
+				                videoWhereQuery.push(['end', d.videoEndDateOperator, d.videoEndDate])
+				                break;
+					        }
+					    }
+					    if(monitorRestrictions.length > 0) {
+					        videoWhereQuery.push(monitorRestrictions)
+					    }
+
+					    // Implementing pagination
+					    var pageSize = parseInt(d.pageSize) || 10; // Default page size
+					    var currentPage = parseInt(d.currentPage) || 1; // Default to page 1
+					    var offset = (currentPage - 1) * pageSize;
+
+					    s.knexQuery({
+					        action: "select",
+					        columns: "*",
+					        table: videoSet === 'cloud' ? `Cloud Videos` : "Videos",
+					        where: videoWhereQuery,
+					        orderBy: ['time','desc'],
+					        limit: pageSize,  // Limiting the number of rows returned
+					        offset: offset    // Skipping the previous pages' rows
+					    },(err,r) => {
+					        if(err) {
+					            console.log(err)
+					            setTimeout(function(){
+					                callback({total:0, limit:pageSize, videos:[]})
+					            },2000)
+					        } else {
+					            s.buildVideoLinks(r,{
+					                videoParam: videoSet === 'cloud' ? `cloudVideos` : "videos",
+					                auth: cn.auth
+					            })
+					            callback({total: r.length, limit: pageSize, videos: r})
+					        }
+					    })
+					}
                                         getVideos(function(videos){
                                             getEvents(function(events){
                                                 tx({

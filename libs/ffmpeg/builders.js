@@ -180,6 +180,9 @@ module.exports = (s,config,lang) => {
                     break;
                 }
             }
+	    if(input.hwaccel_format){
+		inputFlags.push(`-hwaccel_output_format ${input.hwaccel_format}`)
+	    }
         }
         //custom - input flags
         return `${getInputTypeFlags(input.type)} ${inputFlags.join(' ')} -i "${input.fulladdress}"`
@@ -242,7 +245,7 @@ module.exports = (s,config,lang) => {
             streamFlags.push(`-c:v ${videoCodec === 'libx264' ? 'h264' : videoCodec}`)
         }
         if(!videoCodecisCopy || outputRequiresEncoding){
-            if(videoWidth && videoHeight)streamFlags.push(`-s ${videoWidth}x${videoHeight}`)
+            if(videoWidth && videoHeight && !e.details.hwaccel_format) streamFlags.push(`-s ${videoWidth}x${videoHeight}`)
             if(videoFps && streamType === 'mjpeg' || streamType === 'b64'){
                 streamFilters.push(`fps=${videoFps}`)
             }
@@ -362,6 +365,9 @@ module.exports = (s,config,lang) => {
                     break;
                 }
             }
+	    if(e.details.hwaccel_format){
+		inputFlags.push(`-hwaccel_output_format ${e.details.hwaccel_format}`)
+	    }
         }
         inputFlags.push(`-loglevel ${logLevel}`)
         //add main input
@@ -415,8 +421,13 @@ module.exports = (s,config,lang) => {
                 streamFlags.push(`-an`)
             }
             if(videoCodec === 'h264_vaapi'){
-                streamFilters.push('format=nv12,hwupload');
+		if (!e.details.hwaccel_format) {
+                    streamFilters.push('format=nv12,hwupload');
+		}
                 if(e.details.stream_scale_x && e.details.stream_scale_y){
+		    if (!e.details.hwaccel_format) {
+			streamFilters.push(',')
+		    }
                     streamFilters.push('scale_vaapi=w='+e.details.stream_scale_x+':h='+e.details.stream_scale_y)
                 }
         	}
@@ -426,7 +437,7 @@ module.exports = (s,config,lang) => {
             if(!outputRequiresEncoding && videoCodec !== 'no'){
                 streamFlags.push(`-c:v ` + videoCodec)
             }
-            if(!videoCodecisCopy || outputRequiresEncoding){
+            if((!videoCodecisCopy || outputRequiresEncoding) && !e.details.hwaccel_format){
                 if(videoWidth && videoHeight)streamFlags.push(`-s ${videoWidth}x${videoHeight}`)
                 if(videoFps && streamType === 'mjpeg' || streamType === 'b64' || videoFps && !videoCodecisCopy){
                     streamFilters.push(`fps=${videoFps}`)

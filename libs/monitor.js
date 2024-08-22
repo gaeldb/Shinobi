@@ -27,8 +27,12 @@ module.exports = function(s,config,lang){
         getMonitorConfiguration,
         copyMonitorConfiguration,
         checkObjectsInMonitorDetails,
-        isGroupBelowMaxMonitorCount,
     } = require('./monitor/utils.js')(s,config,lang)
+    const {
+        canAddMoreMonitors,
+        sanitizeMonitorConfig,
+        isGroupBelowMaxMonitorCount,
+    } = require('./checker/utils.js')(s,config,lang)
     s.initiateMonitorObject = function(e){
         if(!s.group[e.ke]){s.group[e.ke]={}};
         if(!s.group[e.ke].activeMonitors){s.group[e.ke].activeMonitors={}}
@@ -196,7 +200,7 @@ module.exports = function(s,config,lang){
                         var iconImageFile = streamDir + 'icon.jpg'
                         const snapRawFilters = monitor.details.cust_snap_raw
                         if(snapRawFilters)outputOptions.push(snapRawFilters);
-                        var ffmpegCmd = splitForFFMPEG(`-y -loglevel warning ${isDetectorStream ? '-live_start_index 2' : ''} -re ${inputOptions.join(' ')} -timeout 4000000 -i "${url}" ${outputOptions.join(' ')} -f image2 -an -frames:v 1 "${temporaryImageFile}"`)
+                        var ffmpegCmd = splitForFFMPEG(`-y -loglevel warning ${isDetectorStream ? '-live_start_index 2' : ''} -re ${inputOptions.join(' ')} -i "${url}" ${outputOptions.join(' ')} -f mjpeg -an -frames:v 1 "${temporaryImageFile}"`)
                         try{
                             await fs.promises.mkdir(streamDir, {recursive: true}, (err) => {s.debugLog(err)})
                         }catch(err){
@@ -546,10 +550,9 @@ module.exports = function(s,config,lang){
         var endData = {
             ok: false
         }
-        if(!form.mid){
-            endData.msg = lang['No Monitor ID Present in Form']
+        if(!form.mid || !s.timeReady){
+            endData.msg = !s.timeReady ? lang.notReadyYet : lang['No Monitor ID Present in Form']
             if(callback)callback(endData);
-            resolve(endData)
             return
         }
         form.mid = form.mid.replace(/[^\w\s]/gi,'').replace(/ /g,'')
@@ -563,6 +566,9 @@ module.exports = function(s,config,lang){
             ]
         });
         const monitorExists = selectResponse.rows && selectResponse.rows[0];
+        const systemMax = canAddMoreMonitors();
+        const groupMax = isGroupBelowMaxMonitorCount(form.ke);
+        const canDoTheDo = systemMax && groupMax;
         var affectMonitor = false
         var monitorQuery = {}
         var txData = {
@@ -610,7 +616,7 @@ module.exports = function(s,config,lang){
                 ]
             })
             affectMonitor = true
-        }else if(isGroupBelowMaxMonitorCount(form.ke)){
+        }else if(canDoTheDo){
             txData.new = true
             Object.keys(form).forEach(function(v){
                 if(form[v] && form[v] !== ''){
@@ -631,7 +637,7 @@ module.exports = function(s,config,lang){
         }else{
             txData.f = 'monitor_edit_failed'
             txData.ff = 'max_reached'
-            endData.msg = user.lang.monitorEditFailedMaxReached
+            endData.msg = !systemMax ? user.lang.monitorEditFailedMaxReachedUnactivated : user.lang.monitorEditFailedMaxReached
         }
         if(affectMonitor === true){
             form.details = JSON.parse(form.details)
@@ -650,10 +656,12 @@ module.exports = function(s,config,lang){
         }
         s.tx(txData,'GRP_'+form.ke)
         if(callback)callback(!endData.ok,endData);
-        let monitorConfig = copyMonitorConfiguration(form.ke,form.mid)
-        s.onMonitorSaveExtensions.forEach(function(extender){
-            extender(monitorConfig,form,endData)
-        })
+        if(monitorExists || canDoTheDo){
+            let monitorConfig = copyMonitorConfiguration(form.ke,form.mid)
+            s.onMonitorSaveExtensions.forEach(function(extender){
+                extender(monitorConfig,form,endData)
+            })
+        }
         return endData
     }
     s.camera = async (selectedMode,e,cn) => {

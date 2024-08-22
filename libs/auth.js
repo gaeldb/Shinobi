@@ -169,7 +169,7 @@ module.exports = function(s,config,lang){
                 activeSession &&
                 (
                     activeSession.ip.indexOf('0.0.0.0') > -1 ||
-                    params.ip.indexOf(activeSession.ip) > -1
+                    params.ip && (params.ip.indexOf(activeSession.ip) > -1)
                 )
             ){
                 if(!user.lang){
@@ -217,6 +217,13 @@ module.exports = function(s,config,lang){
         } else {
             onFail()
         }
+    }
+    s.authPromise = function(params,res,req){
+        return new Promise((resolve) => {
+            s.auth(params, (user) => {
+                resolve(user)
+            },res,req)
+        })
     }
     //super user authentication handler
     s.superAuth = function(params,callback,res,req){

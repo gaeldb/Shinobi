@@ -15,6 +15,34 @@ module.exports = function(s,config){
             }
         }
     }
+    s.runExtensionsForArray = (nameOfExtension, nameOfExtensionContainer, args) => {
+        nameOfExtensionContainer = nameOfExtensionContainer || `${nameOfExtension}Extensions`
+        const theExtenders = s[nameOfExtensionContainer];
+        for(extender of theExtenders){
+            extender(...args)
+        }
+    }
+    s.runExtensionsForArrayAwaited = async (nameOfExtension, nameOfExtensionContainer, args) => {
+        nameOfExtensionContainer = nameOfExtensionContainer || `${nameOfExtension}Extensions`
+        const theExtenders = s[nameOfExtensionContainer];
+        for(extender of theExtenders){
+            await extender(...args)
+        }
+    }
+    s.runExtensionsForObject = (nameOfExtension, nameOfExtensionContainer, args) => {
+        nameOfExtensionContainer = nameOfExtensionContainer || `${nameOfExtension}Extensions`
+        const theExtenders = s[nameOfExtensionContainer];
+        for(extender in theExtenders){
+            extender(...args)
+        }
+    }
+    s.runExtensionsForObjectAwaited = async (nameOfExtension, nameOfExtensionContainer, args) => {
+        nameOfExtensionContainer = nameOfExtensionContainer || `${nameOfExtension}Extensions`
+        const theExtenders = s[nameOfExtensionContainer];
+        for(extender in theExtenders){
+            await extender(...args)
+        }
+    }
     ////// USER //////
     createExtension(`onSocketAuthentication`)
     createExtension(`onUserLog`)
@@ -59,6 +87,11 @@ module.exports = function(s,config){
     createExtension(`onSubscriptionCheck`)
     createExtension(`onDataPortMessage`)
     createExtension(`onHttpRequestUpgrade`,null,true)
+    /////// CRON ////////
+    createExtension(`onCronGroupProcessed`)
+    createExtension(`onCronGroupProcessedAwaited`)
+    createExtension(`onCronGroupBeforeProcessed`)
+    createExtension(`onCronGroupBeforeProcessedAwaited`)
     /////// VIDEOS ////////
     createExtension(`insertCompletedVideoExtender`,`insertCompletedVideoExtensions`)
     createExtension(`onEventBasedRecordingComplete`)

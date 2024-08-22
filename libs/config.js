@@ -9,6 +9,8 @@ module.exports = function(s){
     try{
         var config = require(s.location.config)
     }catch(err){
+        console.log('FAILED TO OPEN CONFIGURATION FILE')
+        console.log('CHECK SYNTAX!')
         var config = {}
     }
     if(!config.productType){
