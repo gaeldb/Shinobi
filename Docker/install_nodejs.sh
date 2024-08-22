@@ -17,6 +17,6 @@ fi
 if [ -x "$(command -v npm)" ]; then
     echo "NPM detected. Version : $(npm -v)"
 fi
-npm install --unsafe-perm
+npm install --unsafe-perm $([ `dpkg --print-architecture` = "arm64" ] && echo --maxsockets 1)
 npm i pm2@latest -g
 npm i pg
