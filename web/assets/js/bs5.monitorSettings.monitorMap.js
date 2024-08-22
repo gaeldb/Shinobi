@@ -5,7 +5,7 @@ $(document).ready(function(e){
     var monitorSettingsMapOptionsEl = $('#monitor-settings-geolocation-options')
     var monitorSettingsMapOptionsElOptions = monitorSettingsMapOptionsEl.find('[map-option]')
     var editorForm = monitorEditorWindow.find('form')
-    var loadedMap;
+    var mapInWindow;
     var monitorMapMarker;
     var monitorMapMarkerFov;
     function setAdditionalControls(options){
@@ -34,14 +34,14 @@ $(document).ready(function(e){
             fov,
             range,
         } = getGeolocationParts(geoString || monitor.details.geolocation);
-        loadedMap = L.map('monitor-settings-monitor-map').setView([lat, lng], zoom);
+        mapInWindow = L.map('monitor-settings-monitor-map').setView([lat, lng], zoom);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-        }).addTo(loadedMap);
+        }).addTo(mapInWindow);
         monitorMapMarker = L.marker([lat, lng], {
             title: monitor ? `${monitor.name} (${monitor.host})` : null,
             draggable: true,
-        }).addTo(loadedMap);
+        }).addTo(mapInWindow);
         monitorMapMarker.on('dragend', function(){
             setGeolocationFieldValue()
         });
@@ -49,7 +49,7 @@ $(document).ready(function(e){
             var markerDetails = getMapMarkerDetails();
             setMapMarkerFov(monitorMapMarkerFov,markerDetails)
         });
-        loadedMap.on('zoomend', function(){
+        mapInWindow.on('zoomend', function(){
             setGeolocationFieldValue()
         });
         setAdditionalControls({
@@ -57,7 +57,7 @@ $(document).ready(function(e){
             fov,
             range,
         })
-        monitorMapMarkerFov = drawMapMarkerFov(loadedMap,{
+        monitorMapMarkerFov = drawMapMarkerFov(mapInWindow,{
             lat,
             lng,
             direction,
@@ -71,8 +71,8 @@ $(document).ready(function(e){
         })
     }
     function unloadMap(){
-        loadedMap.remove();
-        loadedMap = null;
+        mapInWindow.remove();
+        mapInWindow = null;
     }
     function getMapOptions(){
         var options = {}
@@ -86,7 +86,7 @@ $(document).ready(function(e){
     }
     function getMapMarkerDetails(){
         var pos = monitorMapMarker.getLatLng()
-        var zoom = loadedMap.getZoom();
+        var zoom = mapInWindow.getZoom();
         var {
             direction,
             fov,

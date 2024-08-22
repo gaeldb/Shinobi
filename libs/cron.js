@@ -28,8 +28,23 @@ module.exports = (s,config,lang) => {
                 case's.deleteVideo':
                     s.deleteVideo(data.file)
                 break;
+                case's.deleteCloudVideo':
+                    s.deleteVideo(data.file)
+                break;
                 case's.deleteFileBinEntry':
                     s.deleteFileBinEntry(data.file)
+                break;
+                case's.onCronGroupBeforeProcessed':
+                    s.runExtensionsForArray('onCronGroupBeforeProcessed', null, data.args)
+                break;
+                case's.onCronGroupBeforeProcessedAwaited':
+                    s.runExtensionsForArrayAwaited('onCronGroupBeforeProcessedAwaited', null, data.args)
+                break;
+                case's.onCronGroupProcessed':
+                    s.runExtensionsForArray('onCronGroupProcessed', null, data.args)
+                break;
+                case's.onCronGroupProcessedAwaited':
+                    s.runExtensionsForArrayAwaited('onCronGroupProcessedAwaited', null, data.args)
                 break;
                 case's.setDiskUsedForGroup':
                    function doOnMain(){

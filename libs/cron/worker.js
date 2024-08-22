@@ -4,7 +4,7 @@ const moment = require('moment');
 const exec = require('child_process').exec;
 const spawn = require('child_process').spawn;
 const { parentPort, isMainThread, workerData } = require('worker_threads');
-const config = workerData
+const config = workerData;
 process.on('uncaughtException', function (err) {
     errorLog('uncaughtException',err);
 });
@@ -95,6 +95,18 @@ function beginProcessing(){
     }
     const deleteFileBinEntry = (x) => {
         postMessage({f:'s.deleteFileBinEntry',file:x})
+    }
+    const onCronGroupBeforeProcessed = (...args) => {
+        postMessage({f:'s.onCronGroupBeforeProcessed', args: args})
+    }
+    const onCronGroupBeforeProcessedAwaited = (...args) => {
+        postMessage({f:'s.onCronGroupBeforeProcessedAwaited', args: args})
+    }
+    const onCronGroupProcessed = (...args) => {
+        postMessage({f:'s.onCronGroupProcessed', args: args})
+    }
+    const onCronGroupProcessedAwaited = (...args) => {
+        postMessage({f:'s.onCronGroupProcessedAwaited', args: args})
     }
     const setDiskUsedForGroup = (groupKey,size,target,videoRow) => {
         postMessage({f:'s.setDiskUsedForGroup', ke: groupKey, size: size, target: target, videoRow: videoRow})
@@ -546,6 +558,9 @@ function beginProcessing(){
             overlapLocks[v.ke] = true
             v.d = JSON.parse(v.details);
             try{
+                debugLog('--- Running Pre Extenders')
+                onCronGroupBeforeProcessed(v)
+                onCronGroupBeforeProcessedAwaited(v)
                 await deleteOldVideos(v)
                 debugLog('--- deleteOldVideos Complete')
                 await deleteOldTimelapseFrames(v)
@@ -562,6 +577,9 @@ function beginProcessing(){
                 debugLog('--- checkFilterRules Complete')
                 await deleteRowsWithNoVideo(v)
                 debugLog('--- deleteRowsWithNoVideo Complete')
+                debugLog('--- Running Post Extenders')
+                onCronGroupProcessed(v)
+                onCronGroupProcessedAwaited(v)
             }catch(err){
                 normalLog(`Failed to Complete User : ${v.mail}`)
                 normalLog(err)

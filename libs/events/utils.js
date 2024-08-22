@@ -39,11 +39,12 @@ module.exports = (s,config,lang) => {
     async function saveImageFromEvent(options,frameBuffer){
         const monitorId = options.mid || options.id
         const groupKey = options.ke
-        if(!frameBuffer || imageSaveEventLock[groupKey + monitorId])return;
+        //if(!frameBuffer || imageSaveEventLock[groupKey + monitorId])return;
+	if(!frameBuffer || frameBuffer.length === 0 || imageSaveEventLock[groupKey + monitorId]) return;
         const eventTime = options.time
         const objectsFound = options.matrices
         const monitorConfig = Object.assign({id: monitorId},s.group[groupKey].rawMonitorConfigurations[monitorId])
-        const timelapseRecordingDirectory = s.getTimelapseFrameDirectory({mid: monitorId, ke: groupKey})
+        const timelapseRecordingDirectory = s.getTimelapseFrameDirectory(monitorConfig)
         const currentDate = s.formattedTime(eventTime,'YYYY-MM-DD')
         const filename = s.formattedTime(eventTime) + '.jpg'
         const location = timelapseRecordingDirectory + currentDate + '/'
@@ -79,9 +80,8 @@ module.exports = (s,config,lang) => {
         var newString = string + ''
         var d = Object.assign(eventData,addOps)
         var detailString = s.stringJSON(d.details)
-        var tag = detailString.matrices
-            && detailString.matrices[0]
-            && detailString.matrices[0].tag;
+        var firstMatrix = d.details.matrices ? d.details.matrices[0] : null;
+        var tag = firstMatrix ? firstMatrix.tag : '';
         newString = newString
             .replace(/{{CONFIDENCE}}/g,d.details.confidence)
             .replace(/{{TIME}}/g,d.currentTimestamp)
@@ -91,18 +91,16 @@ module.exports = (s,config,lang) => {
             .replace(/{{MONITOR_NAME}}/g,s.group[d.ke].rawMonitorConfigurations[d.id].name)
             .replace(/{{GROUP_KEY}}/g,d.ke)
             .replace(/{{DETAILS}}/g,detailString);
-        if(tag){
+        if(firstMatrix && tag){
             newString = newString.replace(/{{TAG}}/g,tag)
         }
-        if(d.details.confidence){
+        if(d.details.confidence || firstMatrix){
             newString = newString
-            .replace(/{{CONFIDENCE}}/g,d.details.confidence)
+            .replace(/{{CONFIDENCE}}/g,d.details.confidence || firstMatrix.confidence)
         }
-        if(newString.includes("REASON")) {
-          if(d.details.reason) {
+        if(d.details.reason && newString.includes("REASON")) {
             newString = newString
             .replace(/{{REASON}}/g, d.details.reason)
-          }
         }
         return newString
     }
