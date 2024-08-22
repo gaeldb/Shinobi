@@ -1,7 +1,7 @@
 // https://us-east-1.console.aws.amazon.com/iamv2/home#/users
 
 const fs = require('fs');
-const { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand, StorageClass} = require("@aws-sdk/client-s3");
 
 module.exports = function(s,config,lang){
     const genericRequest = async (groupKey,requestOptions) => {
@@ -123,7 +123,8 @@ module.exports = function(s,config,lang){
                 Bucket: s.group[groupKey].init.aws_s3_bucket,
                 Key: saveLocation,
                 Body: fileStream,
-                ContentType: 'video/'+e.ext
+                ContentType: 'video/'+e.ext,
+                StorageClass: s.group[groupKey].init.aws_storage_class || StorageClass.STANDARD
             }).then((response) => {
                 if(response.err){
                     s.userLog(e,{type:lang['Amazon S3 Upload Error'],msg:response.err})
@@ -433,6 +434,17 @@ module.exports = function(s,config,lang){
                     }
                ]
           },
+           {
+               "hidden": true,
+               "name": "detail=aws_storage_class",
+               "field": lang['Storage Class'],
+               "fieldType": "select",
+               "form-group-class": "autosave_aws_s3_input autosave_aws_s3_1",
+               "description": "The storage class of the uploaded objects see https://aws.amazon.com/s3/storage-classes/",
+               "default": StorageClass.STANDARD,
+               "example": StorageClass.STANDARD,
+               "possible": Object.keys(StorageClass).map(k => ({name: k, value: k})),
+           },
           {
               "hidden": true,
              "name": "detail=aws_s3_log",
