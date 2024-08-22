@@ -39,7 +39,8 @@ module.exports = (s,config,lang) => {
     async function saveImageFromEvent(options,frameBuffer){
         const monitorId = options.mid || options.id
         const groupKey = options.ke
-        if(!frameBuffer || imageSaveEventLock[groupKey + monitorId])return;
+        //if(!frameBuffer || imageSaveEventLock[groupKey + monitorId])return;
+	if(!frameBuffer || frameBuffer.length === 0 || imageSaveEventLock[groupKey + monitorId]) return;
         const eventTime = options.time
         const objectsFound = options.matrices
         const monitorConfig = Object.assign({id: monitorId},s.group[groupKey].rawMonitorConfigurations[monitorId])
@@ -82,6 +83,7 @@ module.exports = (s,config,lang) => {
         var firstMatrix = d.details.matrices ? d.details.matrices[0] : null;
         var tag = firstMatrix ? firstMatrix.tag : '';
         newString = newString
+            .replace(/{{CONFIDENCE}}/g,d.details.confidence)
             .replace(/{{TIME}}/g,d.currentTimestamp)
             .replace(/{{REGION_NAME}}/g,d.details.name)
             .replace(/{{SNAP_PATH}}/g,s.dir.streams+d.ke+'/'+d.id+'/s.jpg')
