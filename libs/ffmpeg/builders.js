@@ -287,7 +287,7 @@ module.exports = (s,config,lang) => {
             case'hls':
                 const hlsTime = !isNaN(parseInt(channel.hls_time)) ? `${parseInt(channel.hls_time)}` : '2'
                 const hlsListSize = !isNaN(parseInt(channel.hls_list_size)) ? `${parseInt(channel.hls_list_size)}` : '2'
-                if(videoCodec !== 'h264_vaapi' && !videoCodecisCopy){
+                if(videoCodec !== 'h264_nvmpi' && videoCodec !== 'h264_vaapi' && !videoCodecisCopy){
                     if(!arrayContains('-tune',streamFlags)){
                         streamFlags.push(`-tune zerolatency`)
                     }
@@ -470,7 +470,7 @@ module.exports = (s,config,lang) => {
                 case'hls':
                     const hlsTime = !isNaN(parseInt(e.details.hls_time)) ? `${parseInt(e.details.hls_time)}` : '2'
                     const hlsListSize = !isNaN(parseInt(e.details.hls_list_size)) ? `${parseInt(e.details.hls_list_size)}` : '2'
-                    if(videoCodec !== 'h264_vaapi' && !videoCodecisCopy){
+                    if(videoCodec !== 'h264_nvmpi' && videoCodec !== 'h264_vaapi' && !videoCodecisCopy){
                         if(!arrayContains('-tune',streamFlags)){
                             streamFlags.push(`-tune zerolatency`)
                         }
@@ -541,16 +541,17 @@ module.exports = (s,config,lang) => {
             const segmentLengthInMinutes = !isNaN(parseFloat(e.details.cutoff)) ? parseFloat(e.details.cutoff) : '15'
             const inputMap = buildInputMap(e,e.details.input_map_choices.record)
             const { videoWidth, videoHeight } = validateDimensions(e.details.record_scale_x,e.details.record_scale_y)
+            const isNotCertainHwAccel = videoCodec !== 'h264_nvmpi' && videoCodec !== 'h264_vaapi';
             if(inputMap)recordingFlags.push(inputMap)
             if(e.details.cust_record)customRecordingFlags.push(e.details.cust_record)
             //record - resolution
             if(customRecordingFlags.indexOf('-strict -2') === -1)customRecordingFlags.push(`-strict -2`)
             // if(customRecordingFlags.indexOf('-threads') === -1)customRecordingFlags.push(`-threads 10`)
-            if(!videoCodecisCopy){
+            if(!videoCodecisCopy) {
                 if(videoWidth && videoHeight){
                     recordingFlags.push(`-s ${videoWidth}x${videoHeight}`)
                 }
-                if(videoExtIsMp4){
+                if(isNotCertainHwAccel && videoExtIsMp4){
                     recordingFlags.push(`-crf ${videoQuality}`)
                 }else{
                     recordingFlags.push(`-q:v ${videoQuality}`)
@@ -754,7 +755,7 @@ module.exports = (s,config,lang) => {
             if(outputFilters.length > 0){
                 outputFlags.push(`-vf "${outputFilters.join(',')}"`)
             }
-            if(videoCodec !== 'h264_vaapi' && !videoCodecisCopy){
+            if(videoCodec !== 'h264_nvmpi' && videoCodec !== 'h264_vaapi' && !videoCodecisCopy){
                 if(!arrayContains('-tune',outputFlags)){
                     outputFlags.push(`-tune zerolatency`)
                 }
