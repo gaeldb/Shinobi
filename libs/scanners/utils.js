@@ -133,12 +133,12 @@ module.exports = (s,config,lang) => {
     }
 
     const fetchCameraDetails = async (camera, onvifUsername, onvifPassword, foundCameraCallback, failedCameraCallback) => {
-        const previousSuccess = scanStatus.allSuccessful[camera.ip];
-        if (previousSuccess) {
-            // console.log('FOUND PREVIOUS', camera.ip);
-            foundCameraCallback(previousSuccess);
-            return;
-        }
+        // const previousSuccess = scanStatus.allSuccessful[camera.ip];
+        // if (previousSuccess) {
+        //     // console.log('FOUND PREVIOUS', camera.ip);
+        //     foundCameraCallback(previousSuccess);
+        //     return;
+        // }
         try {
             const device = new onvif.OnvifDevice(camera);
             const info = await device.init();
@@ -176,11 +176,11 @@ module.exports = (s,config,lang) => {
     };
 
     const handleCameraError = (camera, err, failedCameraCallback) => {
-        const previousSuccess = scanStatus.allSuccessful[camera.ip];
-        if (previousSuccess) {
-            // console.log('FOUND PREVIOUS AFTER ERROR', camera.ip);
-            return previousSuccess;
-        }
+        // const previousSuccess = scanStatus.allSuccessful[camera.ip];
+        // if (previousSuccess) {
+        //     // console.log('FOUND PREVIOUS AFTER ERROR', camera.ip);
+        //     return previousSuccess;
+        // }
         const searchError = (find) => stringContains(find, err.message, true);
         const commonIgnoredErrors = ['ECONNREFUSED', 'socket hang up'];
         let foundDevice = false;
@@ -293,7 +293,7 @@ module.exports = (s,config,lang) => {
                         if (signal.aborted) {
                             throw new Error('Aborted');
                         }
-                        if(!scanStatus.allSuccessful[camera.ip]){
+                        // if(!scanStatus.allSuccessful[camera.ip]){
                             const cameraIp = task.camera.ip;
                             const hasPingSuccess = allPingSuccess[cameraIp];
                             if (hasPingSuccess !== false) {
@@ -302,11 +302,15 @@ module.exports = (s,config,lang) => {
                                 const result = await fetchPromise;
                                 if (result.refused) allPingSuccess[cameraIp] = !result.refused;
                                 if (result.uri){
-                                    result.uri = detectAndReplaceReolinkRTSP(task.camera, addCredentialsToUrl({ url: result.uri, username: task.camera.user, password: task.camera.pass }));
+                                    try{
+                                        result.uri = detectAndReplaceReolinkRTSP(task.camera, addCredentialsToUrl({ url: result.uri, username: task.camera.user, password: task.camera.pass }));
+                                    }catch(err){
+                                        console.error(err)
+                                    }
                                 }
                                 responseList.push({...result});
                             }
-                        }
+                        // }
                     }, 1);
                 }
                 ipQueues[camera.ip].push({

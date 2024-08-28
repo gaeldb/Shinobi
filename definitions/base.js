@@ -2112,7 +2112,7 @@ module.exports = function(s,config,lang){
                       "description": lang["fieldTextCrf"],
                       "default": "15",
                       "example": "1",
-                      "form-group-class": "h_vc_input h_vc_libvpx h_vc_libvpx-vp9 h_vc_libx264 h_vc_libx265 h_vc_hevc_nvenc h_vc_h264_nvenc h_vc_h264_vaapi h_vc_hevc_vaapi h_vc_h264_qsv h_vc_hevc_qsv h_vc_mpeg2_qsv h_vc_default h_vc_none",
+                      "form-group-class": "h_vc_input h_vc_libvpx h_vc_libvpx-vp9 h_vc_libx264 h_vc_libx265 h_vc_hevc_nvenc h_vc_h264_nvenc h_vc_h264_nvmpi h_vc_h264_vaapi h_vc_hevc_vaapi h_vc_h264_qsv h_vc_hevc_qsv h_vc_mpeg2_qsv h_vc_default h_vc_none",
                       "possible": "1-23"
                    },
                    {
@@ -2122,7 +2122,7 @@ module.exports = function(s,config,lang){
                       "description": lang["fieldTextPresetRecord"],
                       "default": "",
                       "example": "ultrafast",
-                      "form-group-class": "h_vc_input h_vc_libvpx h_vc_libvpx-vp9 h_vc_libx264 h_vc_libx265 h_vc_hevc_nvenc h_vc_h264_nvenc h_vc_h264_vaapi h_vc_hevc_vaapi h_vc_h264_qsv h_vc_hevc_qsv h_vc_mpeg2_qsv h_vc_default h_vc_none",
+                      "form-group-class": "h_vc_input h_vc_libvpx h_vc_libvpx-vp9 h_vc_libx264 h_vc_libx265 h_vc_hevc_nvenc h_vc_h264_nvenc h_vc_h264_nvmpi h_vc_h264_vaapi h_vc_hevc_vaapi h_vc_h264_qsv h_vc_hevc_qsv h_vc_mpeg2_qsv h_vc_default h_vc_none",
                       "possible": ""
                    },
                    {
@@ -2187,7 +2187,7 @@ module.exports = function(s,config,lang){
                       "description": lang["fieldTextFps"],
                       "default": "",
                       "example": "2",
-                      "form-group-class": "h_vc_input h_vc_libvpx h_vc_libvpx-vp9 h_vc_libx264 h_vc_libx265 h_vc_hevc_nvenc h_vc_h264_nvenc h_vc_h264_vaapi h_vc_hevc_vaapi h_vc_h264_qsv h_vc_hevc_qsv h_vc_mpeg2_qsv h_vc_default h_vc_none",
+                      "form-group-class": "h_vc_input h_vc_libvpx h_vc_libvpx-vp9 h_vc_libx264 h_vc_libx265 h_vc_hevc_nvenc h_vc_h264_nvenc h_vc_h264_nvmpi h_vc_h264_vaapi h_vc_hevc_vaapi h_vc_h264_qsv h_vc_hevc_qsv h_vc_mpeg2_qsv h_vc_default h_vc_none",
                       "possible": ""
                    },
                    {
@@ -2196,7 +2196,7 @@ module.exports = function(s,config,lang){
                       "description": "Height of the stream image.",
                       "default": "",
                       "example": "720",
-                      "form-group-class": "h_vc_input h_vc_libvpx h_vc_libvpx-vp9 h_vc_libx264 h_vc_libx265 h_vc_hevc_nvenc h_vc_h264_nvenc h_vc_h264_vaapi h_vc_hevc_vaapi h_vc_h264_qsv h_vc_hevc_qsv h_vc_mpeg2_qsv h_vc_default h_vc_none",
+                      "form-group-class": "h_vc_input h_vc_libvpx h_vc_libvpx-vp9 h_vc_libx264 h_vc_libx265 h_vc_hevc_nvenc h_vc_h264_nvenc h_vc_h264_nvmpi h_vc_h264_vaapi h_vc_hevc_vaapi h_vc_h264_qsv h_vc_hevc_qsv h_vc_mpeg2_qsv h_vc_default h_vc_none",
                       "possible": ""
                    },
                    {
@@ -2205,7 +2205,7 @@ module.exports = function(s,config,lang){
                       "description": "Width of the stream image.",
                       "default": "",
                       "example": "1280",
-                      "form-group-class": "h_vc_input h_vc_libvpx h_vc_libvpx-vp9 h_vc_libx264 h_vc_libx265 h_vc_hevc_nvenc h_vc_h264_nvenc h_vc_h264_vaapi h_vc_hevc_vaapi h_vc_h264_qsv h_vc_hevc_qsv h_vc_mpeg2_qsv h_vc_default h_vc_none",
+                      "form-group-class": "h_vc_input h_vc_libvpx h_vc_libvpx-vp9 h_vc_libx264 h_vc_libx265 h_vc_hevc_nvenc h_vc_h264_nvenc h_vc_h264_nvmpi h_vc_h264_vaapi h_vc_hevc_vaapi h_vc_h264_qsv h_vc_hevc_qsv h_vc_mpeg2_qsv h_vc_default h_vc_none",
                       "possible": ""
                    },
                    {
@@ -2225,7 +2225,7 @@ module.exports = function(s,config,lang){
                       "example": "",
                       "selector": "h_vc",
                       "fieldType": "select",
-                      "form-group-class": "h_vc_input h_vc_libvpx h_vc_libvpx-vp9 h_vc_libx264 h_vc_libx265 h_vc_hevc_nvenc h_vc_h264_nvenc h_vc_h264_vaapi h_vc_hevc_vaapi h_vc_h264_qsv h_vc_hevc_qsv h_vc_mpeg2_qsv h_vc_default h_vc_none",
+                      "form-group-class": "h_vc_input h_vc_libvpx h_vc_libvpx-vp9 h_vc_libx264 h_vc_libx265 h_vc_hevc_nvenc h_vc_h264_nvenc h_vc_h264_nvmpi h_vc_h264_vaapi h_vc_hevc_vaapi h_vc_h264_qsv h_vc_hevc_qsv h_vc_mpeg2_qsv h_vc_default h_vc_none",
                       "possible": [
                            {
                               "name": lang["No Rotation"],
@@ -2260,7 +2260,7 @@ module.exports = function(s,config,lang){
                       "description": lang["fieldTextVf"],
                       "default": "",
                       "example": "",
-                      "form-group-class": "h_vc_input h_vc_libvpx h_vc_libvpx-vp9 h_vc_libx264 h_vc_libx265 h_vc_hevc_nvenc h_vc_h264_nvenc h_vc_h264_vaapi h_vc_hevc_vaapi h_vc_h264_qsv h_vc_hevc_qsv h_vc_mpeg2_qsv h_vc_default h_vc_none",
+                      "form-group-class": "h_vc_input h_vc_libvpx h_vc_libvpx-vp9 h_vc_libx264 h_vc_libx265 h_vc_hevc_nvenc h_vc_h264_nvenc h_vc_h264_nvmpi h_vc_h264_vaapi h_vc_hevc_vaapi h_vc_h264_qsv h_vc_hevc_qsv h_vc_mpeg2_qsv h_vc_default h_vc_none",
                       "possible": ""
                    }
                 ]
@@ -2270,7 +2270,7 @@ module.exports = function(s,config,lang){
                 "name": lang['Recording Timestamp'],
                 "color": "red",
                 isAdvanced: true,
-                "section-pre-class": "h_vc_input h_vc_libvpx h_vc_libvpx-vp9 h_vc_libx264 h_vc_libx265 h_vc_hevc_nvenc h_vc_h264_nvenc h_vc_h264_vaapi h_vc_hevc_vaapi h_vc_h264_qsv h_vc_hevc_qsv h_vc_mpeg2_qsv h_vc_default h_vc_none",
+                "section-pre-class": "h_vc_input h_vc_libvpx h_vc_libvpx-vp9 h_vc_libx264 h_vc_libx265 h_vc_hevc_nvenc h_vc_h264_nvenc h_vc_h264_nvmpi h_vc_h264_vaapi h_vc_hevc_vaapi h_vc_h264_qsv h_vc_hevc_qsv h_vc_mpeg2_qsv h_vc_default h_vc_none",
                 "section-class": "h_m_input h_m_record h_m_idle",
                 "isSection": true,
                 "info": [
@@ -2360,7 +2360,7 @@ module.exports = function(s,config,lang){
                 "name": lang['Recording Watermark'],
                 "color": "red",
                 isAdvanced: true,
-                "section-pre-class": "h_vc_input h_vc_libvpx h_vc_libvpx-vp9 h_vc_libx264 h_vc_libx265 h_vc_hevc_nvenc h_vc_h264_nvenc h_vc_h264_vaapi h_vc_hevc_vaapi h_vc_h264_qsv h_vc_hevc_qsv h_vc_mpeg2_qsv h_vc_default h_vc_none",
+                "section-pre-class": "h_vc_input h_vc_libvpx h_vc_libvpx-vp9 h_vc_libx264 h_vc_libx265 h_vc_hevc_nvenc h_vc_h264_nvenc h_vc_h264_nvmpi h_vc_h264_vaapi h_vc_hevc_vaapi h_vc_h264_qsv h_vc_hevc_qsv h_vc_mpeg2_qsv h_vc_default h_vc_none",
                 "section-class": "h_m_input h_m_record h_m_idle",
                 "isSection": true,
                 "info": [
