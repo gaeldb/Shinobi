@@ -302,7 +302,11 @@ module.exports = (s,config,lang) => {
                                 const result = await fetchPromise;
                                 if (result.refused) allPingSuccess[cameraIp] = !result.refused;
                                 if (result.uri){
-                                    result.uri = detectAndReplaceReolinkRTSP(task.camera, addCredentialsToUrl({ url: result.uri, username: task.camera.user, password: task.camera.pass }));
+                                    try{
+                                        result.uri = detectAndReplaceReolinkRTSP(task.camera, addCredentialsToUrl({ url: result.uri, username: task.camera.user, password: task.camera.pass }));
+                                    }catch(err){
+                                        console.error(err)
+                                    }
                                 }
                                 responseList.push({...result});
                             }
