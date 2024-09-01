@@ -26,6 +26,9 @@ module.exports = function(s,config,lang,app,io){
     const {
         triggerEvent,
     } = require('./events/utils.js')(s,config,lang)
+    const {
+        deleteFilesInFolder,
+    } = require('./basic/utils.js')(process.cwd(), config)
     if(config.dropInEventServer === true){
         if(config.dropInEventForceSaveEvent === undefined)config.dropInEventForceSaveEvent = true
         if(config.dropInEventDeleteFileAfterTrigger === undefined)config.dropInEventDeleteFileAfterTrigger = true
@@ -142,7 +145,7 @@ module.exports = function(s,config,lang,app,io){
                             if(config.dropInEventDeleteFileAfterTrigger){
                                 clearTimeout(fileQueue[filePath])
                                 fileQueue[filePath] = setTimeout(function(){
-                                    exec('rm -rf ' + filePath,function(err){
+                                    fs.rm(filePath, { recursive: true },(err) => {
                                         delete(fileQueue[filePath])
                                     })
                                 },1000 * 60 * 5)
@@ -152,7 +155,7 @@ module.exports = function(s,config,lang,app,io){
                     if(config.dropInEventDeleteFileAfterTrigger){
                         clearTimeout(fileQueueForDeletion[deletionKey])
                         fileQueueForDeletion[deletionKey] = setTimeout(function(){
-                            exec('rm -rf ' + deletionKey,function(err){
+                            fs.rm(filePath, { recursive: true },(err) => {
                                 delete(fileQueueForDeletion[deletionKey])
                             })
                         },1000 * 60 * 5)
@@ -194,7 +197,7 @@ module.exports = function(s,config,lang,app,io){
                 directory = s.dir.dropInEvents + e.ke + '/' + (e.id || e.mid) + '/'
                 fs.mkdir(directory,function(err){
                     s.handleFolderError(err)
-                    exec('rm -rf "' + directory + '*"',function(){})
+                    deleteFilesInFolder(directory)
                     callback(err,directory)
                 })
             })
