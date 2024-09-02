@@ -1168,6 +1168,9 @@ function getRunningMonitors(asArray){
     })
     return asArray ? Object.values(foundMonitors) : foundMonitors
 }
+function buildFileBinUrl(data){
+    return apiBaseUrl + '/fileBin/' + data.ke + '/' + data.mid + '/' + data.name
+}
 $(document).ready(function(){
     $('body')
     .on('click','[system]',function(){

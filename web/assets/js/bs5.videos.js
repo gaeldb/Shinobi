@@ -442,35 +442,93 @@ function loadEventsData(videoEvents){
         loadedEventsInMemory[`${anEvent.mid}${anEvent.time}`] = anEvent
     })
 }
+function getVideoSearchRequestQueries(options){
+    var searchQuery = options.searchQuery
+    var requestQueries = []
+    var monitorId = options.monitorId
+    var archived = options.archived
+    var customVideoSet = options.customVideoSet
+    var limit = options.limit
+    var eventLimit = options.eventLimit || 300
+    var doLimitOnFames = options.doLimitOnFames || false
+    var eventStartTime
+    var eventEndTime
+    if(options.startDate){
+        eventStartTime = formattedTimeForFilename(options.startDate,false)
+        requestQueries.push(`start=${eventStartTime}`)
+    }
+    if(options.endDate){
+        eventEndTime = formattedTimeForFilename(options.endDate,false)
+        requestQueries.push(`end=${eventEndTime}`)
+    }
+    if(searchQuery){
+        requestQueries.push(`search=${searchQuery}`)
+    }
+    if(archived){
+        requestQueries.push(`archived=1`)
+    }
+    return {
+        searchQuery,
+        monitorId,
+        archived,
+        customVideoSet,
+        limit,
+        eventLimit,
+        doLimitOnFames,
+        eventStartTime,
+        eventEndTime,
+        requestQueries,
+    }
+}
+function mergeVideosAndBin(options,callback){
+    const {
+        searchQuery,
+        monitorId,
+        archived,
+        customVideoSet,
+        limit,
+        eventLimit,
+        doLimitOnFames,
+        eventStartTime,
+        eventEndTime,
+        requestQueries,
+    } = getVideoSearchRequestQueries(options);
+    const videos = options.videos.map(video => {
+        const newVideo = {
+            ke: video.ke,
+            mid: video.mid,
+            time: video.time,
+            end: video.end,
+            saveDir: video.saveDir,
+            details: video.details,
+        };
+        delete(newVideo.timelapseFrames)
+        return newVideo
+    });
+    console.log(videos)
+    return new Promise((resolve) => {
+        $.post(`${getApiPrefix(`mergeVideos`)}${monitorId ? `/${monitorId}` : ''}?${requestQueries.concat([limit ? `limit=${limit}` : `noLimit=1`]).join('&')}`, {
+            videos,
+        },function(data){
+            resolve(data)
+        })
+    })
+}
 function getVideos(options,callback,noEvents){
     return new Promise((resolve,reject) => {
         options = options ? options : {}
-        var searchQuery = options.searchQuery
-        var requestQueries = []
-        var monitorId = options.monitorId
-        var archived = options.archived
-        var customVideoSet = options.customVideoSet
-        var limit = options.limit
-        var eventLimit = options.eventLimit || 300
-        var doLimitOnFames = options.doLimitOnFames || false
-        var eventStartTime
-        var eventEndTime
-        // var startDate = options.startDate
-        // var endDate = options.endDate
-        if(options.startDate){
-            eventStartTime = formattedTimeForFilename(options.startDate,false)
-            requestQueries.push(`start=${eventStartTime}`)
-        }
-        if(options.endDate){
-            eventEndTime = formattedTimeForFilename(options.endDate,false)
-            requestQueries.push(`end=${eventEndTime}`)
-        }
-        if(searchQuery){
-            requestQueries.push(`search=${searchQuery}`)
-        }
-        if(archived){
-            requestQueries.push(`archived=1`)
-        }
+        const {
+            searchQuery,
+            monitorId,
+            archived,
+            customVideoSet,
+            limit,
+            eventLimit,
+            doLimitOnFames,
+            eventStartTime,
+            eventEndTime,
+            requestQueries,
+        } = getVideoSearchRequestQueries(options);
         $.getJSON(`${getApiPrefix(customVideoSet ? customVideoSet : searchQuery ? `videosByEventTag` : `videos`)}${monitorId ? `/${monitorId}` : ''}?${requestQueries.concat([limit ? `limit=${limit}` : `noLimit=1`]).join('&')}`,function(data){
             var videos = data.videos.map((video) => {
                 return Object.assign({},video,{

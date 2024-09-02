@@ -274,6 +274,43 @@ $(document).ready(function(e){
         var downloadUrl = buildNewFileLink(data)
         downloadFile(downloadUrl,data.name)
     }
+    function mergeSelectedVideos(){
+        var videos = getSelectedRows(true)
+        var dateRange = getSelectedTime(dateSelector);
+        var searchQuery = objectTagSearchField.val() || null;
+        var startDate = dateRange.startDate;
+        var endDate = dateRange.endDate;
+        var monitorId = monitorsList.val();
+        var wantsArchivedVideo = getVideoSetSelected() === 'archive';
+        if(!monitorId){
+            new PNotify({
+                title: lang['No Monitor Selected'],
+                text: lang['No Monitor Found, Ignoring Request'],
+                type: 'danger',
+            })
+            return
+        }
+        $.confirm.create({
+            title: lang["Merge Videos"],
+            body: `${videos.length > 0 ? lang.MergeAllSelected : lang.MergeAllInRange}`,
+            clickOptions: {
+                title: '<i class="fa fa-check"></i> ' + lang.Save,
+                class: 'btn-success btn-sm'
+            },
+            clickCallback: async function(){
+                console.log('Merging Video...')
+                var result = await mergeVideosAndBin({
+                    monitorId,
+                    startDate,
+                    endDate,
+                    videos,
+                    searchQuery,
+                    archived: wantsArchivedVideo,
+                });
+                console.log('Merged Video! Check Filebin.')
+            }
+        });
+    }
     $('body')
     .on('click','.open-videosTable',function(e){
         e.preventDefault()
@@ -305,6 +342,11 @@ $(document).ready(function(e){
         e.preventDefault()
         var videos = getSelectedRows(true)
         zipVideosAndDownloadWithConfirm(videos)
+        return false;
+    })
+    .on('click','.merge-selected-videos',function(e){
+        e.preventDefault()
+        mergeSelectedVideos();
         return false;
     })
     .on('click','.refresh-data',function(e){
@@ -410,6 +452,14 @@ $(document).ready(function(e){
     })
     onWebSocketEvent((data) => {
         switch(data.f){
+            case'fileBin_item_added':
+                new PNotify({
+                    title: lang['File Saved'],
+                    text: `${lang.checkFileBinForNewFile}<br><br><a class="btn btn-sm btn-success" href="${buildFileBinUrl(data)}" download>${lang.Download}</a>`,
+                    type: 'success',
+                    sticky: true,
+                })
+            break;
             case'video_delete':
             case'video_delete_cloud':
                 if(tabTree.name === 'videosTableView'){

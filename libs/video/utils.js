@@ -1,6 +1,8 @@
 const fs = require('fs')
 const { spawn } = require('child_process')
 const async = require('async');
+const path = require('path');
+const fsP = require('fs').promises;
 module.exports = (s,config,lang) => {
     const {
         ffprobe,
@@ -593,6 +595,7 @@ module.exports = (s,config,lang) => {
                 time: video.time,
             }
             await s.insertFileBinEntry(fileBinInsertQuery)
+            s.notifyFileBinUploaded(fileBinInsertQuery)
             s.tx(Object.assign({
                 f: 'fileBin_item_added',
                 slicedVideo: true,
@@ -603,6 +606,149 @@ module.exports = (s,config,lang) => {
             s.debugLog('sliceVideo ERROR',err)
         }
         return response
+    }
+    const mergingVideos = {};
+    const mergeVideos = async function({
+        groupKey,
+        monitorId,
+        filePaths,
+        outputFilePath,
+        videoCodec = 'libx265',
+        audioCodec = 'aac',
+        onStdout = (data) => {s.systemLog(`${data}`)},
+        onStderr = (data) => {s.systemLog(`${data}`)},
+    }) {
+        if (!Array.isArray(filePaths) || filePaths.length === 0) {
+            throw new Error('First parameter must be a non-empty array of absolute file paths.');
+        }
+        if(mergingVideos[outputFilePath])return;
+        const currentDate = new Date();
+        const fileExtensions = filePaths.map(file => path.extname(file).toLowerCase());
+        const allSameExtension = fileExtensions.every(ext => ext === fileExtensions[0]);
+        const fileList = filePaths.map(file => `file '${file}'`).join('\n');
+        const tempFileListPath = path.join(s.dir.streams, groupKey, monitorId, `video_merge_${currentDate}.txt`);
+        mergingVideos[outputFilePath] = currentDate;
+        try {
+            await fsP.writeFile(tempFileListPath, fileList);
+            let ffmpegArgs;
+            // if (allSameExtension) {
+            //     ffmpegArgs = [
+            //         '-f', 'concat',
+            //         '-safe', '0',
+            //         '-i', tempFileListPath,
+            //         '-c', 'copy',
+            //         '-y',
+            //         outputFilePath
+            //     ];
+            // } else {
+                ffmpegArgs = [
+                    '-loglevel', 'warning',
+                    '-f', 'concat',
+                    '-safe', '0',
+                    '-i', tempFileListPath,
+                    '-c:v', videoCodec,
+                    '-c:a', audioCodec,
+                    '-strict', '-2',
+                    '-crf', '1',
+                    '-y',
+                    outputFilePath
+                ];
+            // }
+            s.debugLog(fileList)
+            s.debugLog(ffmpegArgs)
+
+            await new Promise((resolve, reject) => {
+                const ffmpegProcess = spawn(config.ffmpegDir, ffmpegArgs);
+                ffmpegProcess.stdout.on('data', onStdout);
+                ffmpegProcess.stderr.on('data', onStderr);
+                ffmpegProcess.on('close', (code) => {
+                    delete(mergingVideos[outputFilePath]);
+                    if (code === 0) {
+                        console.log(`FFmpeg process exited with code ${code}`);
+                        resolve();
+                    } else {
+                        reject(new Error(`FFmpeg process exited with code ${code}`));
+                    }
+                });
+                ffmpegProcess.on('error', (err) => {
+                    reject(new Error(`FFmpeg error: ${err}`));
+                });
+            });
+        } finally {
+            await fsP.unlink(tempFileListPath);
+        }
+    };
+    async function mergeVideosAndBin(videos){
+        const currentTime = new Date();
+        const firstVideo = videos[0];
+        const lastVideo = videos[videos.length - 1];
+        const groupKey = firstVideo.ke;
+        const monitorId = firstVideo.mid;
+        const logTarget = { ke: groupKey, mid: '$USER' };
+        try{
+            try{
+                await fsP.stat(outputFilePath)
+                return outputFilePath
+            }catch(err){
+
+            }
+            const filePaths = videos.map(video => {
+                const monitorConfig = s.group[video.ke].rawMonitorConfigurations[video.mid];
+                const filePath = path.join(s.getVideoDirectory(video), `${s.formattedTime(video.time)}.mp4`);
+                return filePath
+            });
+            const filename = `${s.formattedTime(firstVideo.time)}-${s.formattedTime(lastVideo.time)}-${filePaths.length}.mp4`
+            const fileBinFolder = s.getFileBinDirectory(firstVideo);
+            const outputFilePath = path.join(fileBinFolder, filename);
+
+            s.userLog(logTarget,{
+                type: 'mergeVideos ffmpeg START',
+                msg: {
+                    monitorId,
+                    numberOfVideos: filePaths.length,
+                }
+            });
+            await mergeVideos({
+                groupKey,
+                monitorId,
+                filePaths,
+                outputFilePath,
+                onStdout: (data) => {
+                    s.debugLog(data.toString())
+                    s.userLog(logTarget,{
+                        type: 'mergeVideos ffmpeg LOG',
+                        msg: `${data}`
+                    });
+                },
+                onStderr: (data) => {
+                    s.debugLog(data.toString())
+                    s.userLog(logTarget,{
+                        type: 'mergeVideos ffmpeg ERROR',
+                        msg: `${data}`
+                    });
+                },
+            });
+            const fileSize = (await fsP.stat(outputFilePath)).size;
+            const fileBinInsertQuery = {
+                ke: groupKey,
+                mid: monitorId,
+                name: filename,
+                size: fileSize,
+                details: {},
+                status: 1,
+                time: currentTime,
+            }
+            await s.insertFileBinEntry(fileBinInsertQuery);
+            s.notifyFileBinUploaded(fileBinInsertQuery);
+            return outputFilePath
+        }catch(err){
+            console.log('mergeVideos process ERROR', err)
+            s.userLog(logTarget,{
+                type: 'mergeVideos process ERROR',
+                msg: `${err.toString()}`
+            });
+            return null;
+        }
     }
     return {
         reEncodeVideoAndReplace,
@@ -615,5 +761,7 @@ module.exports = (s,config,lang) => {
         reEncodeVideoAndBinOriginalAddToQueue,
         archiveVideo,
         sliceVideo,
+        mergeVideos,
+        mergeVideosAndBin,
     }
 }
