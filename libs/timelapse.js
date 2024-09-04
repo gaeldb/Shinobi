@@ -34,6 +34,7 @@ module.exports = function(s,config,lang,app,io){
     s.createTimelapseFrameAndInsert = function(e,location,filename,eventTime,frameDetails){
         //e = monitor object
         //location = file location
+        var monitorId = e.id || e.mid;
         var filePath = location + filename
         var fileStats = fs.statSync(filePath)
         var details = Object.assign({},frameDetails || {})
@@ -43,7 +44,7 @@ module.exports = function(s,config,lang,app,io){
         const timeNow = eventTime || new Date()
         const queryInfo = {
             ke: e.ke,
-            mid: e.id,
+            mid: monitorId,
             details: s.s(details),
             filename: filename,
             size: fileStats.size,
@@ -53,7 +54,7 @@ module.exports = function(s,config,lang,app,io){
             var currentDate = s.formattedTime(timeNow,'YYYY-MM-DD')
             const childNodeData = {
                 ke: e.ke,
-                mid: e.id,
+                mid: monitorId,
                 time: currentDate,
                 filename: filename,
                 currentDate: currentDate,
@@ -559,8 +560,7 @@ module.exports = function(s,config,lang,app,io){
                 actionParameter && (
                     isRestrictedApiKey && apiKeyPermissions.delete_videos_disallowed ||
                     isRestricted && !monitorPermissions[`${monitorId}_video_delete`]
-                ) ||
-                !actionParameter && (
+                ) || !actionParameter && (
                     isRestrictedApiKey && apiKeyPermissions.watch_videos_disallowed ||
                     isRestricted && monitorId && !monitorPermissions[`${monitorId}_video_view`]
                 )

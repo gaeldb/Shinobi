@@ -218,6 +218,13 @@ module.exports = (processCwd,config) => {
             readStream.pipe(writeStream)
         })
     }
+    async function moveFile(inputFilePath,outputFilePath) {
+        try{
+            await fsP.rm(outputFilePath)
+        }catch(err){}
+        await copyFile(inputFilePath, outputFilePath)
+        await fsP.rm(inputFilePath)
+    }
     function hmsToSeconds(str) {
         var p = str.split(':'),
             s = 0, m = 1;
@@ -274,5 +281,6 @@ module.exports = (processCwd,config) => {
         hmsToSeconds,
         setDefaultIfUndefined,
         deleteFilesInFolder,
+        moveFile,
     }
 }

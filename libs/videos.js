@@ -5,6 +5,9 @@ module.exports = function(s,config,lang){
     const {
         sendVideoToMasterNode,
     } = require('./childNode/childUtils.js')(s,config,lang)
+    const {
+        postProcessCompletedMp4Video,
+    } = require('./video/utils.js')(s,config,lang)
     /**
      * Gets the video directory of the supplied video or monitor database row.
      * @constructor
@@ -180,8 +183,11 @@ module.exports = function(s,config,lang){
                 })
                 s.insertDatabaseRow(e,k,(err,response) => {
                     if(callback)callback(err,response);
-                    s.insertCompletedVideoExtensions.forEach(function(extender){
-                        extender(e,k,response.insertQuery,response)
+                    postProcessCompletedMp4Video(response.insertQuery).then((isGood) => {
+                        if(!isGood)return console.error(`FAILED VIDEO INSERT`);
+                        s.insertCompletedVideoExtensions.forEach(function(extender){
+                            extender(e,k,response.insertQuery,response)
+                        })
                     })
                 })
             }

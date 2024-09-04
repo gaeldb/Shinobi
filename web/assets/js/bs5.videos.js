@@ -499,6 +499,7 @@ function mergeVideosAndBin(options,callback){
             mid: video.mid,
             time: video.time,
             end: video.end,
+            ext: video.ext,
             saveDir: video.saveDir,
             details: video.details,
         };
