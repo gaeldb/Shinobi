@@ -13,6 +13,15 @@ module.exports = (s,config,lang) => {
         workerProcess.on('message',function(data){
             if(data.time === 'moment()')data.time = moment();
             switch(data.f){
+                case'knexQuery':
+                    s.knexQuery(...data.args, function(...args){
+                        workerProcess.postMessage({
+                            f: 'callback',
+                            rid: data.rid,
+                            args,
+                        })
+                    });
+                break;
                 case'debugLog':
                     s.debugLog(...data.data)
                 break;

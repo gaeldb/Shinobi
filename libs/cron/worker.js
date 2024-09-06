@@ -42,6 +42,13 @@ parentPort.on('message',(data) => {
             setDefaultConfigOptions()
             beginProcessing()
         break;
+        case'callback':
+            if(pendingCallbacks[data.rid]){
+                pendingCallbacks[data.rid](...data.args)
+                // console.log(data.rid,typeof pendingCallbacks[data.rid])
+                delete(pendingCallbacks[data.rid])
+            }
+        break;
         case'start':case'restart':
             setIntervalForCron()
         break;
@@ -51,7 +58,7 @@ parentPort.on('message',(data) => {
     }
 })
 function debugLog(...args){
-    if(config.debugLog === true){
+    if(config.debugLog === true || config.logCronInfo === true){
         console.log(...([`CRON.js DEBUG LOG ${new Date()}`].concat(args)))
     }
 }
@@ -64,6 +71,7 @@ function errorLog(...args){
 const s = {
     debugLog,
 }
+const pendingCallbacks = {};
 function beginProcessing(){
     normalLog(`Worker Processing!`)
     const {
@@ -74,8 +82,6 @@ function beginProcessing(){
     } = require('../basic/utils.js')(process.cwd())
     const {
         sqlDate,
-        knexQuery,
-        knexQueryPromise,
         initiateDatabaseEngine
     } = require('../sql/utils.js')(s,config)
     var theCronInterval = null
@@ -110,6 +116,23 @@ function beginProcessing(){
     }
     const setDiskUsedForGroup = (groupKey,size,target,videoRow) => {
         postMessage({f:'s.setDiskUsedForGroup', ke: groupKey, size: size, target: target, videoRow: videoRow})
+    }
+    const knexQuery = (...args) => {
+        const requestId = generateRandomId();
+        const callback = args.pop();
+        pendingCallbacks[requestId] = callback;
+        postMessage({ f: 'knexQuery', args: args, rid: requestId })
+    }
+    const knexQueryPromise = (options) => {
+        return new Promise((resolve,reject) => {
+            knexQuery(options,(err,rows) => {
+                resolve({
+                    ok: !err,
+                    err: err,
+                    rows: rows,
+                })
+            })
+        })
     }
     const getVideoDirectory = function(e){
         if(e.mid&&!e.id){e.id=e.mid};
