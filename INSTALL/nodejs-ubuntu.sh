@@ -1,14 +1,15 @@
-#!/bin/bash
+#!/bin/sh
 
 # Get the Ubuntu version
 UBUNTU_VERSION=$(lsb_release -rs)
 
 # Determine the Node.js major version based on Ubuntu version
-if [[ $(echo "$UBUNTU_VERSION <= 18.04" | bc -l) -eq 1 ]]; then
+if [ "$(echo "$UBUNTU_VERSION <= 18.04" | bc)" -eq 1 ]; then
     NODE_MAJOR=16
 else
     NODE_MAJOR=18
 fi
+echo "Installing Node version: $NODE_MAJOR"
 
 # Update and install necessary packages
 sudo apt-get update
@@ -23,4 +24,4 @@ echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.co
 
 # Update package list and install Node.js
 sudo apt-get update
-sudo apt-get install nodejs -y
+sudo apt-get install -y nodejs
