@@ -12,3 +12,6 @@
     border: 1px solid #009dff;
     border-radius: 10px;
 }
+#superPluginManager .badge-success {
+    background-color: #2fa523;
+}

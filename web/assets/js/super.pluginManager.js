@@ -1,21 +1,65 @@
 $(document).ready(function(){
     var loadedModules = {}
+    var downloadablePlugins = {}
+    var theEnclosure = $('#superPluginManager')
     var listElement = $('#pluginManagerList')
+    var downloadListElement = $('#pluginManagerDownloadble')
     var quickSelect = $('#pluginQuickSelect')
     var pluginDownloadForm = $('#downloadNewPlugin')
     var pluginCommandLine = $('#pluginCommandLine')
+    var pluginDownloadableSearch = $('#pluginManagerDownloadbleListSearch')
     var getModules = function(callback) {
         $.get(superApiPrefix + $user.sessionKey + '/plugins/list',callback)
+    }
+    function drawDownloadablePlugins(data){
+        var html = ''
+        $.each(data,function(n,plugin){
+            html += `
+            <div class="col-md-6" dl-plugin="${plugin.name}">
+                <div class="card cursor-pointer bg-dark text-white mb-3">
+                    <div class="card-body">
+                        <div class="pb-1">
+                            ${plugin.type.map(item => `<span class="badge badge-success">${item}</span>`).join(' ')}
+                            ${plugin.gpuRequired ? `<span class="badge badge-primary">${plugin.gpuRequired instanceof Array ? plugin.gpuRequired.join(', ') : lang['GPU Required']}</span>` : ''}
+                            ${plugin.experimental ? `<span class="badge badge-warning">${lang.Experimental}</span>` : ''}
+                        </div>
+                        <h4 class="title">${plugin.name}</h4>
+                        <div class="pb-1"><span class="badge badge-warning">${plugin.engine}</span> ${plugin.arch.map(item => `<span class="badge badge-primary">${item}</span>`).join(' ')}</div>
+                        <div><a class="btn btn-info cursor-pointer download">${lang.Download}</a></div>
+                    </div>
+                </div>
+            </div>`
+        })
+        downloadListElement.html(html)
+    }
+    function filterDownloadablePlugins(theSearch = '') {
+        var searchQuery = theSearch.trim().toLowerCase();
+        if(searchQuery === ''){
+            downloadListElement.find(`[dl-plugin]`).show()
+            return;
+        }
+        var rows = Object.values(downloadablePlugins);
+        var filtered = []
+        rows.forEach((row) => {
+            var searchInString = JSON.stringify(row).toLowerCase();
+            var theElement = downloadListElement.find(`[dl-plugin="${row.name}"]`)
+            console.log(searchInString)
+            if(searchInString.indexOf(searchQuery) > -1){
+                theElement.show()
+            }else{
+                theElement.hide()
+            }
+        })
+        return filtered
     }
     function getDownloadableModules(callback) {
         return new Promise((resolve,reject) => {
             const pluginListUrl = `https://cdn.shinobi.video/plugins/list.json`
             $.getJSON(pluginListUrl,function(data){
-                var html = ''
                 $.each(data,function(n,plugin){
-                    html += `<option value="${plugin.link}${plugin.dir ? `,${plugin.dir}` : ''}">${plugin.name}</option>`
+                    downloadablePlugins[plugin.name] = plugin;
                 })
-                quickSelect.html(html)
+                drawDownloadablePlugins(data)
                 resolve(data)
             })
         })
@@ -328,13 +372,13 @@ $(document).ready(function(){
             break;
         }
     })
-    pluginDownloadForm.submit(function(e){
-        e.preventDefault();
-        var el = $(this)
-        var form = el.serializeObject()
-        downloadModule(form.downloadUrl,form.packageRoot,function(data){
-            console.log(data)
+    theEnclosure.on('click','[dl-plugin] .download',function(e){
+        var pluginName = $(this).parents('[dl-plugin]').attr('dl-plugin')
+        var theDlPlugin = downloadablePlugins[pluginName]
+        downloadModule(theDlPlugin.link,theDlPlugin.dir,function(data){
             if(data.ok){
+                $('[data-bs-target="#pluginManagerList"],#pluginManagerList').addClass('active')
+                $('[data-bs-target="#pluginManagerDownloadbleList"],#pluginManagerDownloadbleList').removeClass('active')
                 var theModule = data.newModule
                 theModule.config.enabled = false
                 drawModuleBlock(theModule)
@@ -351,7 +395,6 @@ $(document).ready(function(){
                 }
             }
         })
-        return false
     })
     $('#pluginQuickSelectExec').click(function(){
         var currentVal = quickSelect.val()
@@ -361,6 +404,10 @@ $(document).ready(function(){
         pluginDownloadForm.find(`[name="downloadUrl"]`).val(packageUrl)
         pluginDownloadForm.find(`[name="packageRoot"]`).val(packageRoot)
         pluginDownloadForm.submit()
+    })
+    pluginDownloadableSearch.keyup(function(){
+        var searchQuery = $(this).val()
+        filterDownloadablePlugins(searchQuery)
     })
     function getObjectAlphabetically(theObject,key){
         return Object.values(theObject).sort(function( a, b ) {
