@@ -11,21 +11,25 @@ $(document).ready(function(){
     var getModules = function(callback) {
         $.get(superApiPrefix + $user.sessionKey + '/plugins/list',callback)
     }
+    function getDlPluginId(plugin){
+        return `${plugin.name}_${plugin.link}_${plugin.dir}`
+    }
     function drawDownloadablePlugins(data){
         var html = ''
         $.each(data,function(n,plugin){
             html += `
-            <div class="col-md-6" dl-plugin="${plugin.name}">
-                <div class="card cursor-pointer bg-dark text-white mb-3">
+            <div class="col-md-6" dl-plugin="${getDlPluginId(plugin)}">
+                <div class="card bg-dark text-white mb-3">
                     <div class="card-body">
                         <div class="pb-1">
-                            ${plugin.type.map(item => `<span class="badge badge-success">${item}</span>`).join(' ')}
+                            ${plugin.type.map(item => `<span class="small">${item}</span>`).join(', ')}
                             ${plugin.gpuRequired ? `<span class="badge badge-primary">${plugin.gpuRequired instanceof Array ? plugin.gpuRequired.join(', ') : lang['GPU Required']}</span>` : ''}
                             ${plugin.experimental ? `<span class="badge badge-warning">${lang.Experimental}</span>` : ''}
                         </div>
                         <h4 class="title">${plugin.name}</h4>
-                        <div class="pb-1"><span class="badge badge-warning">${plugin.engine}</span> ${plugin.arch.map(item => `<span class="badge badge-primary">${item}</span>`).join(' ')}</div>
-                        <div><a class="btn btn-info cursor-pointer download">${lang.Download}</a></div>
+                        <div><span class="small">${lang['Tested on']}</span> : ${plugin.os.map(item => `<span class="small">${item}</span>`).join(', ')}</div>
+                        <div class="pb-1"><span class="badge badge-warning">${plugin.engine}</span> ${plugin.arch.map(item => `<span title="${lang.Architecture}" class="badge badge-primary">${item}</span>`).join(' ')}</div>
+                        <div><a class="btn btn-info btn-sm cursor-pointer download">${lang.Download}</a></div>
                     </div>
                 </div>
             </div>`
@@ -42,7 +46,7 @@ $(document).ready(function(){
         var filtered = []
         rows.forEach((row) => {
             var searchInString = JSON.stringify(row).toLowerCase();
-            var theElement = downloadListElement.find(`[dl-plugin="${row.name}"]`)
+            var theElement = downloadListElement.find(`[dl-plugin="${getDlPluginId(row)}"]`)
             console.log(searchInString)
             if(searchInString.indexOf(searchQuery) > -1){
                 theElement.show()
@@ -57,7 +61,7 @@ $(document).ready(function(){
             const pluginListUrl = `https://cdn.shinobi.video/plugins/list.json`
             $.getJSON(pluginListUrl,function(data){
                 $.each(data,function(n,plugin){
-                    downloadablePlugins[plugin.name] = plugin;
+                    downloadablePlugins[getDlPluginId(plugin)] = plugin;
                 })
                 drawDownloadablePlugins(data)
                 resolve(data)
@@ -374,6 +378,7 @@ $(document).ready(function(){
     })
     theEnclosure.on('click','[dl-plugin] .download',function(e){
         var pluginName = $(this).parents('[dl-plugin]').attr('dl-plugin')
+        console.log(pluginName)
         var theDlPlugin = downloadablePlugins[pluginName]
         downloadModule(theDlPlugin.link,theDlPlugin.dir,function(data){
             if(data.ok){
