@@ -790,6 +790,8 @@ module.exports = (s,config,lang) => {
         return ``
     }
     const getDefaultSubstreamFields = function(monitor){
+        const otherInputFlags = []
+        const otherOutputFlags = []
         const subStreamFields = parseJSON(monitor.details.substream || {input:{},output:{}})
         const inputAndConnectionFields = Object.assign({
            "type":"h264",
@@ -825,7 +827,15 @@ module.exports = (s,config,lang) => {
            "svf":"",
            "cust_stream":""
        },subStreamFields.output);
+       const isMp4Input = inputAndConnectionFields.type === 'mp4';
+       const inputTypeCanLoop = isMp4Input || inputAndConnectionFields.type === 'local'
+       if(inputTypeCanLoop){
+           otherInputFlags.push('-stream_loop', '-1');
+           if(isMp4Input)otherInputFlags.push('-re');
+       }
        return {
+           otherInputFlags,
+           otherOutputFlags,
            inputAndConnectionFields,
            outputFields,
        }

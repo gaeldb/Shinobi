@@ -32,6 +32,7 @@ module.exports = function(s,config,lang,app,io){
         spawnSubstreamProcess,
         destroySubstreamProcess,
         removeSenstiveInfoFromMonitorConfig,
+        sendSubstreamEvent,
     } = require('./monitor/utils.js')(s,config,lang)
     const {
         sliceVideo,
@@ -916,17 +917,39 @@ module.exports = function(s,config,lang,app,io){
                 const monitorConfig = s.group[groupKey].rawMonitorConfigurations[monitorId]
                 const activeMonitor = s.group[groupKey].activeMonitors[monitorId]
                 const substreamConfig = monitorConfig.details.substream
+                const theAction = req.query.action
                 if(
                     substreamConfig.output
                 ){
-                    if(!activeMonitor.subStreamProcess){
-                        response.ok = true
-                        activeMonitor.allowDestroySubstream = false;
-                        spawnSubstreamProcess(monitorConfig)
-                    }else{
-                        activeMonitor.allowDestroySubstream = true
-                        await destroySubstreamProcess(activeMonitor)
+                    switch(theAction){
+                        case'status':
+                            response.ok = true
+                            response.isRunning = !!activeMonitor.subStreamProcess;
+                            response.channel = activeMonitor.subStreamChannel;
+                        break;
+                        case'stop':
+                            activeMonitor.allowDestroySubstream = true
+                            await destroySubstreamProcess(activeMonitor)
+                        break;
+                        default:
+                            if(!activeMonitor.subStreamProcess){
+                                response.ok = true
+                                activeMonitor.allowDestroySubstream = false;
+                                spawnSubstreamProcess(monitorConfig)
+                                response.channel = activeMonitor.subStreamChannel;
+                            }else{
+                                sendSubstreamEvent(groupKey, monitorId)
+                            }
+                        break;
                     }
+                    // if(!activeMonitor.subStreamProcess){
+                    //     response.ok = true
+                    //     activeMonitor.allowDestroySubstream = false;
+                    //     spawnSubstreamProcess(monitorConfig)
+                    // }else{
+                    //     activeMonitor.allowDestroySubstream = true
+                    //     await destroySubstreamProcess(activeMonitor)
+                    // }
                 }else{
                     response.msg = lang['Invalid Settings']
                 }

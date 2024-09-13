@@ -278,6 +278,15 @@ module.exports = (s,config,lang) => {
             }
         })
     }
+    const sendSubstreamEvent = function(groupKey, monitorId, eventName = 'substream_start'){
+        const activeMonitor = getActiveMonitor(groupKey,monitorId)
+        s.tx({
+            f: eventName,
+            mid: monitorId,
+            ke: groupKey,
+            channel: activeMonitor.subStreamChannel
+        },'GRP_'+groupKey);
+    }
     const spawnSubstreamProcess = function(e){
         // e = monitorConfig
         try{
@@ -295,9 +304,13 @@ module.exports = (s,config,lang) => {
             substreamConfig.input.fulladdress = substreamConfig.input.fulladdress || s.buildMonitorUrl(monitorConfig)
             substreamConfig.input.rtsp_transport = substreamConfig.input.rtsp_transport || monitorConfig.details.rtsp_transport
             const {
+                otherInputFlags,
+                otherOutputFlags,
                 inputAndConnectionFields,
                 outputFields,
             } = getDefaultSubstreamFields(monitorConfig);
+            ffmpegCommand.push(...otherInputFlags);
+            ffmpegCommand.push(...otherOutputFlags);
             ([
                 buildSubstreamString(channelNumber + config.pipeAddition,e),
             ]).forEach(function(commandStringPart){
@@ -375,12 +388,7 @@ module.exports = (s,config,lang) => {
                 }
             })
             activeMonitor.subStreamProcess = subStreamProcess
-            s.tx({
-                f: 'substream_start',
-                mid: monitorId,
-                ke: groupKey,
-                channel: activeMonitor.subStreamChannel
-            },'GRP_'+groupKey);
+            sendSubstreamEvent(groupKey, monitorId)
             return subStreamProcess
         }catch(err){
             s.systemLog(err)
@@ -403,11 +411,7 @@ module.exports = (s,config,lang) => {
                 response.hadSubStream = true
                 response.closeResponse = closeResponse
                 delete(activeMonitor.subStreamProcess)
-                s.tx({
-                    f: 'substream_end',
-                    mid: activeMonitor.mid,
-                    ke: activeMonitor.ke
-                },'GRP_'+activeMonitor.ke);
+                sendSubstreamEvent(activeMonitor.mid, activeMonitor.ke, 'substream_end')
                 activeMonitor.subStreamProcessClosing = false
             }
         }catch(err){
@@ -975,6 +979,7 @@ module.exports = (s,config,lang) => {
         const groupKey = e.ke
         const monitorId = e.mid || e.id
         const activeMonitor = getActiveMonitor(groupKey,monitorId)
+        if(!activeMonitor)return;
         clearTimeout(activeMonitor.streamChecker)
         activeMonitor.streamChecker = setTimeout(function(){
             if(activeMonitor && activeMonitor.isStarted === true){
@@ -988,7 +993,7 @@ module.exports = (s,config,lang) => {
                     }
                 })
             }
-        },60000*1);
+        },60000 * 1);
     }
     function resetTimelapseFramesCheck(e){
         const groupKey = e.ke
@@ -1856,5 +1861,6 @@ module.exports = (s,config,lang) => {
         setTimedActiveViewerForHttp: setTimedActiveViewerForHttp,
         attachMainProcessHandlers: attachMainProcessHandlers,
         removeSenstiveInfoFromMonitorConfig,
+        sendSubstreamEvent,
     }
 }
