@@ -941,31 +941,31 @@ module.exports = (s,config,lang) => {
                 ext: 'mp4'
             },chosenVideo);
             const videoPath = getVideoPath(video);
-            const moovExists = await hasMoovAtom(videoPath);
-            if (moovExists) {
-                s.debugLog('The file already has a moov atom.');
-            } else {
-                return true;
-                // const { videoCodec, audioCodec } = getVideoCodecsFromMonitorConfig(video);
-                // const tempPath = path.join(s.getVideoDirectory(video), `TEMP_${s.formattedTime(video.time)}.${video.ext}`);
-                // await addMoovAtom(videoPath, tempPath, videoCodec, audioCodec);
-                // await moveFile(tempPath, videoPath)
-                // const newFileSize = (await fsP.stat(videoPath)).size;
-                // const updateResponse = await s.knexQueryPromise({
-                //     action: "update",
-                //     table: "Videos",
-                //     update: {
-                //         size: newFileSize
-                //     },
-                //     where: [
-                //         ['ke','=',video.ke],
-                //         ['mid','=',video.mid],
-                //         ['time','=',video.time],
-                //         ['end','=',video.end],
-                //         ['ext','=',video.ext],
-                //     ]
-                // });
-            }
+            // const moovExists = await hasMoovAtom(videoPath);
+            // if (moovExists) {
+            //     s.debugLog('The file already has a moov atom.');
+            // } else {
+            //     return true;
+            //     // const { videoCodec, audioCodec } = getVideoCodecsFromMonitorConfig(video);
+            //     // const tempPath = path.join(s.getVideoDirectory(video), `TEMP_${s.formattedTime(video.time)}.${video.ext}`);
+            //     // await addMoovAtom(videoPath, tempPath, videoCodec, audioCodec);
+            //     // await moveFile(tempPath, videoPath)
+            //     // const newFileSize = (await fsP.stat(videoPath)).size;
+            //     // const updateResponse = await s.knexQueryPromise({
+            //     //     action: "update",
+            //     //     table: "Videos",
+            //     //     update: {
+            //     //         size: newFileSize
+            //     //     },
+            //     //     where: [
+            //     //         ['ke','=',video.ke],
+            //     //         ['mid','=',video.mid],
+            //     //         ['time','=',video.time],
+            //     //         ['end','=',video.end],
+            //     //         ['ext','=',video.ext],
+            //     //     ]
+            //     // });
+            // }
             // await saveVideoFrameToTimelapse(video, 0)
             await saveVideoFrameToTimelapse(video, 7)
             return true;
