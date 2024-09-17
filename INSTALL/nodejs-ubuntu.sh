@@ -22,6 +22,6 @@ curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg 
 # Add NodeSource repository
 echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
 
-# Update package list and install Node.js
+# Update package list and install Node.js 
 sudo apt-get update
 sudo apt-get install -y nodejs
