@@ -886,10 +886,14 @@ module.exports = (s,config,lang) => {
         try{
             await fsP.stat(framePath)
         }catch(err){
-            const frameBuffer = await getVideoFrameAsJpeg(videoPath, secondsIn);
-            await fsP.mkdir(location, { recursive: true })
-            await fsP.writeFile(framePath, frameBuffer)
-            await s.createTimelapseFrameAndInsert(activeMonitor,location,frameFilename, frameTime._d)
+            try{
+                const frameBuffer = await getVideoFrameAsJpeg(videoPath, secondsIn);
+                await fsP.mkdir(location, { recursive: true })
+                await fsP.writeFile(framePath, frameBuffer)
+                await s.createTimelapseFrameAndInsert(activeMonitor,location,frameFilename, frameTime._d)
+            }catch(err){
+                console.error(err)
+            }
         }
         // console.error('Completed Saving Frame from New Video!', framePath)
     }
