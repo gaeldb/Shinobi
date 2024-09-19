@@ -1,13 +1,13 @@
 const fs = require("fs")
 const fetch = require("node-fetch")
-module.exports = function(s,config,lang,getSnapshot){
+module.exports = async function(s,config,lang,getSnapshot){
     const {
         getObjectTagNotifyText,
         getEventBasedRecordingUponCompletion,
     } = require('../events/utils.js')(s,config,lang)
     //matrix bot
     if(config.matrixBot === true){
-        const sdk = require("matrix-js-sdk")
+        const sdk = await import("matrix-js-sdk")
         try{
             function sendFile(file,groupKey){
                 const client = s.group[groupKey].matrixBot
