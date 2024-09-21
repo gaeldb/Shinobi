@@ -10,6 +10,14 @@ $(document).ready(function(){
     var theWindow = $(window);
     var lastWindowWidth = theWindow.width()
     var lastWindowHeight = theWindow.height()
+    function getQueryString(){
+        var theObject = {}
+        location.search.substring(1).split('&').forEach(function(string){
+            var parts = string.split('=')
+            theObject[parts[0]] = parts[1]
+        })
+        return theObject
+    }
     function featureIsActivated(showNotice){
         if(userHasSubscribed){
             return true
