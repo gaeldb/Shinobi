@@ -144,7 +144,7 @@ module.exports = function(s,config,lang){
                     ext: k.ext,
                     size: k.filesize,
                     filesize: k.filesize,
-                    objects: k.objects,
+                    objects: k.objects.substring(0, 510),
                     time: s.timeObject(k.startTime).format('YYYY-MM-DD HH:mm:ss'),
                     end: s.timeObject(k.endTime).format('YYYY-MM-DD HH:mm:ss')
                 }

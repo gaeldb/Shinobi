@@ -189,7 +189,7 @@ $(document).ready(function(e){
                        <div>${timeAgo(file.time)}</div>
                        <div><small><b>${lang.Start} :</b> ${formattedTime(file.time, 'DD-MM-YYYY hh:mm:ss AA')}</small></div>
                        <div><small><b>${lang.End} :</b> ${formattedTime(file.end, 'DD-MM-YYYY hh:mm:ss AA')}</small></div>`,
-                objects: file.objects,
+                objects: `<div style="word-break: break-word;max-width:125px;">${file.objects}</div>`,
                 tags: `
                     ${file.ext ? `<span class="badge badge-${file.ext ==='webm' ? `primary` : 'danger'}">${file.ext}</span>` : ''}
                     ${!isLocalVideo ? `<span class="badge badge-success">${file.type}</span>` : ''}
