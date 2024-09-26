@@ -43,18 +43,7 @@ module.exports = function(s,config,lang,app,io){
     s.detectorPluginArray = []
     s.isAtleatOneDetectorPluginConnected = false
     s.addDetectorPlugin = function(name,d){
-        if(config.useOldPluginConnectionMethod === true){
-            s.ocv = {
-                started: s.timeObject(),
-                id: d.id,
-                plug: d.plug,
-                notice: d.notice,
-                isClientPlugin: d.isClientPlugin,
-                isHostPlugin: d.isHostPlugin,
-                connectionType: d.connectionType
-            }
-        }
-        s.connectedDetectorPlugins[d.plug] = {
+        const newDetector = {
             started: s.timeObject(),
             id: d.id,
             plug: d.plug,
@@ -62,15 +51,22 @@ module.exports = function(s,config,lang,app,io){
             isClientPlugin: d.isClientPlugin,
             isHostPlugin: d.isHostPlugin,
             connectionType: d.connectionType
+        };
+        if(config.useOldPluginConnectionMethod === true){
+            s.ocv = newDetector
         }
+        s.connectedDetectorPlugins[d.plug] = newDetector
         s.resetDetectorPluginArray()
+        s.runExtensionsForArray('onPluginConnected', null, [d.plug, newDetector])
     }
     s.removeDetectorPlugin = function(name){
+        const theDetector = Object.assign({}, s.connectedDetectorPlugins[name])
         if(config.oldPluginConnectionMethod === true && s.ocv && s.ocv.plug === name){
             delete(s.ocv)
         }
         delete(s.connectedDetectorPlugins[name])
         s.resetDetectorPluginArray(name)
+        s.runExtensionsForArray('onPluginDisconnected', null, [name, theDetector])
     }
     s.resetDetectorPluginArray = function(){
         pluginArray = []
@@ -163,6 +159,10 @@ module.exports = function(s,config,lang,app,io){
                 s.connectedPlugins[name].tx(data)
             })
         }
+    }
+    s.sendToDetector = function(pluginName, data){
+        const detector = s.connectedPlugins[pluginName];
+        if(detector)detector.tx(data);
     }
     s.sendDetectorInfoToClient = function(data,txFunction){
         s.detectorPluginArray.forEach(function(name){
@@ -363,7 +363,33 @@ module.exports = function(s,config,lang,app,io){
             }
         }
     }
+    function onMonitorUpdate(monitorConfig){
+        // console.log('Sending Monitor Info to Plugin', monitorConfig.mid)
+        s.sendToAllDetectors({ f: 'monitorUpdate', monitorConfig });
+    }
+    function sendCopyOfAllMonitorConfigs(){
+        const groupKeys = Object.keys(s.group);
+        for(groupKey of groupKeys){
+            const monitorConfigs = Object.values(s.group[groupKey].rawMonitorConfigurations);
+            for(monitorConfig of monitorConfigs){
+                onMonitorUpdate(monitorConfig)
+            }
+        }
+    }
+    /**
+    * API : Get List of Connected Plugins
+    */
+    app.get(config.webPaths.apiPrefix+':auth/plugins/list', async (req,res) => {
+        s.auth(req.params, async (resp) => {
+            s.closeJsonResponse(res,{
+                ok: true,
+                plugins: s.connectedDetectorPlugins
+            })
+        },res,req)
+    })
     s.onSocketAuthentication(onSocketAuthentication)
     s.onWebSocketDisconnection(onWebSocketDisconnection)
     s.onWebSocketConnection(onWebSocketConnection)
+    s.onMonitorStart(onMonitorUpdate)
+    s.onPluginConnected(sendCopyOfAllMonitorConfigs)
 }

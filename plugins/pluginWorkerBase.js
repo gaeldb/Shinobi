@@ -32,8 +32,11 @@ module.exports = function(__dirname, config){
     if(!config.hostPort){config.hostPort = 8082}
     if(config.systemLog === undefined){config.systemLog = true}
     if(config.connectionType === undefined)config.connectionType = 'websocket'
+    const imageBuffers = {}
     s = {
         group: {},
+        monitors: {},
+        monitorInfo: {},
         dir: {},
         isWin: (process.platform === 'win32'),
         s: (json) => {
@@ -192,16 +195,26 @@ module.exports = function(__dirname, config){
                     cn.emit('init',{ok:true,plug:config.plug,notice:config.notice,type:config.type})
                 }
             break;
-            case'init_monitor':
-                retryConnection = 0
-                if(s.group[d.ke] && s.group[d.ke][d.id]){
-                    s.group[d.ke][d.id].numberOfTriggers = 0
-                    delete(s.group[d.ke][d.id].cords)
-                    delete(s.group[d.ke][d.id].buffer)
-                    s.onCameraInitExtensions.forEach((extender) => {
-                        extender(d,cn,tx)
-                    })
+            case'monitorUpdate':
+                var monitorConfig = d.monitorConfig;
+                var groupKey = monitorConfig.ke;
+                var monitorId = monitorConfig.mid;
+                var monitorDetails = monitorConfig.details;
+                var monitorKey = `${groupKey}${monitorId}`
+                if(!s.monitors[monitorKey])s.monitors[monitorKey] = Object.assign({}, monitorConfig);
+                var isObjectDetectionSeparate = monitorDetails.detector_use_detect_object === '1'
+                var width = parseFloat(isObjectDetectionSeparate  && monitorDetails.detector_scale_x_object ? monitorDetails.detector_scale_x_object : monitorDetails.detector_scale_x)
+                var height = parseFloat(isObjectDetectionSeparate  && monitorDetails.detector_scale_y_object ? monitorDetails.detector_scale_y_object : monitorDetails.detector_scale_y)
+                s.monitorInfo[monitorKey] = {
+                    isObjectDetectionSeparate,
+                    width,
+                    height,
                 }
+                delete(imageBuffers[monitorKey])
+                for(extender of s.onCameraInitExtensions){
+                    extender(monitorConfig, cn, tx)
+                }
+                // console.log(monitorId, 'registered', s.monitorInfo[monitorKey])
             break;
             case'frameFromRam':
                 if(!s.group[d.ke]){
@@ -214,29 +227,22 @@ module.exports = function(__dirname, config){
             break;
             case'frame':
                 try{
-                    if(!s.group[d.ke]){
-                        s.group[d.ke]={}
-                    }
-                    if(!s.group[d.ke][d.id]){
-                        s.group[d.ke][d.id] = {}
-                        s.onCameraInitExtensions.forEach((extender) => {
-                            extender(d,cn,tx)
-                        })
-                    }
-                    if(!s.group[d.ke][d.id].buffer){
-                      s.group[d.ke][d.id].buffer = [d.frame];
+                    const monitorKey = `${d.id}${d.ke}`;
+                    imageBuffers[monitorKey]
+                    if(!imageBuffers[monitorKey]){
+                      imageBuffers[monitorKey] = [d.frame];
                     }else{
-                      s.group[d.ke][d.id].buffer.push(d.frame)
+                      imageBuffers[monitorKey].push(d.frame)
                     }
                     if(d.frame[d.frame.length-2] === 0xFF && d.frame[d.frame.length-1] === 0xD9){
-                        var buffer = Buffer.concat(s.group[d.ke][d.id].buffer);
+                        var buffer = Buffer.concat(imageBuffers[monitorKey]);
                         processImage(buffer,d,tx)
-                        s.group[d.ke][d.id].buffer = null
+                        imageBuffers[monitorKey] = null
                     }
                 }catch(err){
                     if(err){
                         s.systemLog(err)
-                        delete(s.group[d.ke][d.id].buffer)
+                        delete(imageBuffers[monitorKey])
                     }
                 }
             break;

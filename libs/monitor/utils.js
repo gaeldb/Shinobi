@@ -1186,7 +1186,6 @@ module.exports = (s,config,lang) => {
             })
         }
         if(e.details.detector === '1'){
-            s.ocvTx({f:'init_monitor',id:monitorId,ke:groupKey})
             //frames from motion detect
             if(e.details.detector_pam === '1'){
                // activeMonitor.spawn.stdio[3].pipe(activeMonitor.p2p).pipe(activeMonitor.pamDiff)

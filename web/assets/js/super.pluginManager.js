@@ -147,7 +147,11 @@ $(document).ready(function(){
                 $.post(superApiPrefix + $user.sessionKey + '/plugins/download',{
                     downloadUrl: url,
                     packageRoot: packageRoot,
-                },callback)
+                },function(data){
+                    setTimeout(function(){
+                        callback(data)
+                    },3000)
+                })
             }
         })
     }
