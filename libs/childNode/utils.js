@@ -1,5 +1,8 @@
 const fs = require('fs');
 module.exports = function(s,config,lang,app,io){
+    const {
+        postProcessCompletedMp4Video,
+    } = require('../video/utils.js')(s,config,lang)
     const masterDoWorkToo = config.childNodes.masterDoWorkToo;
     const maxCpuPercent = config.childNodes.maxCpuPercent || 75;
     const maxRamPercent = config.childNodes.maxRamPercent || 75;
@@ -177,17 +180,21 @@ module.exports = function(s,config,lang,app,io){
                     filename : filename,
                     filesizeMB : parseFloat((data.filesize/1048576).toFixed(2))
                 }
-                s.insertDatabaseRow(monitorConfig,insert)
-                s.insertCompletedVideoExtensions.forEach(function(extender){
-                    extender(activeMonitor, monitorConfig, insert)
+                s.insertDatabaseRow(monitorConfig,insert,function(response){
+                    postProcessCompletedMp4Video(response.insertQuery).then((isGood) => {
+                        if(!isGood)return console.error(`FAILED VIDEO INSERT`);
+                        s.insertCompletedVideoExtensions.forEach(function(extender){
+                            extender(activeMonitor, monitorConfig, insert)
+                        })
+                        //purge over max
+                        s.purgeDiskForGroup(data.ke)
+                        //send new diskUsage values
+                        s.setDiskUsedForGroup(data.ke,insert.filesizeMB)
+                        clearTimeout(activeMonitor.recordingChecker)
+                        clearTimeout(activeMonitor.streamChecker)
+                        resolve(response)
+                    })
                 })
-                //purge over max
-                s.purgeDiskForGroup(data.ke)
-                //send new diskUsage values
-                s.setDiskUsedForGroup(data.ke,insert.filesizeMB)
-                clearTimeout(activeMonitor.recordingChecker)
-                clearTimeout(activeMonitor.streamChecker)
-                resolve(response)
             })
         })
     }

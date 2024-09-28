@@ -10,6 +10,14 @@ $(document).ready(function(){
     var theWindow = $(window);
     var lastWindowWidth = theWindow.width()
     var lastWindowHeight = theWindow.height()
+    function getQueryString(){
+        var theObject = {}
+        location.search.substring(1).split('&').forEach(function(string){
+            var parts = string.split('=')
+            theObject[parts[0]] = parts[1]
+        })
+        return theObject
+    }
     function featureIsActivated(showNotice){
         if(userHasSubscribed){
             return true
@@ -61,6 +69,7 @@ $(document).ready(function(){
 
     function selectMonitor(monitorId, css){
         css = css || {};
+        var embedHost = getQueryString().host || `/`;
         var isSelected = selectedMonitors[monitorId]
         if(isSelected)return;
         var numberOfSelected = Object.keys(selectedMonitors)
@@ -69,7 +78,7 @@ $(document).ready(function(){
         }
         ++selectedMonitorsCount
         selectedMonitors[monitorId] = Object.assign({}, loadedMonitors[monitorId]);
-        wallViewCanvas.append(`<div class="wallview-video p-0 m-0" live-stream="${monitorId}" style="left:${css.left || 0}px;top:${css.top || 0}px;width:${css.width ? css.width + 'px' : '50vw'};height:${css.height ? css.height + 'px' : '50vh'};"><div class="overlay"><div class="wallview-item-controls text-end"><a class="btn btn-sm btn-outline-danger wallview-item-close"><i class="fa fa-times"></i></a></div></div><iframe src="${getApiPrefix('embed')}/${monitorId}/fullscreen%7Cjquery%7Crelative?host=/"></iframe></div>`)
+        wallViewCanvas.append(`<div class="wallview-video p-0 m-0" live-stream="${monitorId}" style="left:${css.left || 0}px;top:${css.top || 0}px;width:${css.width ? css.width + 'px' : '50vw'};height:${css.height ? css.height + 'px' : '50vh'};"><div class="overlay"><div class="wallview-item-controls text-end"><a class="btn btn-sm btn-outline-danger wallview-item-close"><i class="fa fa-times"></i></a></div></div><iframe src="${getApiPrefix('embed')}/${monitorId}/fullscreen%7Cjquery%7Crelative?host=${embedHost}"></iframe></div>`)
         wallViewCanvas.find(`[live-stream="${monitorId}"]`)
         .draggable({
             grid: [40, 40],

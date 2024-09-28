@@ -311,9 +311,6 @@ $(document).ready(function(e){
     function downloadTimelapseFrame(frame){
         downloadFile(frame.href,frame.filename)
     }
-    function buildFileBinUrl(data){
-        return apiBaseUrl + '/fileBin/' + data.ke + '/' + data.mid + '/' + data.name
-    }
     function downloadTimelapseVideo(data){
         var downloadUrl = buildFileBinUrl(data)
         downloadFile(downloadUrl,data.name)

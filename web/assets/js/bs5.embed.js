@@ -2,6 +2,7 @@ var loadedLiveGrids = {}
 var monitorPops = {}
 var liveGridElements = {}
 var runningJpegStreams = {}
+var containerElement = $(`#monitors_live`)
 var liveGrid = $('#monitors_live .stream-element-container')
 var websocketPath = checkCorrectPathEnding(urlPrefix) + 'socket.io'
 //
@@ -75,7 +76,7 @@ function buildLiveGridBlock(monitor){
     var monitorDetails = safeJsonParse(monitor.details)
     var monitorLiveId = `monitor_live_${monitor.mid}`
     var subStreamChannel = monitor.subStreamChannel
-    var streamType = subStreamChannel ? monitorDetails.substream ? monitorDetails.substream.output.stream_type : 'hls' : monitorDetails.stream_type
+    var streamType = monitorDetails.stream_type === 'useSubstream' ? monitorDetails.substream.output.stream_type : monitorDetails.stream_type
     var streamElement = buildStreamElementHtml(streamType)
     var streamBlockInfo = definitions['Monitor Stream Window']
     if(!loadedLiveGrids[monitor.mid])loadedLiveGrids[monitor.mid] = {}
@@ -99,21 +100,18 @@ function buildLiveGridBlock(monitor){
 
 function drawLiveGridBlock(monitorConfig,subStreamChannel){
     var monitorId = monitorConfig.mid
-    if($('#monitor_live_' + monitorId).length === 0){
-        var html = buildLiveGridBlock(monitorConfig)
-        liveGrid.html(html);
-        console.log(liveGrid.length,html)
-        var theBlock = $('#monitor_live_' + monitorId);
-        var streamElement = theBlock.find('.stream-element')
-        liveGridElements[monitorId] = {
-            monitorItem: theBlock,
-            streamElement: streamElement,
-            eventObjects: theBlock.find('.stream-objects'),
-            motionMeter: theBlock.find('.indifference .progress-bar'),
-            motionMeterText: theBlock.find('.indifference .progress-bar span'),
-            width: streamElement.width(),
-            height: streamElement.height(),
-        }
+    var html = buildLiveGridBlock(monitorConfig)
+    liveGrid.html(html);
+    var theBlock = $('#monitor_live_' + monitorId);
+    var streamElement = theBlock.find('.stream-element')
+    liveGridElements[monitorId] = {
+        monitorItem: theBlock,
+        streamElement: streamElement,
+        eventObjects: theBlock.find('.stream-objects'),
+        motionMeter: theBlock.find('.indifference .progress-bar'),
+        motionMeterText: theBlock.find('.indifference .progress-bar span'),
+        width: streamElement.width(),
+        height: streamElement.height(),
     }
     initiateLiveGridPlayer(loadedMonitors[monitorId],subStreamChannel)
 }
@@ -131,15 +129,15 @@ function unmuteVideoPlayer(){
     },3000)
     $('.unmute-embed-audio').remove()
 }
-function initiateLiveGridPlayer(monitor,subStreamChannel){
+function initiateLiveGridPlayer(monitor){
     var livePlayerElement = loadedLiveGrids[monitor.mid]
     var details = monitor.details
     var groupKey = monitor.ke
     var monitorId = monitor.mid
     var loadedMonitor = loadedMonitors[monitorId]
     var loadedPlayer = loadedLiveGrids[monitor.mid]
-    var containerElement = $(`#monitor_live_${monitor.mid}`)
-    var streamType = subStreamChannel ? details.substream ? details.substream.output.stream_type : 'hls' : details.stream_type
+    var subStreamChannel = loadedMonitor.subStreamChannel
+    var streamType = details.stream_type === 'useSubstream' ? details.substream.output.stream_type : details.stream_type
     switch(streamType){
         case'jpeg':
             startJpegStream(monitorId)
@@ -542,10 +540,20 @@ function toggleSubStream(monitorId,callback){
     }
     if(monitor.subStreamToggleLock)return false;
     monitor.subStreamToggleLock = true
-    $.getJSON(getApiPrefix() + '/toggleSubstream/'+$user.ke+'/'+monitorId,function(d){
-        monitor.subStreamToggleLock = false
-        debugLog(d)
-        if(callback)callback()
+    var substreamUrl = getApiPrefix() + '/toggleSubstream/'+$user.ke+'/'+monitorId;
+    $.getJSON(`${substreamUrl}?action=status`,function(response){
+        if(!response.isRunning){
+            $.getJSON(substreamUrl,function(d){
+                monitor.subStreamChannel = d.channel
+                monitor.subStreamToggleLock = false
+                debugLog(d)
+                if(callback)callback()
+            })
+        }else{
+            monitor.subStreamChannel = response.channel
+            monitor.subStreamToggleLock = false
+            if(callback)callback()
+        }
     })
 }
 $(document).ready(function(e){
@@ -595,8 +603,8 @@ $(document).ready(function(e){
             case'monitor_watch_on':
                 var monitorId = d.mid || d.id
                 var loadedMonitor = loadedMonitors[monitorId]
-                var subStreamChannel = d.subStreamChannel
-                if(!loadedMonitor.subStreamChannel && loadedMonitor.details.stream_type === 'useSubstream'){
+                var subStreamChannel = loadedMonitor.subStreamChannel || d.channel
+                if(loadedMonitor.details.stream_type === 'useSubstream'){
                     toggleSubStream(monitorId,function(){
                         drawLiveGridBlock(loadedMonitors[monitorId],subStreamChannel)
                     })
@@ -619,7 +627,6 @@ $(document).ready(function(e){
                 $('body').addClass('jpegMode')
             break;
             case'detector_trigger':
-                console.log(d)
                 var monitorId = d.id
                 var liveGridElement = liveGridElements[monitorId]
                 if(!window.dontShowDetection && liveGridElement){

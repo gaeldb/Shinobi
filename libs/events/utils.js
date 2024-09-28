@@ -40,7 +40,7 @@ module.exports = (s,config,lang) => {
         const monitorId = options.mid || options.id
         const groupKey = options.ke
         //if(!frameBuffer || imageSaveEventLock[groupKey + monitorId])return;
-	if(!frameBuffer || frameBuffer.length === 0 || imageSaveEventLock[groupKey + monitorId]) return;
+	    if(!frameBuffer || frameBuffer.length === 0 || imageSaveEventLock[groupKey + monitorId]) return;
         const eventTime = options.time
         const objectsFound = options.matrices
         const monitorConfig = Object.assign({id: monitorId},s.group[groupKey].rawMonitorConfigurations[monitorId])
@@ -678,17 +678,37 @@ module.exports = (s,config,lang) => {
         const activeMonitor = s.group[groupKey].activeMonitors[monitorId]
         const theEmitter = activeMonitor.secondaryDetectorOutput
         if(!activeMonitor.sendingFromSecondaryDetectorOuput){
-            s.debugLog('start sending object frames',groupKey,monitorId)
-            theEmitter.on('data',activeMonitor.secondaryDetectorOuputContentWriter = (data) => {
+            const monitorConfig = s.group[groupKey].rawMonitorConfigurations[monitorId]
+            const monitorDetails = monitorConfig.details;
+            let chosenDetector = monitorDetails.detectors_selected;
+            if(chosenDetector instanceof Array)chosenDetector = chosenDetector.join(',');
+            let sendToDetector = (data) => {
                 s.ocvTx({
                     f : 'frame',
-                    mon : s.group[groupKey].rawMonitorConfigurations[monitorId].details,
+                    mon : monitorDetails,
                     ke : groupKey,
                     id : monitorId,
                     time : s.formattedTime(),
                     frame : data
                 })
-            })
+            }
+            if(chosenDetector && !(chosenDetector.includes('all'))){
+                const pluginsGettingIt = chosenDetector.split(',').map(item => item.trim()).filter(item => !!item);
+                sendToDetector = (data) => {
+                    for(pluginName of pluginsGettingIt){
+                        s.sendToDetector(pluginName, {
+                            f : 'frame',
+                            mon : monitorDetails,
+                            ke : groupKey,
+                            id : monitorId,
+                            time : s.formattedTime(),
+                            frame : data
+                        })
+                    }
+                }
+            }
+            s.debugLog('start sending object frames',groupKey,monitorId)
+            theEmitter.on('data', activeMonitor.secondaryDetectorOuputContentWriter = sendToDetector)
         }
         clearTimeout(activeMonitor.sendingFromSecondaryDetectorOuput)
         activeMonitor.sendingFromSecondaryDetectorOuput = setTimeout(() => {

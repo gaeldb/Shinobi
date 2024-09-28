@@ -1,4 +1,5 @@
 const fs = require('fs');
+const fsP = require('fs').promises;
 const path = require('path');
 const moment = require('moment');
 const fetch  = require('node-fetch');
@@ -217,6 +218,13 @@ module.exports = (processCwd,config) => {
             readStream.pipe(writeStream)
         })
     }
+    async function moveFile(inputFilePath,outputFilePath) {
+        try{
+            await fsP.rm(outputFilePath)
+        }catch(err){}
+        await copyFile(inputFilePath, outputFilePath)
+        await fsP.rm(inputFilePath)
+    }
     function hmsToSeconds(str) {
         var p = str.split(':'),
             s = 0, m = 1;
@@ -240,6 +248,17 @@ module.exports = (processCwd,config) => {
             }
         }
     }
+    async function deleteFilesInFolder(folderPath) {
+        try {
+            const files = await fsP.readdir(folderPath);
+            for (const file of files) {
+                const filePath = path.join(folderPath, file);
+                await fsP.rm(filePath, { recursive: true });
+            }
+        } catch (error) {
+            console.error(`Error deleting files: ${error.message}`);
+        }
+    }
     return {
         parseJSON: parseJSON,
         stringJSON: stringJSON,
@@ -261,5 +280,7 @@ module.exports = (processCwd,config) => {
         copyFile: copyFile,
         hmsToSeconds,
         setDefaultIfUndefined,
+        deleteFilesInFolder,
+        moveFile,
     }
 }

@@ -15,6 +15,7 @@ var monSectionPresets = $('#monSectionPresets')
 var copySettingsSelector = $('#copy_settings')
 var monitorPresetsSelection = $('#monitorPresetsSelection')
 var monitorPresetsNameField = $('#monitorPresetsName')
+var detectorsSelected = $('#detectorsSelected')
 var monitorsList = monitorEditorWindow.find('.monitors_list')
 var editorForm = monitorEditorWindow.find('form')
 var tagsInput = monitorEditorWindow.find('[name="tags"]')
@@ -566,7 +567,37 @@ function drawInputMapSelectorHtml(options,parent){
     </div>`
     parent.prepend(html)
 }
-function importIntoMonitorEditor(options){
+function getPluginsList(monitorConfig){
+    return new Promise((resolve) => {
+        const chosenDetectors = safeJsonParse(monitorConfig.details).detectors_selected || [];
+        $.get(getApiPrefix() + '/plugins/list',function(data){
+            var plugins = data.plugins || {};
+            var pluginNames = Object.keys(plugins)
+            var disconnectedPlugins = chosenDetectors.filter(item => !pluginNames.includes(item));
+            var html = createOptionHtml({
+                value: 'all',
+                label: `${lang.All} (${lang.Default})`
+            });
+            $.each(plugins, function(name, pluginInfo){
+                html += createOptionHtml({
+                    value: name,
+                    label: name,
+                    selected: chosenDetectors.includes(name),
+                })
+            });
+            $.each(disconnectedPlugins, function(n, name){
+                html += createOptionHtml({
+                    value: name,
+                    label: `${name} (${lang.Disconnected})`,
+                    selected: true,
+                })
+            });
+            detectorsSelected.html(html)
+            resolve(plugins)
+        })
+    })
+}
+async function importIntoMonitorEditor(options){
     var monitorConfig = options.values || options
     var monitorId = monitorConfig.mid
     var monitorDetails = safeJsonParse(monitorConfig.details);
@@ -686,6 +717,9 @@ function importIntoMonitorEditor(options){
             }
         }
     });
+    //
+    await getPluginsList(monitorConfig)
+    //
     copySettingsSelector.val('0').change()
     var tmp = '';
     $.each(loadedMonitors,function(n,monitor){
@@ -1319,9 +1353,11 @@ editorForm.find('[name="type"]').change(function(e){
             break;
             case'detector_plugged':
                 addDetectorPlugin(d.plug,d)
+                if(monitorEditorSelectedMonitor)getPluginsList(monitorEditorSelectedMonitor);
             break;
             case'detector_unplugged':
                 removeDetectorPlugin(d.plug)
+                if(monitorEditorSelectedMonitor)getPluginsList(monitorEditorSelectedMonitor);
             break;
         }
     })
@@ -1335,6 +1371,7 @@ editorForm.find('[name="type"]').change(function(e){
         drawMonitorListToSelector(monitorsList.find('optgroup'),false,'host')
         monitorsList.val(theSelected)
         checkToOpenSideMenu()
+        if(monitorEditorSelectedMonitor)getPluginsList(monitorEditorSelectedMonitor)
     }
     addOnTabAway('monitorSettings', function(){
         if(isSideBarMenuCollapsed()){

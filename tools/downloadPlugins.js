@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const AdmZip = require('adm-zip');
+const unzipper = require('unzipper');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -21,13 +21,14 @@ async function fetchAndDownloadFolder(folderName) {
       throw new Error(`Failed to download folder: ${response.statusText}`);
     }
 
-    const buffer = await response.buffer();
-    const zip = new AdmZip(buffer);
-
-    // Extract the ZIP to a temporary location
+    // Create a temporary path for extraction
     const tempExtractPath = path.join(process.cwd(), 'temp_extracted');
     await fs.mkdir(tempExtractPath, { recursive: true });
-    zip.extractAllTo(tempExtractPath, true);
+
+    // Extract the ZIP using unzipper
+    await response.body
+      .pipe(unzipper.Extract({ path: tempExtractPath }))
+      .promise();
 
     // Find the folder ending with the target name
     const extractedFolder = (await fs.readdir(tempExtractPath)).find(dir => dir.endsWith(folderName));
@@ -66,3 +67,5 @@ if (!folderName) {
   console.error('Usage: node script.js <folderName>');
   process.exit(1);
 }
+
+fetchAndDownloadFolder(folderName);

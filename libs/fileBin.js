@@ -192,6 +192,11 @@ module.exports = function(s,config,lang,app,io){
             })
         })
     }
+    s.notifyFileBinUploaded = function(fileBinInsertQuery){
+        s.tx(Object.assign({
+            f: 'fileBin_item_added',
+        },fileBinInsertQuery),'GRP_'+fileBinInsertQuery.ke);
+    }
     s.getFileBinDirectory = getFileBinDirectory
     s.getFileBinEntry = getFileBinEntry
     s.getFileBinBuffer = getFileBinBuffer
