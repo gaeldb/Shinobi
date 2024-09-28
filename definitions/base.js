@@ -3152,11 +3152,29 @@ module.exports = function(s,config,lang){
                              ]
                          },
                          {
+                             hidden: true,
+                             "id": "detectorsSelected",
+                            "name": "detail=detectors_selected",
+                            "field": lang["Detectors Selected"],
+                            "description": lang.fieldTextDetectorsSelected,
+                            "default": "all",
+                            "attribute": "multiple",
+                            "fieldType": "select",
+                            "form-group-class": "h_casc_input h_casc_1",
+                            "possible": [
+                               {
+                                  "name": `${lang.All} (${lang.Default})`,
+                                  "value": "all"
+                               }
+                            ]
+                         },
+                         {
                             "name": "detail=detector_object_ignore_not_move",
                             "field": lang["Ignore Non-Moving"],
                             "default": "0",
                             "fieldType": "select",
                             "selector": "h_obj_ignore_move",
+                            "form-group-class": "h_casc_input h_casc_1",
                             "possible": [
                                {
                                   "name": lang.No,
@@ -3183,6 +3201,7 @@ module.exports = function(s,config,lang){
                             "description": lang["fieldTextDetectorSendFramesObject"],
                             "default": "1",
                             "fieldType": "select",
+                            "form-group-class": "h_casc_input h_casc_1",
                             "possible": [
                                {
                                   "name": lang.No,
@@ -3222,6 +3241,7 @@ module.exports = function(s,config,lang){
                             "default": "1",
                             "example": "",
                             "fieldType": "select",
+                            "form-group-class": "h_casc_input h_casc_1",
                             "possible": [
                                {
                                   "name": lang.No,
@@ -3242,6 +3262,7 @@ module.exports = function(s,config,lang){
                             "example": "",
                             "selector": "h_det_mot_fir",
                             "fieldType": "select",
+                            "form-group-class": "h_casc_input h_casc_1",
                             "possible": [
                                {
                                   "name": lang.No,
@@ -3290,7 +3311,6 @@ module.exports = function(s,config,lang){
                       ]
                   },
                    {
-                       isAdvanced: true,
                        hidden: true,
                       "name": lang['Event-Based Recording'],
                       "input-mapping": "detector_sip_buffer",

@@ -1102,3 +1102,11 @@ function makeButton({ color, link, text, class: classes}){
 function replaceBrokenImage(_this){
     $(_this).attr('src', `${libURL}/libs/img/bg.jpg`)
 }
+function getQueryString(){
+    var theObject = {}
+    location.search.substring(1).split('&').forEach(function(string){
+        var parts = string.split('=')
+        theObject[parts[0]] = parts[1]
+    })
+    return theObject
+}

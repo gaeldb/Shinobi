@@ -56,7 +56,7 @@ if ! [ -x "$(command -v ifconfig)" ]; then
 fi
 echo "============="
 echo "Shinobi - Installing Node.js"
-sh $DIR/nodejs-ubuntu.sh
+bash $DIR/nodejs-ubuntu.sh
 if ! [ -x "$(command -v npm)" ]; then
     sudo apt install npm -y
 fi

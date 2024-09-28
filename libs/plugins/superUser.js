@@ -94,12 +94,13 @@ module.exports = async (s,config,lang,app,io,currentUse) => {
     const downloadModule = (downloadUrl,packageName) => {
         const downloadPath = modulesBasePath + packageName
         try{
-            fs.mkdirSync(downloadPath)
+            fs.mkdirSync(downloadPath, { recursive: true })
         }catch(err){
             s.debugLog(err)
         }
         return new Promise(async (resolve, reject) => {
-            fs.mkdir(downloadPath, () => {
+            fs.mkdir(downloadPath, { recursive: true }, (err) => {
+                if(err)console.error(err)
                 fetchDownloadAndWrite(downloadUrl,downloadPath + '.zip', 1)
                 .then((readStream) => {
                     readStream.pipe(unzipper.Parse())
@@ -228,11 +229,15 @@ module.exports = async (s,config,lang,app,io,currentUse) => {
     }
     const enableModule = (name,status) => {
         // set status to `false` to enable
-        const modulePath = getModulePath(name)
-        const confJson = getModuleConfiguration(name)
-        const confPath = modulePath + 'conf.json'
-        confJson.enabled = status;
-        fs.writeFileSync(confPath,s.prettyPrint(confJson))
+        try{
+            const modulePath = getModulePath(name)
+            const confJson = getModuleConfiguration(name)
+            const confPath = modulePath + 'conf.json'
+            confJson.enabled = status;
+            fs.writeFileSync(confPath,s.prettyPrint(confJson))
+        }catch(err){
+            console.error('Failed to Toggle Enable Status for Module.', name, status)
+        }
     }
     const deleteModule = (name) => {
         // requires restart for changes to take effect

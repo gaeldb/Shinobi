@@ -73,3 +73,11 @@ function drawMatrices(event,options){
     })
     theContainer.append(html)
 }
+function getQueryString(){
+    var theObject = {}
+    location.search.substring(1).split('&').forEach(function(string){
+        var parts = string.split('=')
+        theObject[parts[0]] = parts[1]
+    })
+    return theObject
+}

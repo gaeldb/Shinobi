@@ -87,6 +87,8 @@ module.exports = function(s,config){
     createExtension(`onSubscriptionCheck`)
     createExtension(`onDataPortMessage`)
     createExtension(`onHttpRequestUpgrade`,null,true)
+    createExtension(`onPluginConnected`)
+    createExtension(`onPluginDisconnected`)
     /////// CRON ////////
     createExtension(`onCronGroupProcessed`)
     createExtension(`onCronGroupProcessedAwaited`)

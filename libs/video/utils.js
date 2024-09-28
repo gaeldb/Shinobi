@@ -1,6 +1,9 @@
 const fs = require('fs')
 const { spawn } = require('child_process')
 const async = require('async');
+const path = require('path');
+const moment = require('moment');
+const fsP = require('fs').promises;
 module.exports = (s,config,lang) => {
     const {
         ffprobe,
@@ -9,7 +12,9 @@ module.exports = (s,config,lang) => {
     const {
         copyFile,
         hmsToSeconds,
+        moveFile,
     } = require('../basic/utils.js')(process.cwd(),config)
+    const chunkReadSize = 4096;
     // orphanedVideoCheck : new function
     const checkIfVideoIsOrphaned = (monitor,videosDirectory,filename) => {
         const response = {ok: true}
@@ -593,6 +598,7 @@ module.exports = (s,config,lang) => {
                 time: video.time,
             }
             await s.insertFileBinEntry(fileBinInsertQuery)
+            s.notifyFileBinUploaded(fileBinInsertQuery)
             s.tx(Object.assign({
                 f: 'fileBin_item_added',
                 slicedVideo: true,
@@ -604,6 +610,374 @@ module.exports = (s,config,lang) => {
         }
         return response
     }
+    const mergingVideos = {};
+    const mergeVideos = async function({
+        groupKey,
+        monitorId,
+        filePaths,
+        outputFilePath,
+        videoCodec = 'libx265',
+        audioCodec = 'aac',
+        onStdout = (data) => {s.systemLog(`${data}`)},
+        onStderr = (data) => {s.systemLog(`${data}`)},
+    }) {
+        if (!Array.isArray(filePaths) || filePaths.length === 0) {
+            throw new Error('First parameter must be a non-empty array of absolute file paths.');
+        }
+        if(mergingVideos[outputFilePath])return;
+        const currentDate = new Date();
+        const fileExtensions = filePaths.map(file => path.extname(file).toLowerCase());
+        const allSameExtension = fileExtensions.every(ext => ext === fileExtensions[0]);
+        const fileList = filePaths.map(file => `file '${file}'`).join('\n');
+        const tempFileListPath = path.join(s.dir.streams, groupKey, monitorId, `video_merge_${currentDate}.txt`);
+        mergingVideos[outputFilePath] = currentDate;
+        try {
+            await fsP.writeFile(tempFileListPath, fileList);
+            let ffmpegArgs;
+            // if (allSameExtension) {
+            //     ffmpegArgs = [
+            //         '-f', 'concat',
+            //         '-safe', '0',
+            //         '-i', tempFileListPath,
+            //         '-c', 'copy',
+            //         '-y',
+            //         outputFilePath
+            //     ];
+            // } else {
+                ffmpegArgs = [
+                    '-loglevel', 'warning',
+                    '-f', 'concat',
+                    '-safe', '0',
+                    '-i', tempFileListPath,
+                    '-c:v', videoCodec,
+                    '-c:a', audioCodec,
+                    '-strict', '-2',
+                    '-crf', '1',
+                    '-y',
+                    outputFilePath
+                ];
+            // }
+            s.debugLog(fileList)
+            s.debugLog(ffmpegArgs)
+
+            await new Promise((resolve, reject) => {
+                const ffmpegProcess = spawn(config.ffmpegDir, ffmpegArgs);
+                ffmpegProcess.stdout.on('data', onStdout);
+                ffmpegProcess.stderr.on('data', onStderr);
+                ffmpegProcess.on('close', (code) => {
+                    delete(mergingVideos[outputFilePath]);
+                    if (code === 0) {
+                        console.log(`FFmpeg process exited with code ${code}`);
+                        resolve();
+                    } else {
+                        reject(new Error(`FFmpeg process exited with code ${code}`));
+                    }
+                });
+                ffmpegProcess.on('error', (err) => {
+                    reject(new Error(`FFmpeg error: ${err}`));
+                });
+            });
+        } finally {
+            await fsP.unlink(tempFileListPath);
+        }
+    };
+    async function mergeVideosAndBin(videos){
+        const currentTime = new Date();
+        const firstVideo = videos[0];
+        const lastVideo = videos[videos.length - 1];
+        const groupKey = firstVideo.ke;
+        const monitorId = firstVideo.mid;
+        const logTarget = { ke: groupKey, mid: '$USER' };
+        try{
+            try{
+                await fsP.stat(outputFilePath)
+                return outputFilePath
+            }catch(err){
+
+            }
+            const filePaths = videos.map(video => {
+                const monitorConfig = s.group[video.ke].rawMonitorConfigurations[video.mid];
+                const filePath = path.join(s.getVideoDirectory(video), `${s.formattedTime(video.time)}.mp4`);
+                return filePath
+            });
+            const filename = `${s.formattedTime(firstVideo.time)}-${s.formattedTime(lastVideo.time)}-${filePaths.length}.mp4`
+            const fileBinFolder = s.getFileBinDirectory(firstVideo);
+            const outputFilePath = path.join(fileBinFolder, filename);
+
+            s.userLog(logTarget,{
+                type: 'mergeVideos ffmpeg START',
+                msg: {
+                    monitorId,
+                    numberOfVideos: filePaths.length,
+                }
+            });
+            await mergeVideos({
+                groupKey,
+                monitorId,
+                filePaths,
+                outputFilePath,
+                onStdout: (data) => {
+                    s.debugLog(data.toString())
+                    s.userLog(logTarget,{
+                        type: 'mergeVideos ffmpeg LOG',
+                        msg: `${data}`
+                    });
+                },
+                onStderr: (data) => {
+                    s.debugLog(data.toString())
+                    s.userLog(logTarget,{
+                        type: 'mergeVideos ffmpeg ERROR',
+                        msg: `${data}`
+                    });
+                },
+            });
+            const fileSize = (await fsP.stat(outputFilePath)).size;
+            const fileBinInsertQuery = {
+                ke: groupKey,
+                mid: monitorId,
+                name: filename,
+                size: fileSize,
+                details: {},
+                status: 1,
+                time: currentTime,
+            }
+            await s.insertFileBinEntry(fileBinInsertQuery);
+            s.notifyFileBinUploaded(fileBinInsertQuery);
+            return outputFilePath
+        }catch(err){
+            console.log('mergeVideos process ERROR', err)
+            s.userLog(logTarget,{
+                type: 'mergeVideos process ERROR',
+                msg: `${err.toString()}`
+            });
+            return null;
+        }
+    }
+
+    async function readChunkForMoov(filePath, start, end) {
+        const stream = fs.createReadStream(filePath, { start, end });
+        let hasMoov = false;
+
+        for await (const chunk of stream) {
+            if (chunk.includes('moov')) {
+                hasMoov = true;
+                break;
+            }
+        }
+
+        return hasMoov;
+    }
+
+    async function checkMoovAtBeginning(filePath) {
+        return await readChunkForMoov(filePath, 0, chunkReadSize - 1);
+    }
+
+    async function checkMoovAtEnd(filePath) {
+        const stats = await fs.promises.stat(filePath);
+        const fileSize = stats.size;
+        return await readChunkForMoov(filePath, fileSize - chunkReadSize, fileSize - 1);
+    }
+
+    async function hasMoovAtom(filePath) {
+        const foundAtBeginning = await checkMoovAtBeginning(filePath);
+
+        if (foundAtBeginning) {
+            return true;
+        }
+
+        const foundAtEnd = await checkMoovAtEnd(filePath);
+        return foundAtEnd;
+    }
+    const addMoovAtom = async (inputFilePath, outputFilePath, videoCodec = 'libx264', audioCodec = 'aac') => {
+        try {
+            const ffmpegArgs = [
+                '-i', inputFilePath,
+                '-c:v', videoCodec,
+            ];
+            if(audioCodec){
+                ffmpegArgs.push('-c:a', audioCodec, '-strict', '-2')
+            }else{
+                ffmpegArgs.push('-an')
+            }
+            ffmpegArgs.push(
+                '-movflags', '+faststart',
+                '-crf', '0',
+                '-q:a', '0',
+                outputFilePath
+            );
+            console.log(config.ffmpegDir + ' ' + ffmpegArgs.join(' '))
+            return new Promise((resolve, reject) => {
+                const ffmpegProcess = spawn(config.ffmpegDir, ffmpegArgs);
+
+                ffmpegProcess.stdout.on('data', (data) => {
+                    console.log(`FFmpeg stdout: ${data}`);
+                });
+
+                ffmpegProcess.stderr.on('data', (data) => {
+                    console.error(`FFmpeg stderr: ${data}`);
+                });
+
+                ffmpegProcess.on('close', (code) => {
+                    if (code === 0) {
+                        resolve(outputFilePath);
+                    } else {
+                        reject(new Error(`FFmpeg process exited with code ${code}`));
+                    }
+                });
+
+                ffmpegProcess.on('error', (err) => {
+                    reject(err);
+                });
+            });
+        } catch (error) {
+            throw new Error(`Failed to re-encode file: ${error.message}`);
+        }
+    };
+    async function getVideoFrameAsJpeg(filePath, seconds = 7){
+        return new Promise((resolve, reject) => {
+            const ffmpegArgs = [
+                '-loglevel', 'warning',
+                '-ss', seconds.toString(),
+                '-i', filePath,
+                '-frames:v', '1',
+                '-q:v', '2',
+                '-f', 'image2pipe',
+                '-vcodec', 'mjpeg',
+                'pipe:1'
+            ];
+            const ffmpegProcess = spawn(config.ffmpegDir, ffmpegArgs);
+            let buffer = Buffer.alloc(0);
+            ffmpegProcess.stdout.on('data', (data) => {
+                buffer = Buffer.concat([buffer, data]);
+            });
+
+            ffmpegProcess.stderr.on('data', (data) => {
+                s.debugLog(`getVideoFrameAsJpeg FFmpeg stderr: ${data}`);
+            });
+
+            ffmpegProcess.on('close', (code) => {
+                if (code === 0) {
+                    resolve(buffer);
+                } else {
+                    reject(new Error(`FFmpeg process exited with code ${code}`));
+                }
+            });
+
+            ffmpegProcess.on('error', (err) => {
+                reject(err);
+            });
+        });
+    };
+    function getVideoPath(video){
+        const videoPath = path.join(s.getVideoDirectory(video), `${s.formattedTime(video.time)}.${video.ext}`);
+        return videoPath
+    }
+    async function saveVideoFrameToTimelapse(video, secondsIn = 7){
+        // console.error(video)
+        const monitorConfig = s.group[video.ke].rawMonitorConfigurations[video.mid];
+        const activeMonitor = s.group[video.ke].activeMonitors[video.mid];
+        const frameTime = moment(video.time).add(secondsIn, 'seconds');
+        const frameDate = s.formattedTime(frameTime,'YYYY-MM-DD');
+        const timelapseRecordingDirectory = s.getTimelapseFrameDirectory(monitorConfig);
+        const videoPath = getVideoPath(video);
+        const frameFilename = s.formattedTime(frameTime) + '.jpg';
+        const location = timelapseRecordingDirectory + frameDate + '/';
+        const framePath = path.join(location, frameFilename);
+        try{
+            await fsP.stat(framePath)
+        }catch(err){
+            try{
+                const frameBuffer = await getVideoFrameAsJpeg(videoPath, secondsIn);
+                await fsP.mkdir(location, { recursive: true })
+                await fsP.writeFile(framePath, frameBuffer)
+                await s.createTimelapseFrameAndInsert(activeMonitor,location,frameFilename, frameTime._d)
+            }catch(err){
+                console.error(err)
+            }
+        }
+        // console.error('Completed Saving Frame from New Video!', framePath)
+    }
+    function getVideoCodecsFromMonitorConfig(video){
+        const monitorConfig = s.group[video.ke].rawMonitorConfigurations[video.mid];
+        const modeIsRecord = monitorConfig.mode === 'record'
+        let eventBasedVideoCodec = monitorConfig.details.detector_buffer_vcodec
+        let eventBasedAudioCodec = monitorConfig.details.detector_buffer_acodec
+        let recordingVideoCodec = monitorConfig.details.vcodec
+        let recordingAudioCodec = monitorConfig.details.acodec
+        switch(eventBasedVideoCodec){
+            case null:case '':case undefined:case'auto':
+                eventBasedVideoCodec = 'libx264'
+            break;
+        }
+        switch(eventBasedAudioCodec){
+            case null:case '':case undefined:case'auto':
+                eventBasedAudioCodec = 'aac'
+            break;
+            case'no':
+                eventBasedAudioCodec = null
+            break;
+        }
+        switch(recordingVideoCodec){
+            case null:case '':case undefined:case'auto':case'default':case'copy':
+                recordingVideoCodec = 'libx264'
+            break;
+        }
+        switch(recordingAudioCodec){
+            case null:case '':case undefined:case'auto':case'copy':
+                recordingAudioCodec = 'aac'
+            break;
+            case'no':
+                recordingAudioCodec = null
+            break;
+        }
+        return {
+            videoCodec: modeIsRecord ? recordingVideoCodec : eventBasedVideoCodec,
+            audioCodec: modeIsRecord ? recordingAudioCodec : eventBasedAudioCodec,
+            recordingVideoCodec,
+            recordingAudioCodec,
+            eventBasedVideoCodec,
+            eventBasedAudioCodec,
+        }
+    }
+    async function postProcessCompletedMp4Video(chosenVideo){
+        try {
+            const video = Object.assign({
+                ext: 'mp4'
+            },chosenVideo);
+            const videoPath = getVideoPath(video);
+            // const moovExists = await hasMoovAtom(videoPath);
+            // if (moovExists) {
+            //     s.debugLog('The file already has a moov atom.');
+            // } else {
+            //     return true;
+            //     // const { videoCodec, audioCodec } = getVideoCodecsFromMonitorConfig(video);
+            //     // const tempPath = path.join(s.getVideoDirectory(video), `TEMP_${s.formattedTime(video.time)}.${video.ext}`);
+            //     // await addMoovAtom(videoPath, tempPath, videoCodec, audioCodec);
+            //     // await moveFile(tempPath, videoPath)
+            //     // const newFileSize = (await fsP.stat(videoPath)).size;
+            //     // const updateResponse = await s.knexQueryPromise({
+            //     //     action: "update",
+            //     //     table: "Videos",
+            //     //     update: {
+            //     //         size: newFileSize
+            //     //     },
+            //     //     where: [
+            //     //         ['ke','=',video.ke],
+            //     //         ['mid','=',video.mid],
+            //     //         ['time','=',video.time],
+            //     //         ['end','=',video.end],
+            //     //         ['ext','=',video.ext],
+            //     //     ]
+            //     // });
+            // }
+            // await saveVideoFrameToTimelapse(video, 0)
+            await saveVideoFrameToTimelapse(video, 7)
+            return true;
+        } catch (error) {
+            console.error('Error processing MP4 file:', error);
+            return false;
+        }
+    };
     return {
         reEncodeVideoAndReplace,
         stitchMp4Files,
@@ -615,5 +989,13 @@ module.exports = (s,config,lang) => {
         reEncodeVideoAndBinOriginalAddToQueue,
         archiveVideo,
         sliceVideo,
+        mergeVideos,
+        mergeVideosAndBin,
+        saveVideoFrameToTimelapse,
+        postProcessCompletedMp4Video,
+        readChunkForMoov,
+        checkMoovAtBeginning,
+        checkMoovAtEnd,
+        hasMoovAtom
     }
 }

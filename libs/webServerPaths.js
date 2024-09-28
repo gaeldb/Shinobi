@@ -32,6 +32,7 @@ module.exports = function(s,config,lang,app,io){
         spawnSubstreamProcess,
         destroySubstreamProcess,
         removeSenstiveInfoFromMonitorConfig,
+        sendSubstreamEvent,
     } = require('./monitor/utils.js')(s,config,lang)
     const {
         sliceVideo,
@@ -39,6 +40,7 @@ module.exports = function(s,config,lang,app,io){
         reEncodeVideoAndReplace,
         reEncodeVideoAndBinOriginalAddToQueue,
         getVideosBasedOnTagFoundInMatrixOfAssociatedEvent,
+        mergeVideosAndBin,
     } = require('./video/utils.js')(s,config,lang)
     s.renderPage = function(req,res,paths,passables,callback){
         passables.window = {}
@@ -915,17 +917,39 @@ module.exports = function(s,config,lang,app,io){
                 const monitorConfig = s.group[groupKey].rawMonitorConfigurations[monitorId]
                 const activeMonitor = s.group[groupKey].activeMonitors[monitorId]
                 const substreamConfig = monitorConfig.details.substream
+                const theAction = req.query.action
                 if(
                     substreamConfig.output
                 ){
-                    if(!activeMonitor.subStreamProcess){
-                        response.ok = true
-                        activeMonitor.allowDestroySubstream = false;
-                        spawnSubstreamProcess(monitorConfig)
-                    }else{
-                        activeMonitor.allowDestroySubstream = true
-                        await destroySubstreamProcess(activeMonitor)
+                    switch(theAction){
+                        case'status':
+                            response.ok = true
+                            response.isRunning = !!activeMonitor.subStreamProcess;
+                            response.channel = activeMonitor.subStreamChannel;
+                        break;
+                        case'stop':
+                            activeMonitor.allowDestroySubstream = true
+                            await destroySubstreamProcess(activeMonitor)
+                        break;
+                        default:
+                            if(!activeMonitor.subStreamProcess){
+                                response.ok = true
+                                activeMonitor.allowDestroySubstream = false;
+                                spawnSubstreamProcess(monitorConfig)
+                                response.channel = activeMonitor.subStreamChannel;
+                            }else{
+                                sendSubstreamEvent(groupKey, monitorId)
+                            }
+                        break;
                     }
+                    // if(!activeMonitor.subStreamProcess){
+                    //     response.ok = true
+                    //     activeMonitor.allowDestroySubstream = false;
+                    //     spawnSubstreamProcess(monitorConfig)
+                    // }else{
+                    //     activeMonitor.allowDestroySubstream = true
+                    //     await destroySubstreamProcess(activeMonitor)
+                    // }
                 }else{
                     response.msg = lang['Invalid Settings']
                 }
@@ -1970,7 +1994,69 @@ module.exports = function(s,config,lang,app,io){
                 res.end(s.prettyPrint(response));
             })
         },res,req);
-    })
+    });
+    /**
+    * API : Merge Videos and Bin it
+     */
+    app.post(config.webPaths.apiPrefix+':auth/mergeVideos/:ke/:id', function (req,res){
+        s.auth(req.params, async function(user){
+            const monitorId = req.params.id
+            const groupKey = req.params.ke
+            const {
+                monitorPermissions,
+                monitorRestrictions,
+            } = s.getMonitorsPermitted(user.details,monitorId,'video_view')
+            const {
+                isRestricted,
+                isRestrictedApiKey,
+                apiKeyPermissions,
+            } = s.checkPermission(user);
+            if(
+                isRestrictedApiKey && apiKeyPermissions.watch_videos_disallowed ||
+                isRestricted && (
+                    monitorId && !monitorPermissions[`${monitorId}_video_view`] ||
+                    monitorRestrictions.length === 0
+                )
+            ){
+                s.closeJsonResponse(res,{ok: false, msg: lang['Not Authorized'], videos: []});
+                return
+            }
+            const response = { ok: false }
+            const selectedVideos = s.getPostData(req,'videos');
+            console.log('selected',selectedVideos)
+            if(selectedVideos && selectedVideos.length > 1){
+                const mergedFilePath = await mergeVideosAndBin(selectedVideos);
+                response.ok = !!mergedFilePath;
+                s.closeJsonResponse(res, response);
+            }else{
+                s.sqlQueryBetweenTimesWithPermissions({
+                    table: 'Videos',
+                    user: user,
+                    noCount: true,
+                    groupKey,
+                    monitorId,
+                    startTime: s.getPostData(req,'start'),
+                    endTime: s.getPostData(req,'end'),
+                    startTimeOperator: s.getPostData(req,'startOperator'),
+                    endTimeOperator: s.getPostData(req,'endOperator'),
+                    noLimit: s.getPostData(req,'noLimit'),
+                    limit: s.getPostData(req,'limit'),
+                    archived: s.getPostData(req,'archived'),
+                    endIsStartTo: !!s.getPostData(req,'endIsStartTo'),
+                    parseRowDetails: false,
+                    rowName: 'videos',
+                    monitorRestrictions: monitorRestrictions,
+                    preliminaryValidationFailed: false
+                }, async ({ videos }) => {
+                    if(videos){
+                        const mergedFilePath = await mergeVideosAndBin(videos);
+                        response.ok = !!mergedFilePath;
+                    }
+                    s.closeJsonResponse(res, response);
+                })
+            }
+        },res,req);
+    });
     /**
     * API : Get Login Tokens
      */
