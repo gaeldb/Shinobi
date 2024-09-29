@@ -1,6 +1,6 @@
 const fs = require('fs');
 const { Readable } = require('stream');
-const B2 = require('backblaze-b2')
+const B2 = require('shinobi-backblaze-b2')
 module.exports = function(s,config,lang){
     //Backblaze B2
     var serviceProvider = 'b2'
