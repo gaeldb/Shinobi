@@ -7905,6 +7905,11 @@ module.exports = function(s,config,lang){
                           eval: `!$user.details.sub || $user.details.monitor_create !== 0`,
                       },
                       {
+                          icon: 'ravelry',
+                          label: `${lang['Rally']}`,
+                          pageOpen: 'rally',
+                      },
+                      {
                           icon: 'eyedropper',
                           label: `${lang['FFprobe']}`,
                           pageOpen: 'cameraProbe',
@@ -9220,6 +9225,6 @@ module.exports = function(s,config,lang){
                  ]
              },
           }
-        },
+        }
   })
 }

@@ -1,0 +1,11 @@
+<main class="container page-tab dark pt-3" id="tab-rally">
+    <form id="rallyForm" class="row">
+      <% Object.keys(define['Rally'].blocks).forEach(function(blockKey) { -%>
+        <%- include('drawBlock', {
+                theBlock: define['Rally'].blocks[blockKey],
+                details: $user.details
+            }) %>
+       <%  }) -%>
+    </form>
+    <script src="<%-window.libURL%>assets/js/bs5.rally.js"></script>
+</main>
