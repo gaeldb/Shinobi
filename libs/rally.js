@@ -42,7 +42,7 @@ module.exports = (s,config,lang,app,io) => {
     });
 
     // page structure
-    config.webBlocksPreloaded.push(`home/rally`)
+    config.webBlocksPreloaded.push(`home/rally`);
     s.definitions['Rally'] = {
           "name": "Rally",
           "blocks": {
