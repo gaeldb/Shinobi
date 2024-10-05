@@ -265,7 +265,7 @@ Run "npm install ffbinaries" to get a different static FFmpeg downloader.`
                     console.log('ffbinaries : Downloading FFmpeg. Please Wait...');
                     ffbinaries.downloadBinaries(['ffmpeg', 'ffprobe'], {
                         destination: ffbinaryDir,
-                        version : '4.2'
+                        version : config.ffbinariesVersion || '4.2'
                     },function () {
                         config.ffmpegDir = ffbinaryDir + 'ffmpeg'
                         response.msg = 'ffbinaries : FFmpeg Downloaded.'
