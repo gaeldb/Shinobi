@@ -10,6 +10,7 @@ module.exports = function(s,config,lang){
             await s.group[groupKey].whcs.send(requestOptions);
         } catch (err) {
             console.error('AMZ genericRequest',groupKey,requestOptions)
+            console.error('AMZ genericRequest ERR',err)
             response.ok = false
             response.err = err
         }

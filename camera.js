@@ -89,6 +89,8 @@ require('./libs/ffmpeg.js')(s,config,lang, async () => {
     require('./libs/onvifDeviceManager.js')(s,config,lang,app,io)
     //alternate logins
     require('./libs/auth/logins.js')(s,config,lang,app)
+    //rally other Shinobi
+    require('./libs/rally.js')(s,config,lang,app,io)
     //on-start actions, daemon(s) starter
     await require('./libs/startup.js')(s,config,lang)
     //p2p, commander

@@ -164,13 +164,17 @@ module.exports = function(s,config,lang,app,io){
            })
         }
         var createDropInEventsDirectory = function(){
-            if(!config.dropInEventsDir){
-                config.dropInEventsDir = s.dir.streams + 'dropInEvents/'
-            }
-            s.dir.dropInEvents = s.checkCorrectPathEnding(config.dropInEventsDir)
-            //dropInEvents dir
-            if(!fs.existsSync(s.dir.dropInEvents)){
-                fs.mkdirSync(s.dir.dropInEvents)
+            try{
+                if(!config.dropInEventsDir){
+                    config.dropInEventsDir = s.dir.streams + 'dropInEvents/'
+                }
+                s.dir.dropInEvents = s.checkCorrectPathEnding(config.dropInEventsDir)
+                //dropInEvents dir
+                if(!fs.existsSync(s.dir.dropInEvents)){
+                    fs.mkdirSync(s.dir.dropInEvents)
+                }
+            }catch(err){
+                console.error(err)
             }
         }
         var getDropInEventDir = function(monitorConfig){
@@ -209,58 +213,65 @@ module.exports = function(s,config,lang,app,io){
             createDropInEventDirectory(monitorConfig,function(err,monitorEventDropDir){})
         }
         // FTP Server
+        createDropInEventsDirectory()
         if(config.ftpServer === true){
-            createDropInEventsDirectory()
-            if(!config.ftpServerPort)config.ftpServerPort = 21
-            if(!config.ftpServerUrl)config.ftpServerUrl = `ftp://0.0.0.0:${config.ftpServerPort}`
-            if(!config.ftpServerPasvUrl)config.ftpServerPasvUrl = config.ftpServerUrl.replace(/.*:\/\//, '').replace(/:.*/, '');
-            if(!config.ftpServerPasvMinPort)config.ftpServerPasvMinPort = 10050;
-            if(!config.ftpServerPasvMaxPort)config.ftpServerPasvMaxPort = 10100;
-            config.ftpServerUrl = config.ftpServerUrl.replace('{{PORT}}',config.ftpServerPort)
-            const FtpSrv = require('ftp-srv')
+            try{
+                const FtpSrv = require('ftp-srv')
+                console.error('WARNING : FTP Server is enabled.')
+                if(!config.ftpServerPort)config.ftpServerPort = 21
+                if(!config.ftpServerUrl)config.ftpServerUrl = `ftp://0.0.0.0:${config.ftpServerPort}`
+                if(!config.ftpServerPasvUrl)config.ftpServerPasvUrl = config.ftpServerUrl.replace(/.*:\/\//, '').replace(/:.*/, '');
+                if(!config.ftpServerPasvMinPort)config.ftpServerPasvMinPort = 10050;
+                if(!config.ftpServerPasvMaxPort)config.ftpServerPasvMaxPort = 10100;
+                config.ftpServerUrl = config.ftpServerUrl.replace('{{PORT}}',config.ftpServerPort)
 
-            const ftpServer = new FtpSrv({
-                url: config.ftpServerUrl,
-                // pasv_url must be set to enable PASV; ftp-srv uses its known IP if given 127.0.0.1,
-                // and smart clients will ignore the IP anyway. Some Dahua IP cams require PASV mode.
-                // ftp-srv just wants an IP only (no protocol or port)
-                pasv_url: config.ftpServerPasvUrl,
-                pasv_min: config.ftpServerPasvMinPort,
-                pasv_max: config.ftpServerPasvMaxPort,
-                greeting: "Shinobi FTP dropInEvent Server says hello!",
-                log: require('bunyan').createLogger({
-                  name: 'ftp-srv',
-                  level: 100
-                }),
-            })
-
-            ftpServer.on('login', ({connection, username, password}, resolve, reject) => {
-                s.basicOrApiAuthentication(username,password,function(err,user){
-                    if(user){
-                        connection.on('STOR', (error, fileName) => {
-                            if(!fileName)return;
-                            var pathPieces = fileName.replace(s.dir.dropInEvents,'').split('/')
-                            var ke = pathPieces[0]
-                            var mid = pathPieces[1]
-                            var firstDroppedPart = pathPieces[2]
-                            var monitorEventDropDir = s.dir.dropInEvents + ke + '/' + mid + '/'
-                            var deleteKey = monitorEventDropDir + firstDroppedPart
-                            onFileOrFolderFound(monitorEventDropDir + firstDroppedPart,deleteKey,Object.assign({},s.group[ke].rawMonitorConfigurations[mid]))
-                        })
-                        resolve({root: s.dir.dropInEvents + user.ke})
-                    }else{
-                        // reject(new Error('Failed Authorization'))
-                    }
+                const ftpServer = new FtpSrv({
+                    url: config.ftpServerUrl,
+                    // pasv_url must be set to enable PASV; ftp-srv uses its known IP if given 127.0.0.1,
+                    // and smart clients will ignore the IP anyway. Some Dahua IP cams require PASV mode.
+                    // ftp-srv just wants an IP only (no protocol or port)
+                    pasv_url: config.ftpServerPasvUrl,
+                    pasv_min: config.ftpServerPasvMinPort,
+                    pasv_max: config.ftpServerPasvMaxPort,
+                    greeting: "Shinobi FTP dropInEvent Server says hello!",
+                    log: require('bunyan').createLogger({
+                      name: 'ftp-srv',
+                      level: 100
+                    }),
                 })
-            })
-            ftpServer.on('client-error', ({connection, context, error}) => {
-                console.log('client-error',error)
-            })
-            ftpServer.listen().then(() => {
-                s.systemLog(`FTP Server running on port ${config.ftpServerPort}...`)
-            }).catch(function(err){
-                s.systemLog(err)
-            })
+
+                ftpServer.on('login', ({connection, username, password}, resolve, reject) => {
+                    s.basicOrApiAuthentication(username,password,function(err,user){
+                        if(user){
+                            connection.on('STOR', (error, fileName) => {
+                                if(!fileName)return;
+                                var pathPieces = fileName.replace(s.dir.dropInEvents,'').split('/')
+                                var ke = pathPieces[0]
+                                var mid = pathPieces[1]
+                                var firstDroppedPart = pathPieces[2]
+                                var monitorEventDropDir = s.dir.dropInEvents + ke + '/' + mid + '/'
+                                var deleteKey = monitorEventDropDir + firstDroppedPart
+                                onFileOrFolderFound(monitorEventDropDir + firstDroppedPart,deleteKey,Object.assign({},s.group[ke].rawMonitorConfigurations[mid]))
+                            })
+                            resolve({root: s.dir.dropInEvents + user.ke})
+                        }else{
+                            // reject(new Error('Failed Authorization'))
+                        }
+                    })
+                })
+                ftpServer.on('client-error', ({connection, context, error}) => {
+                    console.log('client-error',error)
+                })
+                ftpServer.listen().then(() => {
+                    s.systemLog(`FTP Server running on port ${config.ftpServerPort}...`)
+                }).catch(function(err){
+                    s.systemLog(err)
+                })
+            }catch(err){
+                console.error(err.message)
+                console.error('Could not start FTP Server, please run "npm install ftp-srv" inside the Shinobi folder.')
+                console.error('The ftp-srv Module is known to have possible vulnerabilities. Due to the nature of the vulnerability you should be unaffected unless the FTP Port is public facing. Use at your own risk.')
+            }
         }
         //add extensions
         s.onMonitorInit(onMonitorInit)

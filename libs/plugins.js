@@ -370,9 +370,13 @@ module.exports = function(s,config,lang,app,io){
     function sendCopyOfAllMonitorConfigs(){
         const groupKeys = Object.keys(s.group);
         for(groupKey of groupKeys){
-            const monitorConfigs = Object.values(s.group[groupKey].rawMonitorConfigurations);
-            for(monitorConfig of monitorConfigs){
-                onMonitorUpdate(monitorConfig)
+            try{
+                const monitorConfigs = Object.values(s.group[groupKey].rawMonitorConfigurations);
+                for(monitorConfig of monitorConfigs){
+                    onMonitorUpdate(monitorConfig)
+                }
+            }catch(err){
+                s.debugLog(err)
             }
         }
     }

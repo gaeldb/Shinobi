@@ -20,8 +20,10 @@ module.exports = function(s,config,lang,getSnapshot){
 
     //telegram bot
     if(config.telegramBot === true){
-        const TelegramBot = require('node-telegram-bot-api');
         try{
+            const TelegramBot = require('node-telegram-bot-api');
+            console.error('WARNING : Telegram bot is enabled.')
+
             const sendMessage = async function(sendBody,attachments,groupKey){
                 var bot = s.group[groupKey].telegramBot
                 if(!bot){
@@ -363,8 +365,9 @@ module.exports = function(s,config,lang,getSnapshot){
                 ]
             })
         }catch(err){
-            console.error(err)
-            console.log('Could not start Telegram bot, please run "npm install node-telegram-bot-api" inside the Shinobi folder.')
+            console.error(err.message)
+            console.error('Could not start Telegram bot, please run "npm install node-telegram-bot-api" inside the Shinobi folder.')
+            console.error('The Telegram Module is known to have possible vulnerabilities. Use at your own risk.')
         }
     }
 }
