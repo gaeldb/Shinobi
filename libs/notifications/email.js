@@ -116,7 +116,6 @@ module.exports = function(s,config,lang,getSnapshot){
                         detector_mail_timeout = parseFloat(monitorConfig.details.detector_mail_timeout) * 1000 * 60;
                     }
                     s.group[d.ke].activeMonitors[d.id].detector_mail = setTimeout(function(){
-                        clearTimeout(s.group[d.ke].activeMonitors[d.id].detector_mail);
                         s.group[d.ke].activeMonitors[d.id].detector_mail = null
                     },detector_mail_timeout);
                     const sendMail = function(files){
