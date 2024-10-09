@@ -1452,9 +1452,10 @@ module.exports = (s,config,lang) => {
         const monitorId = e.mid || e.id
         const theGroup = s.group[groupKey]
         const activeMonitor = theGroup.activeMonitors[monitorId]
+        const monitorConfig = theGroup.rawMonitorConfigurations[monitorId]
         const isMacOS = s.platform !== 'darwin';
-        const isWatchOnly = e.functionMode === 'start'
-        const isRecord = e.functionMode === 'record'
+        const isWatchOnly = monitorConfig.mode === 'start'
+        const isRecord = monitorConfig.mode === 'record'
         const isWatchOnlyOrRecord = isWatchOnly || isRecord;
         const streamTypeIsJPEG = e.details.stream_type === 'jpeg'
         const streamTypeIsHLS = e.details.stream_type === 'hls'
@@ -1463,7 +1464,6 @@ module.exports = (s,config,lang) => {
         const typeIsMjpeg = e.type === 'mjpeg'
         const typeIsH264 = e.type === 'h264'
         const typeIsLocal = e.type === 'local'
-        const monitorConfig = theGroup.rawMonitorConfigurations[monitorId]
         const doPingTest = e.type !== 'socket' && e.type !== 'dashcam' && e.protocol !== 'udp' && e.type !== 'local' && e.details.skip_ping !== '1';
         if(!theGroup.startMonitorInQueue){
             theGroup.startMonitorInQueue = createQueueAwaited(0.5, 1)
