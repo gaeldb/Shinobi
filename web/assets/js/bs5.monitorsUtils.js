@@ -679,13 +679,17 @@ function redAlertNotify(options) {
         hide: options.hide === undefined ? false : options.hide,
         delay: options.delay || 30000
     };
-    if (redAlertNotice) {
-        redAlertNotice.update(notifyOptions);
-    } else {
-        redAlertNotices[title] = new PNotify(notifyOptions);
-        redAlertNotices[title].on('close', function() {
-            redAlertNotices[title] = null;
-        });
+    try{
+        if (redAlertNotice) {
+            redAlertNotice.update(notifyOptions);
+        } else {
+            redAlertNotices[title] = new PNotify(notifyOptions);
+            redAlertNotices[title].on('close', function() {
+                redAlertNotices[title] = null;
+            });
+        }
+    }catch(err){
+        console.error('redAlertNotify ERROR',err)
     }
 }
 function buildPosePoints(bodyParts, x, y){

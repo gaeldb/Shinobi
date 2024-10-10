@@ -86,17 +86,20 @@ $(document).ready(function(){
         var el = $(this)
         var targetElement = el.attr('data-target')
         var classToToggle = el.attr('class_toggle')
-        var iconClassesToToggle = el.attr('icon-toggle').split(' ')
-        var iconTarget = el.attr('icon-child')
-        var iconTargetElement = el.find(el.attr('icon-child'))
+        var iconClassesToToggle = el.attr('icon-toggle')
         var togglPosition = $(targetElement).hasClass(classToToggle) ? 0 : 1
         var classToggles = dashboardOptions().class_toggle || {}
         classToggles[targetElement] = [classToToggle,togglPosition,iconClassesToToggle,iconTarget];
         dashboardOptions('class_toggle',classToggles)
         $(targetElement).toggleClass(classToToggle)
-        iconTargetElement
-            .removeClass(iconClassesToToggle[togglPosition === 1 ? 0 : 1])
-            .addClass(iconClassesToToggle[togglPosition])
+        if(iconClassesToToggle){
+            iconClassesToToggle = iconClassesToToggle.split(' ')
+            var iconTarget = el.attr('icon-child')
+            var iconTargetElement = el.find(el.attr('icon-child'))
+            iconTargetElement
+                .removeClass(iconClassesToToggle[togglPosition === 1 ? 0 : 1])
+                .addClass(iconClassesToToggle[togglPosition])
+        }
     })
     .on('keyup','.search-parent .search-controller',function(){
         var _this = this;

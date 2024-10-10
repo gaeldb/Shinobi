@@ -834,6 +834,15 @@ function shakeLogWriterIcon(){
         logWriterIconIndicator.removeClass('animate-shake')
     },3000)
 }
+function shakeLogWriterMonitorIcon(monitorId){
+    if(logStreamWiggling[monitorId])return;
+    var theWiggler = logStreamWiggler[monitorId];
+    theWiggler.addClass('animate-shake text-yellow')
+    logStreamWiggling[monitorId] = setTimeout(function(){
+        logStreamWiggling[monitorId] = null;
+        theWiggler.removeClass('animate-shake text-yellow')
+    },3000)
+}
 var logWriterFloodTimeout = null
 var logWriterFloodCounter = 0
 var logWriterFloodLock = null
@@ -854,23 +863,20 @@ function buildLogRow(v){
     </div>`
     return html
 }
-function logWriterDraw(id,data){
-    // if(logWriterFloodLock)return debugLog('logWriterFloodLock : Log was dropped');
-    var elementTags = '#global-log-stream,'+id+'.monitor_item .logs:visible,'+id+'#tab-monitorSettings:visible .logs'
-    // if(logWriterFloodTimeout){
-    //     ++logWriterFloodCounter
-    // }
-    // if(logWriterFloodCounter > 10){
-    //     window.logWriterFloodLock = setTimeout(function(){
-    //         delete(logWriterFloodLock)
-    //     },10000)
-    // }
-    // clearTimeout(logWriterFloodTimeout)
-    // logWriterFloodTimeout = setTimeout(function(){
-    //     delete(logWriterFloodTimeout)
-    //     logWriterFloodCounter = 0
-    // },2000)
+
+function removeLogRows(logElements){
+    logElements.each(function(n,v){
+        var theRows = logElements.find('.log-item')
+        if(theRows.length > 10){
+            theRows.last().remove()
+        }
+    })
+}
+
+function logWriterDraw(monitorId,data){
     if(!data.time)data.time = formattedTime();
+    var isUserLog = monitorId === '$USER'
+    var logElement = isUserLog ? logStreams['_USER'] : logStreams[monitorId];
     var html = buildLogRow({
         ke: data.ke,
         mid: data.mid,
@@ -878,13 +884,18 @@ function logWriterDraw(id,data){
         time: data.time,
     })
     shakeLogWriterIcon()
-    $(elementTags).prepend(html).each(function(n,v){
-        var el = $(v);
-        var theRows = el.find('.log-item')
-        if(theRows.length > 10){
-            theRows.last().remove()
+    try{
+        shakeLogWriterMonitorIcon(isUserLog ? '_USER' : monitorId)
+        logElement.prepend(html)
+        removeLogRows(logElement)
+        if(tabTree.name === 'monitorSettings' && monitorEditorSelectedMonitor.mid === monitorId){
+            monitorLogStreamElement.prepend(html)
+            removeLogRows(monitorLogStreamElement)
         }
-    })
+        logStreamLastTimeEl[monitorId].text(formattedTime(new Date(), true))
+    }catch(err){
+        console.log(`Failed Log Write`, data)
+    }
 }
 
 function setSwitchUIState(systemSwitch,toggleState){

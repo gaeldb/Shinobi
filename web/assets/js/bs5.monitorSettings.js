@@ -971,7 +971,7 @@ var showInputMappingFields = function(showMaps){
 function setFieldVisibilityNewWay(){
     var validation = getMonitorEditFormFields()
     if(!validation.ok){
-        return console.log('Failed setFieldVisibilityNewWay',new Error(),validation)
+        return console.log('Failed setFieldVisibilityNewWay', validation)
     }
     var monitorConfig = validation.monitorConfig
     var monitorDetails = safeJsonParse(monitorConfig.details)
