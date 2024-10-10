@@ -38,6 +38,7 @@ $(document).ready(function(){
     var timeStripAutoScrollAmount = null;
     var timeStripItemIncrement = 0;
     var loadedVideosOnTimeStrip = []
+    var loadedMonitorsOnCanvas = []
     var loadedVideosOnCanvas = {}
     var loadedVideoElsOnCanvas = {}
     var loadedVideoElsOnCanvasNextVideoTimeout = {}
@@ -296,7 +297,7 @@ $(document).ready(function(){
             timeStripActionWithPausePlay().then((timeChanging) => {
                 if(!timeChanging){
                     resetTimeline(clickTime)
-                    executeExtender('timelineTimeChange', [clickTime])
+                    executeExtender('timelineTimeChange', [clickTime, loadedMonitorsOnCanvas])
                 }
             })
         });
@@ -317,7 +318,7 @@ $(document).ready(function(){
                 setTimeout(() => {
                     timeChanging = false
                     getAndDrawVideosToTimeline(clickTime)
-                    executeExtender('timelineRangeChanged', [properties.start, properties.end, getTimestripDate()])
+                    executeExtender('timelineRangeChanged', [properties.start, properties.end, getTimestripDate(), loadedMonitorsOnCanvas])
                 },500)
             },300)
         })
@@ -394,6 +395,7 @@ $(document).ready(function(){
     function selectAndDrawVideosToCanvas(theTime,redrawVideos){
         var selectedVideosForTime = selectVideosForCanvas(theTime,loadedVideosOnTimeStrip)
         loadedVideosOnCanvas = selectedVideosForTime;
+        loadedMonitorsOnCanvas = Object.keys(loadedVideosOnCanvas)
         if(redrawVideos){
             drawVideosToCanvas(selectedVideosForTime)
         }
@@ -425,8 +427,17 @@ $(document).ready(function(){
             jumpToNextVideo()
         }
     }
+    function setActiveMonitorIds(monitorId, toggle){
+        if(toggle){
+            if(loadedMonitorsOnCanvas.indexOf(monitorId) === -1)loadedMonitorsOnCanvas.push(monitorId)
+        }else{
+            const monitorIndex = loadedMonitorsOnCanvas.indexOf(monitorId);
+            if(monitorIndex > -1)loadedMonitorsOnCanvas.splice(monitorIndex, 1)
+        }
+    }
     function clearVideoInCanvas(oldVideo){
         var monitorId = oldVideo.mid
+        setActiveMonitorIds(monitorId, false)
         loadedVideosOnCanvas[monitorId] = null
         loadedVideoElsOnCanvas[monitorId] = null
         clearTimeout(loadedVideoEndingTimeouts[monitorId])
@@ -459,6 +470,7 @@ $(document).ready(function(){
             container,
             objectContainer,
         }
+        setActiveMonitorIds(monitorId, true)
         loadedVideosOnCanvas[monitorId] = newVideo
         timeStripPreBuffersEls[monitorId] = getVideoContainerPreBufferEl(newVideo)
         queueNextVideo(newVideo)
@@ -605,6 +617,9 @@ $(document).ready(function(){
     function getAllActiveVideosInSlots(){
         return timeStripVideoCanvas.find('video')
     }
+    function getActiveMonitorsInSlots(){
+        return loadedMonitorsOnCanvas
+    }
     function playVideo(videoEl){
         try{
             videoEl.playbackRate = timelineSpeed
@@ -646,7 +661,7 @@ $(document).ready(function(){
                 addition += (msSpeed * timelineSpeed);
                 newTime = new Date(currentDate + addition)
                 setTickDate(newTime);
-                executeExtender('timelineTimeChange', [newTime])
+                executeExtender('timelineTimeChange', [newTime, loadedMonitorsOnCanvas])
                 // setTimeOfCanvasVideos(newTime)
             }, msSpeed)
             timeStripVisTickMovementIntervalSecond = setInterval(function() {
