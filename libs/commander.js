@@ -70,11 +70,11 @@ module.exports = function(s,config,lang,app){
             }
         }
 
-        fetch('https://cdn.shinobi.video/configs/p2pServers.js')
+        fetch('https://cdn.shinobi.video/configs/p2pServers.json')
             .then(res => res.text())
             .then((text) => {
                 try {
-                    const parsedData = new Function(`return ${text}`)();
+                    const parsedData = JSON.parse(text);
                     config.p2pServerList = parsedData;
                 } catch (err) {
                     s.debugLog(`Failed to parse server list: ${err.message}`);
