@@ -95,10 +95,11 @@ module.exports = function(s,config,lang,app){
                 res.end('404 : Monitor not found');
                 return
             }
-            s.checkChildProxy(req.params,function(){
+            s.checkChildProxy(req.params,async function(){
                     var Channel = 'MAIN'
                     if(req.params.channel){
                         Channel = parseInt(req.params.channel)+config.pipeAddition
+                        await s.toggleSubstreamAndWaitForOutput(req.params.ke, monitorId);
                     }
                     var mp4frag = s.group[req.params.ke].activeMonitors[req.params.id].mp4frag[Channel];
                     var errorMessage = 'MP4 Stream is not enabled'
@@ -158,7 +159,7 @@ module.exports = function(s,config,lang,app){
                     s.closeJsonResponse(res,{ok: false, msg: lang['Not Authorized']});
                     return;
                 }
-                s.checkChildProxy(req.params,function(){
+                s.checkChildProxy(req.params,async function(){
                     if(s.group[req.params.ke]&&s.group[req.params.ke].activeMonitors&&s.group[req.params.ke].activeMonitors[req.params.id]){
                         if(user.permissions.watch_stream==="0"||user.details.sub&&user.details.allmonitors!=='1'&&user.details.monitors.indexOf(req.params.id)===-1){
                             res.end(user.lang['Not Permitted'])
@@ -170,6 +171,7 @@ module.exports = function(s,config,lang,app){
                         if(!req.params.channel){
                             Emitter = s.group[req.params.ke].activeMonitors[req.params.id].emitter
                         }else{
+                            await s.toggleSubstreamAndWaitForOutput(req.params.ke, monitorId);
                             Emitter = s.group[req.params.ke].activeMonitors[req.params.id].emitterChannel[chosenChannel]
                         }
                         res.writeHead(200, {
@@ -228,7 +230,7 @@ module.exports = function(s,config,lang,app){
                 s.closeJsonResponse(res,{ok: false, msg: lang['Not Authorized']});
                 return;
             }
-            s.checkChildProxy(req.params,function(){
+            s.checkChildProxy(req.params,async function(){
                 noCache(res)
                 if(user.permissions.watch_stream==="0"||user.details.sub&&user.details.allmonitors!=='1'&&user.details.monitors.indexOf(req.params.id)===-1){
                     res.end(user.lang['Not Permitted'])
@@ -241,6 +243,19 @@ module.exports = function(s,config,lang,app){
                     req.dir+=req.params.file;
                 }
                 res.on('finish',function(){res.end();});
+                if (req.params.file.endsWith('.m3u8')) {
+                    await s.toggleSubstreamAndWaitForOutput(req.params.ke, monitorId);
+                    const monitorTimeout = s.getSubstreamWaitTimeout(req.params.ke, monitorId);
+                    var ip = s.getClientIp(req)
+                    s.camera('watch_on',{
+                        id : req.params.id,
+                        ke: req.params.ke,
+                        monitorTimeout: monitorTimeout
+                    },{
+                        id: req.params.auth + ip + req.headers['user-agent'],
+                        url: req.originalUrl
+                    })
+                }
                 if (fs.existsSync(req.dir)){
                     fs.createReadStream(req.dir).pipe(res);
                 }else{
@@ -310,19 +325,21 @@ module.exports = function(s,config,lang,app){
     */
     app.get([config.webPaths.apiPrefix+':auth/flv/:ke/:id/s.flv',config.webPaths.apiPrefix+':auth/flv/:ke/:id/:channel/s.flv'], function(req,res) {
         s.auth(req.params,function(user){
+            const monitorId = req.params.id
             if(cantLiveStreamPermission(user,monitorId,'watch_stream')){
                 s.closeJsonResponse(res,{ok: false, msg: lang['Not Authorized']});
                 return;
             }
-            s.checkChildProxy(req.params,function(){
+            s.checkChildProxy(req.params, async function () {
                 noCache(res)
                 var Emitter,chunkChannel
                 if(!req.params.channel){
                     Emitter = s.group[req.params.ke].activeMonitors[req.params.id].emitter
                     chunkChannel = 'MAIN'
                 }else{
-                    Emitter = s.group[req.params.ke].activeMonitors[req.params.id].emitterChannel[parseInt(req.params.channel)+config.pipeAddition]
-                    chunkChannel = parseInt(req.params.channel)+config.pipeAddition
+                    await s.toggleSubstreamAndWaitForOutput(req.params.ke, monitorId);
+                    chunkChannel = parseInt(req.params.channel) + config.pipeAddition;
+                    Emitter = s.group[req.params.ke].activeMonitors[req.params.id].emitterChannel[chunkChannel];
                 }
                 if(s.group[req.params.ke].activeMonitors[req.params.id].firstStreamChunk[chunkChannel]){
                     //variable name of contentWriter
@@ -370,17 +387,19 @@ module.exports = function(s,config,lang,app){
         config.webPaths.apiPrefix+':auth/h264/:ke/:id'
     ], function (req, res) {
         s.auth(req.params,function(user){
+            const monitorId = req.params.id;
             if(cantLiveStreamPermission(user,monitorId,'watch_stream')){
                 s.closeJsonResponse(res,{ok: false, msg: lang['Not Authorized']});
                 return;
             }
-            s.checkChildProxy(req.params,function(){
+            s.checkChildProxy(req.params, async function(){
                 noCache(res)
                 if(!req.query.feed){req.query.feed='1'}
                 var Emitter
                 if(!req.params.feed){
                     Emitter = s.group[req.params.ke].activeMonitors[req.params.id].streamIn[req.query.feed]
                 }else{
+                    await s.toggleSubstreamAndWaitForOutput(req.params.ke, monitorId);
                     Emitter = s.group[req.params.ke].activeMonitors[req.params.id].emitterChannel[parseInt(req.params.feed)+config.pipeAddition]
                 }
                 var contentWriter

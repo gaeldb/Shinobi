@@ -192,11 +192,20 @@ module.exports = (s,config,lang) => {
         //`e` is the monitor object
         //`x` is an object used to contain temporary values.
         const channelStreamDirectory = !isNaN(parseInt(number)) ? `${e.sdir || s.getStreamsDirectory(e)}channel${number}/` : e.sdir
-        if(channelStreamDirectory !== e.sdir && !fs.existsSync(channelStreamDirectory)){
-            try{
-                fs.mkdirSync(channelStreamDirectory)
-            }catch(err){
-                // s.debugLog(err)
+        if(channelStreamDirectory !== e.sdir){
+            if (fs.existsSync(channelStreamDirectory)) {
+                try {
+                    fs.rmdirSync(channelStreamDirectory, { recursive: true, force: true })
+                }catch(err){
+                    // s.debugLog(err)
+                }
+            }
+            if (!fs.existsSync(channelStreamDirectory)) {
+                try {
+                    fs.mkdirSync(channelStreamDirectory)
+                }catch(err){
+                    // s.debugLog(err)
+                }
             }
         }
         const channelNumber = number - config.pipeAddition
