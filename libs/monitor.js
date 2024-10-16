@@ -665,11 +665,18 @@ module.exports = function(s,config,lang){
         }
         return endData
     }
-    s.getSubstreamWaitTimeout = function (groupId, monitorId) {
+    s.getStreamWaitTimeout = function (groupId, monitorId) {
         const monitorConfig = s.group[groupId].rawMonitorConfigurations[monitorId];
-        const subStreamType = monitorConfig.details.substream.output.stream_type;
-        return subStreamType == 'hls'
-            ? (parseInt(monitorConfig.details.substream.output.hls_time) * 1000) + 10000
+        var streamType = monitorConfig.details.stream_type;
+        var hls_time;
+        if (streamType === 'useSubstream') {
+            streamType = monitorConfig.details.substream.output.stream_type;
+            hls_time = monitorConfig.details.substream.output.hls_time;
+        } else {
+            hls_time = monitorConfig.details.hls_time;
+        }
+        return streamType == 'hls' && hls_time != ''
+            ? (parseInt(hls_time) * 1000) + 10000
             : 10000;
     }
     s.toggleSubstreamAndWaitForOutput = async function (groupId, monitorId) {
@@ -682,7 +689,7 @@ module.exports = function(s,config,lang){
             }
             if (!activeMonitor.subStreamOutputReady) {
                 const checkTime = 250;
-                var monitorTimeout = s.getSubstreamWaitTimeout(groupId, monitorId);
+                var monitorTimeout = s.getStreamWaitTimeout(groupId, monitorId);
                 return await new Promise((resolve, reject) => {
                     let totalTime = 0;
                     const timer = setInterval(function () {

@@ -245,7 +245,7 @@ module.exports = function(s,config,lang,app){
                 res.on('finish',function(){res.end();});
                 if (req.params.file.endsWith('.m3u8')) {
                     await s.toggleSubstreamAndWaitForOutput(req.params.ke, monitorId);
-                    const monitorTimeout = s.getSubstreamWaitTimeout(req.params.ke, monitorId);
+                    const monitorTimeout = s.getStreamWaitTimeout(req.params.ke, monitorId);
                     var ip = s.getClientIp(req)
                     s.camera('watch_on',{
                         id : req.params.id,
