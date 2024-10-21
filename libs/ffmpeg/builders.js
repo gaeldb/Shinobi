@@ -195,7 +195,7 @@ module.exports = (s,config,lang) => {
         if(channelStreamDirectory !== e.sdir){
             if (fs.existsSync(channelStreamDirectory)) {
                 try {
-                    fs.rmdirSync(channelStreamDirectory, { recursive: true, force: true })
+                    fs.rmSync(channelStreamDirectory, { recursive: true, force: true })
                 }catch(err){
                     // s.debugLog(err)
                 }
@@ -255,7 +255,7 @@ module.exports = (s,config,lang) => {
         }
         if(!videoCodecisCopy || outputRequiresEncoding){
             if(videoWidth && videoHeight && !e.details.hwaccel_format) streamFlags.push(`-s ${videoWidth}x${videoHeight}`)
-            if(videoFps && streamType === 'mjpeg' || streamType === 'b64'){
+            if(videoFps && streamType === 'mjpeg' || videoFps && streamType === 'b64'){
                 streamFilters.push(`fps=${videoFps}`)
             }
         }
