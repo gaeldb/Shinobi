@@ -957,6 +957,39 @@ module.exports = function(s,config,lang,app,io){
             s.closeJsonResponse(res,response);
         },res,req);
     });
+    /**
+    * API : Get Active Event-Based Recording Info
+     */
+    app.get(config.webPaths.apiPrefix+':auth/eventRecordings/:ke/:id', function (req,res){
+        const response = {ok: false};
+        s.auth(req.params,async (user) => {
+            const groupKey = req.params.ke
+            const monitorId = req.params.id
+            const {
+                monitorPermissions,
+                monitorRestrictions,
+            } = s.getMonitorsPermitted(user.details,monitorId)
+            const {
+                isRestricted,
+                userPermissions,
+                apiKeyPermissions,
+                isRestrictedApiKey,
+            } = s.checkPermission(user)
+            if(
+                isRestrictedApiKey && apiKeyPermissions.control_monitors_disallowed ||
+                isRestricted && !monitorPermissions[`${monitorId}_monitors`]
+            ){
+                response.msg = user.lang['Not Permitted']
+            }else{
+                const monitorConfig = s.group[groupKey].rawMonitorConfigurations[monitorId]
+                const activeMonitor = s.group[groupKey].activeMonitors[monitorId]
+                const fileTimes = Object.keys(activeMonitor.eventBasedRecording)
+                response.fileTimes = fileTimes;
+                response.ok = true;
+            }
+            s.closeJsonResponse(res,response);
+        },res,req);
+    });
     // /**
     // * API : Merge Recorded Videos into one file
     //  */

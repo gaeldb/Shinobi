@@ -533,32 +533,35 @@ module.exports = (s,config,lang) => {
         const activeMonitor = s.group[groupKey].activeMonitors[monitorId]
         const monitorConfig = s.group[groupKey].rawMonitorConfigurations[monitorId]
         const monitorDetails = monitorConfig.details
+        const overlappingRecordings = monitorDetails.detector_record_overlap === '1'
         if(monitorDetails.detector !== '1'){
             return
         }
-        var detector_timeout
+        if(!overlappingRecordings && activeMonitor.eventBasedRecordingLastFileTime)fileTime = activeMonitor.eventBasedRecordingLastFileTime;
+        var detector_timeout;
         if(!monitorDetails.detector_timeout||monitorDetails.detector_timeout===''){
             detector_timeout = 10
         }else{
             detector_timeout = parseFloat(monitorDetails.detector_timeout)
         }
-        if(monitorDetails.watchdog_reset === '1' || !activeMonitor.eventBasedRecording.timeout){
-            clearTimeout(activeMonitor.eventBasedRecording.timeout)
-            activeMonitor.eventBasedRecording.timeout = setTimeout(function(){
-                activeMonitor.eventBasedRecording.allowEnd = true
+        if(!activeMonitor.eventBasedRecording[fileTime])activeMonitor.eventBasedRecording[fileTime] = {};
+        if((!overlappingRecordings && monitorDetails.watchdog_reset === '1') || !activeMonitor.eventBasedRecording[fileTime].timeout){
+            clearTimeout(activeMonitor.eventBasedRecording[fileTime].timeout)
+            activeMonitor.eventBasedRecording[fileTime].timeout = setTimeout(function(){
+                activeMonitor.eventBasedRecording[fileTime].allowEnd = true
                 try{
-                    activeMonitor.eventBasedRecording.process.stdin.setEncoding('utf8')
-                    activeMonitor.eventBasedRecording.process.stdin.write('q')
+                    activeMonitor.eventBasedRecording[fileTime].process.stdin.setEncoding('utf8')
+                    activeMonitor.eventBasedRecording[fileTime].process.stdin.write('q')
                 }catch(err){
                     s.debugLog(err)
                 }
-                activeMonitor.eventBasedRecording.process.kill('SIGINT')
-                delete(activeMonitor.eventBasedRecording.timeout)
+                activeMonitor.eventBasedRecording[fileTime].process.kill('SIGINT')
+                delete(activeMonitor.eventBasedRecording[fileTime].timeout)
             },detector_timeout * 1000 * 60)
         }
-        if(!activeMonitor.eventBasedRecording.process){
-            activeMonitor.eventBasedRecording.allowEnd = false;
-            activeMonitor.eventBasedRecording.lastFileTime = `${fileTime}`;
+        if(!activeMonitor.eventBasedRecording[fileTime].process){
+            activeMonitor.eventBasedRecording[fileTime].allowEnd = false;
+            activeMonitor.eventBasedRecordingLastFileTime = `${fileTime}`;
             const runRecord = function(){
                 var ffmpegError = ''
                 var error
@@ -586,18 +589,18 @@ module.exports = (s,config,lang) => {
                 let LiveStartIndex = parseInt(secondsBefore / 2 + 1)
                 const ffmpegCommand = `-loglevel warning -live_start_index -${LiveStartIndex} -analyzeduration ${analyzeDuration} -probesize ${probeSize} -re -i "${s.dir.streams+groupKey+'/'+monitorId}/detectorStream.m3u8" ${outputMap}-movflags faststart -fflags +igndts -c:v copy -c:a aac -strict -2 -strftime 1 -y "${s.getVideoDirectory(monitorConfig) + filename}"`
                 s.debugLog(ffmpegCommand)
-                activeMonitor.eventBasedRecording.process = spawn(
+                activeMonitor.eventBasedRecording[fileTime].process = spawn(
                     config.ffmpegDir,
                     splitForFFMPEG(ffmpegCommand)
                 )
-                activeMonitor.eventBasedRecording.process.stderr.on('data',function(data){
+                activeMonitor.eventBasedRecording[fileTime].process.stderr.on('data',function(data){
                     s.userLog(d,{
                         type: logTitleText,
                         msg: data.toString()
                     })
                 })
-                activeMonitor.eventBasedRecording.process.on('close',function(){
-                    if(!activeMonitor.eventBasedRecording.allowEnd){
+                activeMonitor.eventBasedRecording[fileTime].process.on('close',function(){
+                    if(!activeMonitor.eventBasedRecording[fileTime].allowEnd){
                         s.userLog(d,{
                             type: logTitleText,
                             msg: lang["Detector Recording Process Exited Prematurely. Restarting."]
@@ -627,15 +630,15 @@ module.exports = (s,config,lang) => {
                     s.userLog(d,{
                         type: logTitleText,
                         msg: lang["Detector Recording Complete"]
-                    })
+                    });
                     s.userLog(d,{
                         type: logTitleText,
                         msg: lang["Clear Recorder Process"]
-                    })
-                    delete(activeMonitor.eventBasedRecording.process)
-                    clearTimeout(activeMonitor.eventBasedRecording.timeout)
-                    delete(activeMonitor.eventBasedRecording.timeout)
+                    });
+                    if(!overlappingRecordings)delete(activeMonitor.eventBasedRecordingLastFileTime)
+                    clearTimeout(activeMonitor.eventBasedRecording[fileTime].timeout)
                     clearTimeout(activeMonitor.recordingChecker)
+                    delete(activeMonitor.eventBasedRecording[fileTime])
                 })
             }
             runRecord()
@@ -643,10 +646,13 @@ module.exports = (s,config,lang) => {
     }
     const closeEventBasedRecording = function(e){
         const activeMonitor = s.group[e.ke].activeMonitors[e.id]
-        if(activeMonitor.eventBasedRecording.process){
-            clearTimeout(activeMonitor.eventBasedRecording.timeout)
-            activeMonitor.eventBasedRecording.allowEnd = true
-            activeMonitor.eventBasedRecording.process.kill('SIGTERM')
+        const eventBasedRecordings = activeMonitor.eventBasedRecording;
+        for(fileTime in eventBasedRecordings){
+            if(eventBasedRecordings[fileTime].process){
+                clearTimeout(eventBasedRecordings[fileTime].timeout)
+                eventBasedRecordings[fileTime].allowEnd = true
+                eventBasedRecordings[fileTime].process.kill('SIGTERM')
+            }
         }
         // var stackedProcesses = s.group[e.ke].activeMonitors[e.id].eventBasedRecording.stackable
         // Object.keys(stackedProcesses).forEach(function(key){

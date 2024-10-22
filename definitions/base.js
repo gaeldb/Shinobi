@@ -3426,6 +3426,24 @@ module.exports = function(s,config,lang){
                               default: '32',
                           },
                           {
+                             "name": "detail=detector_record_overlap",
+                             "field": lang['Recording Overlap'],
+                             "description": lang.fieldTextRecordingOverlap,
+                             "default": "0",
+                             "form-group-class-pre-layer": "h_rec_mtd_input h_rec_mtd_hot h_rec_mtd_sip",
+                             "fieldType": "select",
+                             "possible": [
+                                {
+                                   "name": lang.No,
+                                   "value": "0"
+                                },
+                                {
+                                   "name": lang.Yes,
+                                   "value": "1"
+                                }
+                             ]
+                          },
+                          {
                              "fieldType": "div",
                              // style: `width:100%;background:#eceaea;border-radius:5px;color:#333;font-family:monospace`,
                              divContent: `<pre><code id="monEditBufferPreview"></code></pre>`
