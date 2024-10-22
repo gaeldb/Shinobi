@@ -605,9 +605,11 @@ async function importIntoMonitorEditor(options){
     var monitorGroups = monitorDetails.groups ? safeJsonParse(monitorDetails.groups) : []
     monitorTags = monitorTags.concat(monitorGroups)
     loadMonitorGroupTriggerList()
-    $.get(getApiPrefix()+'/hls/'+monitorConfig.ke+'/'+monitorConfig.mid+'/detectorStream.m3u8',function(data){
-        $('#monEditBufferPreview').html(data)
-    })
+	if (monitorConfig.ke && monitorConfig.mid) {
+		$.get(getApiPrefix()+'/hls/'+monitorConfig.ke+'/'+monitorConfig.mid+'/detectorStream.m3u8',function(data){
+			$('#monEditBufferPreview').html(data)
+		})
+	}
     tagsInput.tagsinput('removeAll');
     monitorTags.forEach((tag) => {
         tagsInput.tagsinput('add',tag);
