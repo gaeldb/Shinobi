@@ -27,6 +27,7 @@ module.exports = function(s,config,lang){
         getMonitorConfiguration,
         copyMonitorConfiguration,
         checkObjectsInMonitorDetails,
+        spawnSubstreamProcess,
     } = require('./monitor/utils.js')(s,config,lang)
     const {
         canAddMoreMonitors,
@@ -663,6 +664,45 @@ module.exports = function(s,config,lang){
             })
         }
         return endData
+    }
+    s.getStreamWaitTimeout = function (groupId, monitorId) {
+        const monitorConfig = s.group[groupId].rawMonitorConfigurations[monitorId];
+        var streamType = monitorConfig.details.stream_type;
+        var hls_time;
+        if (streamType === 'useSubstream') {
+            streamType = monitorConfig.details.substream.output.stream_type;
+            hls_time = monitorConfig.details.substream.output.hls_time;
+        } else {
+            hls_time = monitorConfig.details.hls_time;
+        }
+        return streamType == 'hls' && hls_time != ''
+            ? (parseInt(hls_time) * 1000) + 10000
+            : 10000;
+    }
+    s.toggleSubstreamAndWaitForOutput = async function (groupId, monitorId) {
+        const monitorConfig = s.group[groupId].rawMonitorConfigurations[monitorId];
+        const streamType = monitorConfig.details.stream_type;
+        if (streamType === 'useSubstream') {
+            const activeMonitor = s.group[groupId].activeMonitors[monitorId];
+            if (!activeMonitor.subStreamProcess) {
+                spawnSubstreamProcess(monitorConfig);
+            }
+            if (!activeMonitor.subStreamOutputReady) {
+                const checkTime = 250;
+                var monitorTimeout = s.getStreamWaitTimeout(groupId, monitorId);
+                return await new Promise((resolve, reject) => {
+                    let totalTime = 0;
+                    const timer = setInterval(function () {
+                        totalTime += checkTime;
+                        if (activeMonitor.subStreamOutputReady || totalTime >= monitorTimeout) {
+                            clearInterval(timer);
+                            resolve(activeMonitor.subStreamOutputReady);
+                        }
+                    }, checkTime);
+                });
+            }
+        }
+        return false;
     }
     s.camera = async (selectedMode,e,cn) => {
         // e = monitor object
