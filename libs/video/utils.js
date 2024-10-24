@@ -246,14 +246,19 @@ module.exports = (s,config,lang) => {
         searchQuery,
         monitorRestrictions
     }){
+        const theSearches = searchQuery.split(',').map(query => ['objects','LIKE',`%${query}%`]);
+        const lastIndex = theSearches.length - 1;
+        theSearches.forEach(function(item, n){
+            if(n !== 0)theSearches[n] = ['or', ...item];
+        });
         const initialEventQuery = [
             ['ke','=',groupKey],
-            ['objects','LIKE',`%${searchQuery}%`],
-        ]
+        ];
         if(monitorId)initialEventQuery.push(['mid','=',monitorId]);
         if(startTime)initialEventQuery.push(['time','>',startTime]);
         if(endTime)initialEventQuery.push(['end','<',endTime]);
-        if(monitorRestrictions)initialEventQuery.push(monitorRestrictions);
+        if(monitorRestrictions.length > 0)initialEventQuery.push(monitorRestrictions);
+        initialEventQuery.push([...theSearches]);
         const videoSelectResponse = await s.knexQueryPromise({
             action: "select",
             columns: "*",
@@ -856,9 +861,9 @@ module.exports = (s,config,lang) => {
             });
 
             ffmpegProcess.on('close', (code) => {
-                if (code === 0) {
+                if(code === 0){
                     resolve(buffer);
-                } else {
+                }else{
                     reject(new Error(`FFmpeg process exited with code ${code}`));
                 }
             });
