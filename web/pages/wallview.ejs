@@ -64,6 +64,16 @@
         <a class="btn btn-success wallview-autoplace" href="#"><%- lang['Auto Placement'] %></a>
         <a class="btn btn-primary open-wallview" href="#"><%- lang['New Wall Display'] %></a>
         <div class="dropdown d-inline-block">
+          <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="monitorListButton2" data-bs-toggle="dropdown" aria-expanded="false">
+            <%- lang['Open Next'] %>
+          </a>
+          <ul class="dropdown-menu text-center pb-0" aria-labelledby="monitorListButton2">
+              <% [2,4,6,9,12,16,32].forEach((numberOf) => { %>
+                  <a class="btn btn-primary mb-2 wallview-open-next" number-of="<%- numberOf %>" href="#"><%- numberOf %></a>
+              <% }) %>
+          </ul>
+        </div>
+        <div class="dropdown d-inline-block">
           <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="monitorListButton" data-bs-toggle="dropdown" aria-expanded="false">
             <%- lang.Monitors %>
           </a>

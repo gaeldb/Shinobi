@@ -16,8 +16,8 @@
 
 #wallview-controls{
     position: absolute;
-    width: 100%;
     top: 0;
+    right: 0;
     padding: 5px;
     opacity: 0;
     transition: 0.2s;
