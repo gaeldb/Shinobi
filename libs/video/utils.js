@@ -246,7 +246,7 @@ module.exports = (s,config,lang) => {
         searchQuery,
         monitorRestrictions
     }){
-        const theSearches = searchQuery.split(',').map(query => ['objects','LIKE',`%${query}%`]);
+        const theSearches = searchQuery.split(',').map(query => ['objects','LIKE',`%${query.trim()}%`]);
         const lastIndex = theSearches.length - 1;
         theSearches.forEach(function(item, n){
             if(n !== 0)theSearches[n] = ['or', ...item];
