@@ -7,7 +7,6 @@ async function addExtender(extenderContainer){
     };
 }
 async function executeExtender(extenderContainer, args){
-    console.log('Running', extenderContainer)
     for(extender of dashboardExtensions[extenderContainer]){
         await extender(...args)
     }

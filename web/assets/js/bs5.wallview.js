@@ -1,6 +1,5 @@
 var loadedMonitors = {}
 var selectedMonitors = {}
-var selectedMonitorsCount = 0
 $(document).ready(function(){
     PNotify.prototype.options.styling = "fontawesome";
     var wallViewMonitorList = $('#wallview-monitorList')
@@ -76,7 +75,6 @@ $(document).ready(function(){
         if(numberOfSelected > 3 && !featureIsActivated(true)){
             return
         }
-        ++selectedMonitorsCount
         selectedMonitors[monitorId] = Object.assign({}, loadedMonitors[monitorId]);
         wallViewCanvas.append(`<div class="wallview-video p-0 m-0" live-stream="${monitorId}" style="left:${css.left || 0}px;top:${css.top || 0}px;width:${css.width ? css.width + 'px' : '50vw'};height:${css.height ? css.height + 'px' : '50vh'};"><div class="overlay"><div class="wallview-item-controls text-end"><a class="btn btn-sm btn-outline-danger wallview-item-close"><i class="fa fa-times"></i></a></div></div><iframe src="${getApiPrefix('embed')}/${monitorId}/fullscreen%7Cjquery%7Crelative?host=${embedHost}"></iframe></div>`)
         wallViewCanvas.find(`[live-stream="${monitorId}"]`)
@@ -98,7 +96,6 @@ $(document).ready(function(){
         getMonitorListItem(monitorId).addClass('active')
     }
     function deselectMonitor(monitorId){
-        --selectedMonitorsCount
         delete(selectedMonitors[monitorId])
         var monitorItem = wallViewCanvas.find(`[live-stream="${monitorId}"]`);
         monitorItem.find('iframe').attr('src','about:blank')
@@ -171,7 +168,7 @@ $(document).ready(function(){
     }
 
     function displayInfoScreen(){
-        if(selectedMonitorsCount === 0){
+        if(getCurrentLayout().length === 0){
             wallViewInfoScreen.css('display','flex')
         }else{
             wallViewInfoScreen.hide()
@@ -239,8 +236,33 @@ $(document).ready(function(){
 
     function openAllMonitors(){
         $.each(loadedMonitors,function(monitorId, monitor){
-            selectMonitor(monitorId)
+            var modeAccepted = monitor.mode !== 'stop' && monitor.mode !== 'idle'
+            if(modeAccepted)selectMonitor(monitorId)
         })
+        autoPlaceCurrentMonitorItems()
+        displayInfoScreen()
+        saveLayout()
+    }
+
+    function openNextMonitors(numberOf){
+        var allLayouts = getAllLayouts()
+        var ignoreMonitors = []
+        var availableMonitors = []
+        var numberToOpen = parseInt(numberOf) || 4;
+        $.each(allLayouts,function(windowName, { layout }){
+            $.each(layout,function(n, { monitorId }){
+                ignoreMonitors.push(monitorId)
+            })
+        });
+        $.each(loadedMonitors,function(monitorId, monitor){
+            if(ignoreMonitors.indexOf(monitor.mid) === -1){
+                var modeAccepted = monitor.mode !== 'stop' && monitor.mode !== 'idle'
+                if(modeAccepted)availableMonitors.push(monitorId)
+            }
+        });
+        for (let i = 0; i < numberToOpen; i++) {
+            selectMonitor(availableMonitors[i])
+        }
         autoPlaceCurrentMonitorItems()
         displayInfoScreen()
         saveLayout()
@@ -300,6 +322,11 @@ $(document).ready(function(){
     .on('click', '.wallview-open-all', function(e){
         e.preventDefault()
         openAllMonitors()
+    })
+    .on('click', '.wallview-open-next', function(e){
+        e.preventDefault()
+        var numberOf = $(this).attr('number-of')
+        openNextMonitors(numberOf)
     })
     .on('click', '.wallview-close-all', function(e){
         e.preventDefault()

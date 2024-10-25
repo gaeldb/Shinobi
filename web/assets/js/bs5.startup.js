@@ -164,7 +164,7 @@ onWebSocketEvent(function (d){
             }
         break;
         case'log':
-            logWriterDraw('[data-mid="'+d.mid+'"][data-ke="'+d.ke+'"]',d)
+            logWriterDraw(d.mid, d)
         break;
         case'os'://indicator
             //cpu

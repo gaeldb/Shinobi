@@ -3,7 +3,7 @@ $(document).ready(function(){
     var downloadablePlugins = {}
     var theEnclosure = $('#superPluginManager')
     var listElement = $('#pluginManagerList')
-    var downloadListElement = $('#pluginManagerDownloadble')
+    var downloadListElement = $('#pluginManagerDownloadble tbody')
     var quickSelect = $('#pluginQuickSelect')
     var pluginDownloadForm = $('#downloadNewPlugin')
     var pluginCommandLine = $('#pluginCommandLine')
@@ -18,21 +18,28 @@ $(document).ready(function(){
         var html = ''
         $.each(data,function(n,plugin){
             html += `
-            <div class="col-md-6" dl-plugin="${getDlPluginId(plugin)}">
-                <div class="card bg-dark text-white mb-3">
-                    <div class="card-body">
-                        <div class="pb-1">
-                            ${plugin.type.map(item => `<span class="small">${item}</span>`).join(', ')}
-                            ${plugin.gpuRequired ? `<span class="badge badge-primary">${plugin.gpuRequired instanceof Array ? plugin.gpuRequired.join(', ') : lang['GPU Required']}</span>` : ''}
-                            ${plugin.experimental ? `<span class="badge badge-warning">${lang.Experimental}</span>` : ''}
-                        </div>
-                        <h4 class="title">${plugin.name}</h4>
-                        <div><span class="small">${lang['Tested on']}</span> : ${plugin.os.map(item => `<span class="small">${item}</span>`).join(', ')}</div>
-                        <div class="pb-1"><span class="badge badge-warning">${plugin.engine}</span> ${plugin.arch.map(item => `<span title="${lang.Architecture}" class="badge badge-primary">${item}</span>`).join(' ')}</div>
-                        <div><a class="btn btn-info btn-sm cursor-pointer download">${lang.Download}</a></div>
-                    </div>
-                </div>
-            </div>`
+            <tr dl-plugin="${getDlPluginId(plugin)}">
+                <td class="align-middle">
+                    <a class="btn btn-info btn-sm cursor-pointer download" title="${lang.Download}"><i class="fa fa-download"></i></a>
+                </td>
+                <td class="align-middle">
+                    <div>${plugin.name}</div>
+                    <div><small>${plugin.updated}</small></div>
+                </td>
+                <td class="align-middle">
+                    <div>${plugin.type.map(item => `<span>${item}</span>`).join(', ')}</div>
+                    <div class="small"><span>${lang['Tested on']}</span> : ${plugin.os.map(item => `<span>${item}</span>`).join(', ')}</div>
+                </td>
+                <td class="align-middle">
+                    ${plugin.dir}
+                </td>
+                <td class="align-middle">
+                    <div><span class="badge badge-info">${plugin.engine}</span></div>
+                    <div>${plugin.gpuRequired ? `<span class="badge badge-primary">${plugin.gpuRequired instanceof Array ? plugin.gpuRequired.join(', ') : lang['GPU Required']}</span>` : ''}</div>
+                    <div>${plugin.experimental ? `<span class="badge badge-info">${lang.Experimental}</span>` : ''}</div>
+                    <div>${plugin.arch.map(item => `<span title="${lang.Architecture}" class="badge badge-primary">${item}</span>`).join(' ')}</div>
+                </td>
+            </tr>`
         })
         downloadListElement.html(html)
     }
@@ -137,18 +144,28 @@ $(document).ready(function(){
     }
     var downloadModule = function(url,packageRoot,callback){
         $.confirm.create({
-            title: 'Module Download',
-            body: `Do you want to download the module from <b>${url}</b>? `,
+            title: lang['Plugin Download'],
+            body: `${lang.superPluginDownloadText}<br><b>${url}</b>? `,
             clickOptions: {
                 class: 'btn-success',
                 title: lang.Download,
             },
             clickCallback: function(){
+                new PNotify({
+                    title: lang['Plugin Downloading'],
+                    text: lang['Please Wait...'],
+                    type: 'info'
+                });
                 $.post(superApiPrefix + $user.sessionKey + '/plugins/download',{
                     downloadUrl: url,
                     packageRoot: packageRoot,
                 },function(data){
                     setTimeout(function(){
+                        new PNotify({
+                            title: lang['Plugin Downloaded'],
+                            text: lang.superPluginDownloadedText,
+                            type: 'success'
+                        });
                         callback(data)
                     },3000)
                 })

@@ -852,7 +852,7 @@ function signalCheckLiveStream(options){
         var streamType = subStreamChannel ? monitorDetails.substream ? monitorDetails.substream.output.stream_type : 'hls' : monitorDetails.stream_type
         function failedStreamCheck(){
             if(monitorConfig.signal_check_log == 1){
-                logWriterDraw('[mid="'+monitorId+'"]',{
+                logWriterDraw(monitorId, {
                     log: {
                         type: 'Stream Check',
                         msg: lang.clientStreamFailedattemptingReconnect
@@ -863,7 +863,7 @@ function signalCheckLiveStream(options){
         }
         function succeededStreamCheck(){
             if(monitorConfig.signal_check_log == 1){
-                logWriterDraw('[mid="'+monitorId+'"]',{
+                logWriterDraw(monitorId, {
                     log: {
                         type: 'Stream Check',
                         msg : lang.Success

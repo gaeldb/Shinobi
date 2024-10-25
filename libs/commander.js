@@ -69,15 +69,19 @@ module.exports = function(s,config,lang,app){
                 }
             }
         }
-        // get latest
-        fetch('https://cdn.shinobi.video/configs/p2pServers.js')
+
+        fetch('https://cdn.shinobi.video/configs/p2pServers.json')
             .then(res => res.text())
             .then((text) => {
-                try{
-                    eval(`config.p2pServerList = ` + text)
-                }catch(err){
-                    s.debugLog(err)
+                try {
+                    const parsedData = JSON.parse(text);
+                    config.p2pServerList = parsedData;
+                } catch (err) {
+                    s.debugLog(`Failed to parse server list: ${err.message}`);
                 }
+            })
+            .catch((error) => {
+                s.debugLog(`Fetch error: ${error.message}`);
             });
     }
     if(!config.p2pHostSelected)config.p2pHostSelected = config.useBetterP2P ? 'paris-1-v2' : 'paris-1'

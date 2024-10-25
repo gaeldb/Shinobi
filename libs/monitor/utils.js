@@ -287,6 +287,14 @@ module.exports = (s,config,lang) => {
             channel: activeMonitor.subStreamChannel
         },'GRP_'+groupKey);
     }
+    const sendSubstreamEventActiveMonitor = function(activeMonitor, eventName = 'substream_start'){
+        s.tx({
+            f: eventName,
+            mid: activeMonitor.mid,
+            ke: activeMonitor.ke,
+            channel: activeMonitor.subStreamChannel
+        },'GRP_'+activeMonitor.mid);
+    }
     const spawnSubstreamProcess = function(e){
         // e = monitorConfig
         try{
@@ -387,6 +395,26 @@ module.exports = (s,config,lang) => {
                     },2000)
                 }
             })
+            activeMonitor.subStreamOutputReady = false;
+            if (outputFields.stream_type == 'hls') {
+                const channelStream = subStreamProcess.spawnargs.at(-1);
+                activeMonitor.subStreamOutputReadyCheck = setInterval(function () {
+                    if (fs.existsSync(channelStream)) {
+                        activeMonitor.subStreamOutputReady = true;
+                        clearInterval(activeMonitor.subStreamOutputReadyCheck);
+                    }
+                }, 1000);
+            } else if (outputFields.stream_type == 'mp4') {
+                const pipeNumber = activeMonitor.subStreamChannel + config.pipeAddition;
+                subStreamProcess.stdio[pipeNumber].once('data', (data) => {
+                    activeMonitor.subStreamOutputReady = true;
+                }); 
+            } else {
+                const pipeNumber = activeMonitor.subStreamChannel + config.pipeAddition;
+                activeMonitor.emitterChannel[pipeNumber].once('data', (data) => {
+                    activeMonitor.subStreamOutputReady = true;
+                }); 
+            }
             activeMonitor.subStreamProcess = subStreamProcess
             sendSubstreamEvent(groupKey, monitorId)
             return subStreamProcess
@@ -407,11 +435,13 @@ module.exports = (s,config,lang) => {
             }else if(activeMonitor.subStreamProcess){
                 activeMonitor.subStreamProcessClosing = true
                 activeMonitor.subStreamChannel = null;
+                activeMonitor.subStreamOutputReady = false;
+                clearInterval(activeMonitor.subStreamOutputReadyCheck);
                 const closeResponse = await processKill(activeMonitor.subStreamProcess)
                 response.hadSubStream = true
                 response.closeResponse = closeResponse
                 delete(activeMonitor.subStreamProcess)
-                sendSubstreamEvent(activeMonitor.mid, activeMonitor.ke, 'substream_end')
+                sendSubstreamEventActiveMonitor(activeMonitor, 'substream_end')
                 activeMonitor.subStreamProcessClosing = false
             }
         }catch(err){
@@ -462,7 +492,7 @@ module.exports = (s,config,lang) => {
     function setActiveViewer(groupKey,monitorId,connectionId,isBeingAdded){
         const viewerList = s.group[groupKey].activeMonitors[monitorId].watch;
         if(isBeingAdded){
-            if(viewerList.indexOf(connectionId) > -1)viewerList.push(connectionId);
+            if(viewerList.indexOf(connectionId) == -1)viewerList.push(connectionId);
         }else{
             viewerList.splice(viewerList.indexOf(connectionId), 1)
         }
@@ -811,6 +841,13 @@ module.exports = (s,config,lang) => {
         setActiveViewer(groupKey,monitorId,cn.id,true)
         activeMonitor.allowDestroySubstream = false
         clearTimeout(activeMonitor.noViewerCountDisableSubstream)
+        if (e.monitorTimeout) {
+            const uniqueId = cn.url + cn.id;
+            clearTimeout(streamViewerCountTimeouts[uniqueId])
+            streamViewerCountTimeouts[uniqueId] = setTimeout(() => {
+                monitorRemoveViewer(e,cn)
+            },e.monitorTimeout)
+        }
     }
     function monitorRemoveViewer(e,cn){
         const groupKey = e.ke
@@ -1452,9 +1489,10 @@ module.exports = (s,config,lang) => {
         const monitorId = e.mid || e.id
         const theGroup = s.group[groupKey]
         const activeMonitor = theGroup.activeMonitors[monitorId]
+        const monitorConfig = theGroup.rawMonitorConfigurations[monitorId]
         const isMacOS = s.platform !== 'darwin';
-        const isWatchOnly = e.functionMode === 'start'
-        const isRecord = e.functionMode === 'record'
+        const isWatchOnly = monitorConfig.mode === 'start'
+        const isRecord = monitorConfig.mode === 'record'
         const isWatchOnlyOrRecord = isWatchOnly || isRecord;
         const streamTypeIsJPEG = e.details.stream_type === 'jpeg'
         const streamTypeIsHLS = e.details.stream_type === 'hls'
@@ -1463,7 +1501,6 @@ module.exports = (s,config,lang) => {
         const typeIsMjpeg = e.type === 'mjpeg'
         const typeIsH264 = e.type === 'h264'
         const typeIsLocal = e.type === 'local'
-        const monitorConfig = theGroup.rawMonitorConfigurations[monitorId]
         const doPingTest = e.type !== 'socket' && e.type !== 'dashcam' && e.protocol !== 'udp' && e.type !== 'local' && e.details.skip_ping !== '1';
         if(!theGroup.startMonitorInQueue){
             theGroup.startMonitorInQueue = createQueueAwaited(0.5, 1)
@@ -1861,5 +1898,6 @@ module.exports = (s,config,lang) => {
         attachMainProcessHandlers: attachMainProcessHandlers,
         removeSenstiveInfoFromMonitorConfig,
         sendSubstreamEvent,
+        sendSubstreamEventActiveMonitor
     }
 }
