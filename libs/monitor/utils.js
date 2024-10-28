@@ -395,26 +395,6 @@ module.exports = (s,config,lang) => {
                     },2000)
                 }
             })
-            activeMonitor.subStreamOutputReady = false;
-            if (outputFields.stream_type == 'hls') {
-                const channelStream = subStreamProcess.spawnargs.at(-1);
-                activeMonitor.subStreamOutputReadyCheck = setInterval(function () {
-                    if (fs.existsSync(channelStream)) {
-                        activeMonitor.subStreamOutputReady = true;
-                        clearInterval(activeMonitor.subStreamOutputReadyCheck);
-                    }
-                }, 1000);
-            } else if (outputFields.stream_type == 'mp4') {
-                const pipeNumber = activeMonitor.subStreamChannel + config.pipeAddition;
-                subStreamProcess.stdio[pipeNumber].once('data', (data) => {
-                    activeMonitor.subStreamOutputReady = true;
-                }); 
-            } else {
-                const pipeNumber = activeMonitor.subStreamChannel + config.pipeAddition;
-                activeMonitor.emitterChannel[pipeNumber].once('data', (data) => {
-                    activeMonitor.subStreamOutputReady = true;
-                }); 
-            }
             activeMonitor.subStreamProcess = subStreamProcess
             sendSubstreamEvent(groupKey, monitorId)
             return subStreamProcess

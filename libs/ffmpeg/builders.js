@@ -192,20 +192,11 @@ module.exports = (s,config,lang) => {
         //`e` is the monitor object
         //`x` is an object used to contain temporary values.
         const channelStreamDirectory = !isNaN(parseInt(number)) ? `${e.sdir || s.getStreamsDirectory(e)}channel${number}/` : e.sdir
-        if(channelStreamDirectory !== e.sdir){
-            if (fs.existsSync(channelStreamDirectory)) {
-                try {
-                    fs.rmSync(channelStreamDirectory, { recursive: true, force: true })
-                }catch(err){
-                    // s.debugLog(err)
-                }
-            }
-            if (!fs.existsSync(channelStreamDirectory)) {
-                try {
-                    fs.mkdirSync(channelStreamDirectory)
-                }catch(err){
-                    // s.debugLog(err)
-                }
+        if(channelStreamDirectory !== e.sdir && !fs.existsSync(channelStreamDirectory)){
+            try {
+                fs.mkdirSync(channelStreamDirectory)
+            }catch(err){
+                // s.debugLog(err)
             }
         }
         const channelNumber = number - config.pipeAddition
@@ -448,7 +439,7 @@ module.exports = (s,config,lang) => {
             }
             if((!videoCodecisCopy || outputRequiresEncoding) && !e.details.hwaccel_format){
                 if(videoWidth && videoHeight)streamFlags.push(`-s ${videoWidth}x${videoHeight}`)
-                if(videoFps && streamType === 'mjpeg' || streamType === 'b64' || videoFps && !videoCodecisCopy){
+                if(videoFps && streamType === 'mjpeg' || videoFps && streamType === 'b64' || videoFps && !videoCodecisCopy){
                     streamFilters.push(`fps=${videoFps}`)
                 }
             }
