@@ -293,7 +293,7 @@ module.exports = (s,config,lang) => {
             mid: activeMonitor.mid,
             ke: activeMonitor.ke,
             channel: activeMonitor.subStreamChannel
-        },'GRP_'+activeMonitor.mid);
+        },'GRP_'+activeMonitor.ke);
     }
     const spawnSubstreamProcess = function(e){
         // e = monitorConfig
@@ -425,6 +425,7 @@ module.exports = (s,config,lang) => {
                 activeMonitor.subStreamProcessClosing = false
             }
         }catch(err){
+            console.error(err)
             s.debugLog('destroySubstreamProcess',err)
         }
         return response

@@ -223,7 +223,7 @@ function toggleSubStream(monitorId,callback){
     }
     if(monitor.subStreamToggleLock)return false;
     monitor.subStreamToggleLock = true
-    $.getJSON(getApiPrefix() + '/toggleSubstream/'+$user.ke+'/'+monitorId,function(d){
+    $.getJSON(getApiPrefix() + '/toggleSubstream/'+$user.ke+'/'+monitorId + (monitor.subStreamActive ? '?action=stop' : ''),function(d){
         monitor.subStreamToggleLock = false
         debugLog(d)
         if(callback)callback()
