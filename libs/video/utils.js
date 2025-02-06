@@ -54,11 +54,8 @@ module.exports = (s,config,lang) => {
             })
         })
     }
-    const scanForOrphanedVideos = (monitor,options) => {
-        // const options = {
-        //     checkMax: 2
-        // }
-        options = options ? options : {}
+    const scanForOrphanedVideos = (monitor, options) => {
+        options = options || {}
         return new Promise((resolve,reject) => {
             const response = {ok: false}
             if(options.forceCheck === true || config.insertOrphans === true){
@@ -70,30 +67,32 @@ module.exports = (s,config,lang) => {
                 let videosFound = 0;
                 const videosDirectory = s.getVideoDirectory(monitor)
                 const tempDirectory = s.getStreamsDirectory(monitor)
-                // const findCmd = [videosDirectory].concat(options.flags || ['-maxdepth','1'])
+
+                // Write the `sh` script
                 try{
                     fs.writeFileSync(
                         tempDirectory + 'orphanCheck.sh',
                         `find "${s.checkCorrectPathEnding(videosDirectory,true)}" -maxdepth 1 -type f -exec stat -c "%n" {} + | sort -r | head -n ${options.checkMax}`
                     );
-                }catch(err){
+                } catch(err) {
                     console.log('Failed scanForOrphanedVideos', monitor.ke, monitor.mid)
                     response.err = err.toString()
-                    resolve(response)
-                    return
+                    return resolve(response)
                 }
+
                 let listing = spawn('sh',[tempDirectory + 'orphanCheck.sh'])
-                // const onData = options.onData ? options.onData : () => {}
                 const onError = options.onError ? options.onError : s.systemLog
+
                 const onExit = async () => {
-                    try{
+                    try {
                         listing.kill('SIGTERM')
                         await fs.promises.rm(tempDirectory + 'orphanCheck.sh')
-                    }catch(err){
+                    } catch(err) {
                         s.debugLog(err)
                     }
                     delete(listing)
                 }
+
                 const onFinish = () => {
                     if(!finished){
                         finished = true
@@ -103,9 +102,9 @@ module.exports = (s,config,lang) => {
                         onExit()
                     }
                 }
+
                 const processLine = async (filePath) => {
-                    let filename = filePath.split('/')
-                    filename = `${filename[filename.length - 1]}`.trim()
+                    let filename = filePath.split('/').pop().trim()
                     if(filename && filename.indexOf('-') > -1 && filename.indexOf('.') > -1){
                         const { status } = await checkIfVideoIsOrphaned(monitor,videosDirectory,filename)
                         if(status === 2){
@@ -117,21 +116,45 @@ module.exports = (s,config,lang) => {
                         }
                     }
                 }
+
+                // ------------------------------------------------------------------------------
+                // Inactivity logic: if no data has arrived for 10 seconds, kill the process
+                // ------------------------------------------------------------------------------
+                let lastDataTimestamp = Date.now()
+                const INACTIVITY_TIMEOUT = 10000
+
+                const checkInactivity = () => {
+                    if(finished) return // If we've already finished, do nothing
+                    const now = Date.now()
+                    if(now - lastDataTimestamp >= INACTIVITY_TIMEOUT){
+                        // It's been more than 10 seconds since the last data event
+                        onFinish()
+                    } else {
+                        // Check again in 1 second
+                        setTimeout(checkInactivity, 1000)
+                    }
+                }
+                // Start the inactivity checker
+                setTimeout(checkInactivity, 1000)
+                // ------------------------------------------------------------------------------
+
                 listing.stdout.on('data', async (d) => {
+                    // Reset the inactivity timer
+                    lastDataTimestamp = Date.now()
+
                     const filePathLines = d.toString().split('\n')
-                    var i;
-                    for (i = 0; i < filePathLines.length; i++) {
+                    for (let i = 0; i < filePathLines.length; i++) {
                         await processLine(filePathLines[i])
                     }
                 })
-                listing.stderr.on('data', d=>onError(d.toString()))
+                listing.stderr.on('data', d => onError(d.toString()))
                 listing.on('close', (code) => {
-                    // s.debugLog(`findOrphanedVideos ${monitor.ke} : ${monitor.mid} process exited with code ${code}`);
                     setTimeout(() => {
                         onFinish()
                     },1000)
                 });
-            }else{
+            } else {
+                // If we are not going to check for orphans, just resolve
                 resolve(response)
             }
         })
@@ -244,13 +267,16 @@ module.exports = (s,config,lang) => {
         startTime,
         endTime,
         searchQuery,
-        monitorRestrictions
+        monitorRestrictions,
+        andOnly
     }){
         const theSearches = searchQuery.split(',').map(query => ['objects','LIKE',`%${query.trim()}%`]);
         const lastIndex = theSearches.length - 1;
-        theSearches.forEach(function(item, n){
-            if(n !== 0)theSearches[n] = ['or', ...item];
-        });
+        if(!andOnly){
+            theSearches.forEach(function(item, n){
+                if(n !== 0)theSearches[n] = ['or', ...item];
+            });
+        }
         const initialEventQuery = [
             ['ke','=',groupKey],
         ];
@@ -897,7 +923,7 @@ module.exports = (s,config,lang) => {
                 await fsP.writeFile(framePath, frameBuffer)
                 await s.createTimelapseFrameAndInsert(activeMonitor,location,frameFilename, frameTime._d)
             }catch(err){
-                console.error(err)
+                s.debugLog(err)
             }
         }
         // console.error('Completed Saving Frame from New Video!', framePath)

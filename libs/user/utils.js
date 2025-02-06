@@ -539,7 +539,28 @@ module.exports = (s,config,lang) => {
             })
         })
     }
+    async function getAdminUser(groupKey, uid){
+        const { rows } = await s.knexQueryPromise({
+            action: "select",
+            columns: "ke,uid,details,mail",
+            table: "Users",
+            where: [
+                ['uid','=', uid],
+                ['ke','=', groupKey],
+            ],
+            limit: 1,
+        });
+        try{
+            const user = rows[0];
+            user.details = JSON.parse(user.details)
+            return user
+        }catch(err){
+            s.systemLog(err)
+            return null;
+        }
+    }
     return {
+        getAdminUser,
         deleteSetOfVideos: deleteSetOfVideos,
         deleteSetOfTimelapseFrames: deleteSetOfTimelapseFrames,
         deleteSetOfFileBinFiles: deleteSetOfFileBinFiles,

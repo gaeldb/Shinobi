@@ -66,37 +66,23 @@ fi
 
 DATABASE_CONFIG='{"host": "'$DB_HOST'","user": "'$DB_USER'","password": "'$DB_PASSWORD'","database": "'$DB_DATABASE'","port":'$DB_PORT'}'
 
-cronKey="$(head -c 1024 < /dev/urandom | sha256sum | awk '{print substr($1,1,29)}')"
-
 cd /home/Shinobi
 mkdir -p libs/customAutoLoad
 
-if [ -e "/config/conf.json" ]; then
-    cp /config/conf.json conf.json
-elif [ ! -e "./conf.json" ]; then
+# Create /config/conf.json if it doesn't exist
+if [ ! -e "./conf.json" ]; then
     cp conf.sample.json conf.json
 fi
-# Create /config/conf.json if it doesn't exist
-if [ ! -e "/config/conf.json" ]; then
-  node tools/modifyConfiguration.js cpuUsageMarker=CPU subscriptionId=$SUBSCRIPTION_ID thisIsDocker=true pluginKeys="$PLUGIN_KEYS" databaseType="$DB_TYPE" db="$DATABASE_CONFIG" ssl="$SSL_CONFIG"
-  cp /config/conf.json conf.json
-fi
-sed -i -e 's/change_this_to_something_very_random__just_anything_other_than_this/'"$cronKey"'/g' conf.json
 
+node tools/modifyConfiguration.js cpuUsageMarker=CPU subscriptionId=$SUBSCRIPTION_ID pluginKeys="$PLUGIN_KEYS" databaseType="$DB_TYPE" db="$DATABASE_CONFIG" ssl="$SSL_CONFIG"
 
 echo "============="
 echo "Default Superuser : admin@shinobi.video"
 echo "Default Password : admin"
 echo "Log in at http://HOST_IP:SHINOBI_PORT/super"
-if [ -e "/config/super.json" ]; then
-    cp /config/super.json super.json
-elif [ ! -e "./super.json" ]; then
-    cp super.sample.json super.json
-fi
 
-if [ -e "/config/init.extension.sh" ]; then
-    echo "Running extension init file ..."
-    ( sh /config/init.extension.sh )
+if [ ! -e "./super.json" ]; then
+    cp super.sample.json super.json
 fi
 
 # Execute Command

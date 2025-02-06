@@ -90,7 +90,16 @@ module.exports = function(s,config,lang){
                 usedSpaceFilebin: s.group[groupKey].usedSpaceFilebin,
                 usedSpaceTimelapseFrames: s.group[groupKey].usedSpaceTimelapseFrames,
                 limit: s.group[groupKey].sizeLimit,
-                addStorage: s.group[groupKey].addStorageUse
+                addStorage: s.group[groupKey].addStorageUse,
+            },'GRP_'+groupKey);
+        }
+    }
+    s.sendCloudDiskUsedAmountToClients = function(groupKey){
+        //send the amount used disk space to connected users
+        if(s.group[groupKey]&&s.group[groupKey].init){
+            s.tx({
+                f: 'cloudDiskUsed',
+                cloudDisks: s.group[groupKey].cloudDiskUse,
             },'GRP_'+groupKey);
         }
     }
@@ -151,6 +160,7 @@ module.exports = function(s,config,lang){
         theGroup.usedSpace = theGroup.usedSpace || ((e.size || 0) / 1048576)
         //emit the changes to connected users
         s.sendDiskUsedAmountToClients(e.ke)
+        s.sendCloudDiskUsedAmountToClients(e.ke)
         // create monitor management queue
         theGroup.startMonitorInQueue = createQueueAwaited(0.5, 1)
     }
@@ -205,6 +215,7 @@ module.exports = function(s,config,lang){
                                 cloudDisk.usedSpaceVideos += amount
                             break;
                         }
+                        s.sendCloudDiskUsedAmountToClients(e.ke)
                     })
                     if(config.cron.deleteOverMax === true){
                         s.group[e.ke].diskUsedEmitter.on('purgeCloud',function(storageType,storagePoint){

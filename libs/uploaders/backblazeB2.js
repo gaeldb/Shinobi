@@ -206,6 +206,7 @@ module.exports = function(s,config,lang){
        "evaluation": "details.use_bb_b2 !== '0'",
        "name": lang["Backblaze B2"],
        "color": "forestgreen",
+       "uploaderId": 'b2',
        "info": [
            {
               "name": "detail=bb_b2_save",

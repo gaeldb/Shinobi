@@ -497,7 +497,8 @@ module.exports = function(s,config,lang){
                         s.tx({f:'monitor_snapshot',snapshot:e.mon.name,snapshot_format:'plc',mid:e.mid,ke:e.ke},'GRP_'+e.ke)
                     }
                 }
-                if(s.group[e.ke].activeMonitors[e.mid].onvifConnection){
+                const onvifDevice = s.group[e.ke].activeMonitors[e.mid].onvifConnection || (await s.createOnvifDevice({ id: e.mid, ke: e.ke })).device;
+                if(onvifDevice){
                     try{
                         const screenShot = await s.getSnapshotFromOnvif({
                             ke: e.ke,
@@ -733,6 +734,13 @@ module.exports = function(s,config,lang){
             break;
             case'start':case'record':
                 await monitorStart(e)
+                s.tx({
+                    f: 'monitor_watch_on',
+                    id: monitorId,
+                    ke: groupKey,
+                    subStreamChannel: s.group[groupKey].activeMonitors[monitorId].subStreamChannel,
+                    warnings: s.group[groupKey].activeMonitors[monitorId].warnings || []
+                }, `MON_${groupKey}${monitorId}`)
             break;
             default:
                 console.log('No s.camera execute : ',selectedMode)

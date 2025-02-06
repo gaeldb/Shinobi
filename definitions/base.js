@@ -126,6 +126,12 @@ module.exports = function(s,config,lang){
                       "possible": s.listOfStorage
                   },
                   {
+                     "name": "detail=ptz_id",
+                     "field": lang["PTZ Control ID"],
+                     "example": "1",
+                     "description": lang["ptzControlIdFieldText"],
+                  },
+                  {
                      "name": "detail=auto_compress_videos",
                      "field": lang['Compress Completed Videos'],
                      "description": lang.compressCompletedVideosFieldText,
@@ -306,6 +312,10 @@ module.exports = function(s,config,lang){
                            {
                               "name": "RTSP",
                               "value": "rtsp"
+                           },
+                           {
+                              "name": "SRT",
+                              "value": "srt"
                            },
                            {
                               "name": "RTMP",
@@ -4472,8 +4482,8 @@ module.exports = function(s,config,lang){
                       "default": "0",
                       "example": "",
                       "fieldType": "select",
+                      "attribute": "multiple",
                        id: 'copy_settings_monitors',
-                      "attribute": `copy="#monSectionLogging" style="min-height:100px" multiple`,
                       "form-group-class": "h_copy_settings_input h_copy_settings_1",
                       "possible": [
                          {
@@ -4974,9 +4984,35 @@ module.exports = function(s,config,lang){
                 "color": "navy",
                 "info": [
                     {
+                        "field": lang['Force Monitors Per Row'],
+                        attribute:'localStorage="montage_use"',
+                        selector:'st_force_mon_rows',
+                        "description": "",
+                        "default": "0",
+                        "example": "",
+                        "fieldType": "select",
+                        "possible": [
+                            {
+                               "name": lang.No,
+                               "value": "0"
+                            },
+                            {
+                               "name": lang.Yes,
+                               "value": "1"
+                            }
+                        ]
+                    },
+                    {
                         "field": lang['Monitors per row'],
-                        "placeholder": "3",
+                        "form-group-class":"st_force_mon_rows_input st_force_mon_rows_1",
                         attribute:'localStorage="montage"',
+                        "placeholder": "3",
+                    },
+                    {
+                          "field": lang.hlsOptions,
+                          "name": "localStorage=hlsOptions",
+                          fieldType:"textarea",
+                          "placeholder": "{}",
                     },
                 ]
             },
@@ -4984,46 +5020,20 @@ module.exports = function(s,config,lang){
                 "name": lang.Preferences,
                 "color": "navy",
                 "info": [
-                    {
+                   {
                         "field": lang['Clock Format'],
-                       "name": "detail=clock_date_format",
-                       "placeholder": "$DAYNAME $DAY $MONTHNAME $YEAR",
+                        "name": "detail=clock_date_format",
+                        "placeholder": "$DAYNAME $DAY $MONTHNAME $YEAR",
                    },
                    {
-                       "field": lang.CSS,
-                      "name": "detail=css",
-                      fieldType:"textarea",
-                      "placeholder": "#main_header{background:#b59f00}",
-                      "description": "",
-                      "default": "",
-                      "example": "",
-                      "possible": ""
-                  },
-                  {
-                        "field": lang.hlsOptions,
-                        "name": "localStorage=hlsOptions",
+                        "field": lang.CSS,
+                        "name": "detail=css",
                         fieldType:"textarea",
-                        "placeholder": "{}",
-                  },
-                  {
-                      "field": lang['Force Monitors Per Row'],
-                      "form-group-class":"st_force_mon_rows_input st_force_mon_rows_1",
-                      attribute:'localStorage="montage_use"',
-                      selector:'st_force_mon_rows',
-                      "description": "",
-                      "default": "0",
-                      "example": "",
-                      "fieldType": "select",
-                      "possible": [
-                          {
-                             "name": lang.No,
-                             "value": "0"
-                          },
-                          {
-                             "name": lang.Yes,
-                             "value": "1"
-                          }
-                      ]
+                        "placeholder": "#main_header{background:#b59f00}",
+                        "description": "",
+                        "default": "",
+                        "example": "",
+                        "possible": ""
                   },
                   {
                       "field": lang['Browser Console Log'],
@@ -6637,7 +6647,7 @@ module.exports = function(s,config,lang){
                       {
                          "name": "ip",
                          "field": lang['IP Address'],
-                         "description": lang[lang["fieldTextIp"]],
+                         "description": lang["fieldTextIp"],
                          "example": "10.1.100.1-10.1.100.254",
                       },
                       {
@@ -8473,13 +8483,30 @@ module.exports = function(s,config,lang){
                         "example": "person",
                      },
                      {
+                         id:'videosTable_tag_search_andonly',
+                         field: lang['Search Type'],
+                         default: '0',
+                         "fieldType": "select",
+                         possible:[
+                             {
+                                 "name": lang.OR,
+                                 "value": "0",
+                                 selected: true,
+                             },
+                             {
+                                 "name": lang.AND,
+                                 "value": "1"
+                             },
+                        ]
+                     },
+                     {
                          "class": "date_selector",
                          "field": lang.Date,
                      },
                      {
                          id:'videosTable_cloudVideos',
                          field: lang['Video Set'],
-                         default:'local',
+                         default: 'local',
                          "fieldType": "select",
                          possible:[
                            {
@@ -9210,6 +9237,13 @@ module.exports = function(s,config,lang){
                               </div>
                               <div class="btn-group">
                                   <input class="form-control form-control-sm" id="timeline-video-object-search" placeholder="${lang['Search Object Tags']}">
+                              </div>
+                              <div class="btn-group">
+                                  <select class="form-control form-control-sm" id="timeline-video-type">
+                                    <option value="">${lang.Local}</option>
+                                    <option value="cloud">${lang.Cloud}</option>
+                                    <option value="archive">${lang.Archive}</option>
+                                  </select>
                               </div>
                               <div class="btn-group">
                                   <a class="btn btn-sm btn-primary" timeline-action="autoGridSizer" title="${lang.autoResizeGrid}"><i class="fa fa-expand"></i></a>

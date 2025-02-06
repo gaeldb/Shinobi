@@ -1,6 +1,8 @@
 ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
-# OUTDATED, Newest Docker method here :
+
+# This Docker method is only for integrated Database and simple volume mounts. For separate database and more elaborate installation please use this registry instead :
 https://gitlab.com/Shinobi-Systems/ShinobiDocker
+
 ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
 
 
@@ -33,26 +35,8 @@ Once complete open port `8080` of your Docker host in a web browser.
 > Please remember to check out the Environment Variables table further down this README.
 
 ```
-docker run -d --name='Shinobi' -p '8080:8080/tcp' -v "/dev/shm/Shinobi/streams":'/dev/shm/streams':'rw' -v "$HOME/Shinobi/config":'/config':'rw' -v "$HOME/Shinobi/customAutoLoad":'/home/Shinobi/libs/customAutoLoad':'rw' -v "$HOME/Shinobi/database":'/var/lib/mysql':'rw' -v "$HOME/Shinobi/videos":'/home/Shinobi/videos':'rw' -v "$HOME/Shinobi/plugins":'/home/Shinobi/plugins':'rw' -v '/etc/localtime':'/etc/localtime':'ro' registry.gitlab.com/shinobi-systems/shinobi:dev
+docker run -d --name='Shinobi' --memory=2g -p '8080:8080/tcp' -p '21:21/tcp' -v "$HOME/ShinobiDatabase":'/var/lib/mysql':'rw' -v "$HOME/Shinobi":'/home/Shinobi':'rw' registry.gitlab.com/shinobi-systems/shinobi:dev
 ```
-
-**Installing Object Detection (TensorFlow.js)**
-*Updated Image only works with Dashboard v3*
-
-> This requires that you add the plugin key to the Shinobi container. This key is generated and displayed in the startup logs of the Object Detection docker container.
-
-- `-p '8082:8082/tcp'` is an optional flag if you decide to run the plugin in host mode.
-- `-e PLUGIN_HOST='10.1.103.113'` Set this as your Shinobi IP Address.
-- `-e PLUGIN_PORT='8080'` Set this as your Shinobi Web Port number.
-
-```
-docker run -d --name='shinobi-tensorflow' -e PLUGIN_HOST='10.1.103.113' -e PLUGIN_PORT='8080' -v "$HOME/Shinobi/docker-plugins/tensorflow":'/config':'rw' registry.gitlab.com/shinobi-systems/docker-plugin-tensorflow.js:master
-```
-
-More Information about this plugin :
-- CPU : https://gitlab.com/Shinobi-Systems/docker-plugin-tensorflow.js
-- GPU (NVIDIA CUDA) : https://gitlab.com/Shinobi-Systems/docker-plugin-tensorflow.js/-/tree/gpu
-
 
 ## From Source
 > Image is based on Ubuntu Bionic (20.04). Node.js 12 is used. MariaDB and FFmpeg are included.
@@ -86,27 +70,18 @@ docker build -f Dockerfile.arm32v7 --tag shinobi-image:1.0 .
 > This command only works on Linux because of the temporary directory used. This location must exist in RAM. `-v "/dev/shm/shinobiStreams":'/dev/shm/streams':'rw'`. The timezone is also acquired from the host by the volume declaration of `-v '/etc/localtime':'/etc/localtime':'ro'`.
 
 ```
-docker run -d --name='Shinobi' -p '8080:8080/tcp' -v "/dev/shm/Shinobi/streams":'/dev/shm/streams':'rw' -v "$HOME/Shinobi/config":'/config':'rw' -v "$HOME/Shinobi/customAutoLoad":'/home/Shinobi/libs/customAutoLoad':'rw' -v "$HOME/Shinobi/database":'/var/lib/mysql':'rw' -v "$HOME/Shinobi/videos":'/home/Shinobi/videos':'rw' -v "$HOME/Shinobi/plugins":'/home/Shinobi/plugins':'rw' -v '/etc/localtime':'/etc/localtime':'ro' shinobi-image:1.0
+docker run -d --name='Shinobi' --memory=2g -p '8080:8080/tcp' -p '21:21/tcp' -v "$HOME/ShinobiDatabase":'/var/lib/mysql':'rw' -v "$HOME/Shinobi":'/home/Shinobi':'rw' shinobi-image:1.0
 ```
 
  > Host mount paths have been updated in this document.
 
- ### Running without Included Database (NoDB)
-
- For information about this please see this Merge Request done by @thtmnisamnstr. It thoroughly documents how to use the NoDB installation method.
-
- https://gitlab.com/Shinobi-Systems/Shinobi/-/merge_requests/443
 
  ### Volumes
 
  | Volumes                      | Description                                                                                                                                         |
  |------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
- | /dev/shm/Shinobi/streams     | **IMPORTANT!** This must be mapped to somewhere in the host's RAM. When running this image on Windows you will need to select a different location. |
- | /config                      | Put `conf.json` or `super.json` files in here to override the default. values.                                                                      |
- | $HOME/Shinobi/customAutoLoad | Maps to the `/home/Shinobi/libs/customAutoLoad` folder for loading your own modules into Shinobi.                                                   |
- | $HOME/Shinobi/database       | A map to `/var/lib/mysql` in the container. This is the database's core files.                                                                      |
- | $HOME/Shinobi/videos         | A map to `/home/Shinobi/videos`. The storage location of your recorded videos.                                                                      |
- | $HOME/Shinobi/plugins        | A map to `/home/Shinobi/plugins`. Mapped so that plugins can easily be modified or swapped.                                                         |
+ | $HOME/Shinobi | Maps to the `/home/Shinobi` folder for the `customAutoLoad`, `plugins`, and `videos` folders inside and other files. Additionally you can edit the conf.json and super.json here. |
+ | $HOME/ShinobiDatabase       | A map to `/var/lib/mysql` in the container. This is the database's core files.                                                                      |
 
 ### Environment Variables
 

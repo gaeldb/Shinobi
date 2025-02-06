@@ -383,7 +383,7 @@ module.exports = function(s,config,lang,app,io){
     /**
     * API : Get List of Connected Plugins
     */
-    app.get(config.webPaths.apiPrefix+':auth/plugins/list', async (req,res) => {
+    app.get(config.webPaths.apiPrefix+':auth/plugins/:ke/list', async (req,res) => {
         s.auth(req.params, async (resp) => {
             s.closeJsonResponse(res,{
                 ok: true,

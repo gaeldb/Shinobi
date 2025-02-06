@@ -18,7 +18,10 @@
     var hasGUI = getAddon('gui')
     var isFullscreen = getAddon('fullscreen')
     var isRelativeUrl = getAddon('relative')
-    if(forceUrlPrefix){
+    var hasHost = getAddon('host')
+    if(hasHost){
+        urlPrefix = decodeURI(hasHost)
+    }else if(forceUrlPrefix){
         urlPrefix = forceUrlPrefix
     }else if(isRelativeUrl){
         urlPrefix = ''

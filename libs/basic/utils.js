@@ -136,7 +136,7 @@ module.exports = (processCwd,config) => {
         }
         return theRequester(requestUrl,requestOptions)
     }
-    const checkSubscription = (subscriptionId,callback) => {
+    const checkSubscription = (subscriptionId,callback,suppressCheckNotice = false) => {
         function subscriptionFailed(){
             console.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
             console.error('This Install of Shinobi is NOT Activated')
@@ -163,9 +163,11 @@ module.exports = (processCwd,config) => {
                 }
                 callback(hasSubcribed)
                 if(hasSubcribed){
-                    s.systemLog('This Install of Shinobi is Activated')
-                    if(!json.expired && json.timeExpires){
-                        s.systemLog(`This License expires on ${json.timeExpires}`)
+                    if(!suppressCheckNotice){
+                        s.systemLog('This Install of Shinobi is Activated')
+                        if(!json.expired && json.timeExpires){
+                            s.systemLog(`This License expires on ${json.timeExpires}`)
+                        }
                     }
                 }else{
                     subscriptionFailed()
@@ -186,6 +188,18 @@ module.exports = (processCwd,config) => {
             }
             callback(hasSubcribed)
         }
+    }
+    function checkAgainSubscription(){
+        let checkCount = 1
+        return setInterval(function(){
+            if(checkCount === 28){
+                checkSubscription(config.subscriptionId || config.peerConnectKey || config.p2pApiKey, function(hasSubcribed){
+                    config.userHasSubscribed = hasSubcribed
+                }, true);
+                checkCount = 1;
+            }
+            ++checkCount;
+        }, 1000 * 60 * 60 * 24);
     }
     function isEven(value) {
         if (value%2 == 0)
@@ -272,6 +286,7 @@ module.exports = (processCwd,config) => {
         localToUtc: localToUtc,
         formattedTime: formattedTime,
         checkSubscription: checkSubscription,
+        checkAgainSubscription,
         isEven: isEven,
         fetchTimeout: fetchTimeout,
         fetchDownloadAndWrite: fetchDownloadAndWrite,

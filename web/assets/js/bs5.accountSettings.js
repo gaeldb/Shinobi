@@ -10,7 +10,7 @@ $(document).ready(function(){
             var addStorageData = safeJsonParse($user.details.addStorage || '{}')
             var html = ''
             $.each(addStorage,function(n,storage){
-                var theStorage = addStorageData[storage.path]
+                var theStorage = addStorageData[storage.path] || {}
                 html += `
                 <div addStorageFields="${storage.path}">
                     <div class="form-group">

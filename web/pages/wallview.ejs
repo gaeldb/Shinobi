@@ -36,10 +36,11 @@
     var originalURL = `${urlPrefix}`
 %>
 <%- include('blocks/header-favicon') %>
+<script>window.lang=<%- JSON.stringify(lang) %>;</script>
 <script>window.$user=<%- JSON.stringify($user) %>;</script>
 <script>window.urlPrefix = "<%- urlPrefix || '' %>";</script>
-<script>window.groupKey = "<%- groupKey || '' %>";</script>
-<script>window.authKey = "<%- authKey || '' %>";</script>
+<script>window.groupKey = "<%- groupKey || '' %>";$user.ke = groupKey;</script>
+<script>window.authKey = "<%- authKey || '' %>";$user.auth_token = authKey;</script>
 <script>window.userHasSubscribed = <%- config.userHasSubscribed ? 'true' : 'false' %>;</script>
 <script src="<%- urlPrefix %>assets/vendor/js/socket.io.min.js"></script>
 <script src="<%- urlPrefix %>assets/vendor/js/jquery.min.js"></script>
@@ -59,6 +60,9 @@
 
     </div>
     <div id="wallview-controls" class="text-end">
+        <a class="btn btn-primary wallview-cycle-control wallview-cycle-back" style="display:none" href="#"><i class="fa fa-arrow-left"></i></a>
+        <a class="btn btn-primary wallview-cycle" href="#"><%- lang['Cycle'] %></a>
+        <a class="btn btn-primary wallview-cycle-control wallview-cycle-front" style="display:none" href="#"><i class="fa fa-arrow-right"></i></a>
         <a class="btn btn-primary wallview-open-all" href="#"><%- lang['Open All'] %></a>
         <a class="btn btn-danger wallview-close-all" href="#"><%- lang['Close All'] %></a>
         <a class="btn btn-success wallview-autoplace" href="#"><%- lang['Auto Placement'] %></a>
@@ -73,16 +77,27 @@
               <% }) %>
           </ul>
         </div>
-        <div class="dropdown d-inline-block">
-          <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="monitorListButton" data-bs-toggle="dropdown" aria-expanded="false">
-            <%- lang.Monitors %>
-          </a>
-          <ul id="wallview-monitorList" class="dropdown-menu" aria-labelledby="monitorListButton"></ul>
+        <a class="btn btn-secondary wallview-toggle-monitor-list" href="#"><%- lang.Monitors %></a>
+    </div>
+    <div id="wallview-monitorList-container" class="d-none search-parent">
+        <div class="p-2">
+            <a class="btn btn-success d-block wallview-autoplace" href="#"><%- lang['Auto Placement'] %></a>
+        </div>
+        <div class="px-2 pb-2">
+            <input class="form-control search-controller" placeholder="<%- lang.Search %>">
+        </div>
+        <div id="wallview-monitorList" class="px-2 pb-2 search-body">
+
         </div>
     </div>
 </div>
 <!-- <script src="<%- urlPrefix %>assets/js/bs5.embed.utils.js"></script> -->
+<script src="<%- urlPrefix %>assets/js/bs5.embed.utils.js"></script>
 <script src="<%- urlPrefix %>assets/vendor/bootstrap5/js/bootstrap.bundle.min.js"></script>
 <script src="<%- urlPrefix %>assets/vendor/js/pnotify.custom.min.js"></script>
 <script src="<%- urlPrefix %>assets/vendor/js/jquery-ui.min.js"></script>
+<script src="<%- urlPrefix %>assets/js/bs5.extenders.js"></script>
+<script src="<%- urlPrefix %>assets/js/bs5.websocket.js"></script>
 <script src="<%- urlPrefix %>assets/js/bs5.wallview.js"></script>
+<script src="<%- urlPrefix %>assets/js/bs5.wallview.gamepad.js"></script>
+<script src="<%- urlPrefix %>assets/js/bs5.wallview.cycle.js"></script>

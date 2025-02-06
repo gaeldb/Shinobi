@@ -35,6 +35,9 @@ function getLiveGridData(){
 }
 function getMonitorsPerRow(){
     var x
+    if(dashboardOptions().montage_use != '1'){
+        return '4'
+    }
     switch(dashboardOptions().montage){
         case'1':
             x = '12'
@@ -422,45 +425,43 @@ function initiateLiveGridPlayer(monitor,subStreamChannel){
                 })
             break;
             case'mp4':
-                setTimeout(function(){
-                    var stream = containerElement.find('.stream-element');
-                    var onPoseidonError = function(){
-                        // setTimeout(function(){
-                        //     mainSocket.f({f:'monitor',ff:'watch_on',id:monitorId})
-                        // },2000)
+                var stream = containerElement.find('.stream-element');
+                var onPoseidonError = function(){
+                    // setTimeout(function(){
+                    //     mainSocket.f({f:'monitor',ff:'watch_on',id:monitorId})
+                    // },2000)
+                }
+                if(!loadedPlayer.PoseidonErrorCount)loadedPlayer.PoseidonErrorCount = 0
+                if(loadedPlayer.PoseidonErrorCount >= 5)return
+                if(subStreamChannel ? details.substream.output.stream_flv_type === 'ws' : monitor.details.stream_flv_type === 'ws'){
+                    if(loadedPlayer.Poseidon){
+                        loadedPlayer.Poseidon.stop()
+                        revokeVideoPlayerUrl(monitorId)
                     }
-                    if(!loadedPlayer.PoseidonErrorCount)loadedPlayer.PoseidonErrorCount = 0
-                    if(loadedPlayer.PoseidonErrorCount >= 5)return
-                    if(subStreamChannel ? details.substream.output.stream_flv_type === 'ws' : monitor.details.stream_flv_type === 'ws'){
-                        if(loadedPlayer.Poseidon){
-                            loadedPlayer.Poseidon.stop()
-                            revokeVideoPlayerUrl(monitorId)
-                        }
-                        try{
-                            loadedPlayer.Poseidon = new Poseidon({
-                                video: stream[0],
-                                auth_token: $user.auth_token,
-                                ke: monitor.ke,
-                                uid: $user.uid,
-                                id: monitor.mid,
-                                url: location.origin,
-                                path: websocketPath,
-                                query: websocketQuery,
-                                onError : onPoseidonError,
-                                channel : subStreamChannel
-                            })
-                            loadedPlayer.Poseidon.start();
-                        }catch(err){
-                            // onPoseidonError()
-                            console.log('onTryPoseidonError',err)
-                        }
-                    }else{
-                        stream.attr('src',getApiPrefix(`mp4`)+'/'+monitor.mid + (subStreamChannel ? `/${subStreamChannel}` : '')+'/s.mp4?time=' + (new Date()).getTime())
-                        stream[0].onerror = function(err){
-                            console.error(err)
-                        }
+                    try{
+                        loadedPlayer.Poseidon = new Poseidon({
+                            video: stream[0],
+                            auth_token: $user.auth_token,
+                            ke: monitor.ke,
+                            uid: $user.uid,
+                            id: monitor.mid,
+                            url: location.origin,
+                            path: websocketPath,
+                            query: websocketQuery,
+                            onError : onPoseidonError,
+                            channel : subStreamChannel
+                        })
+                        loadedPlayer.Poseidon.start();
+                    }catch(err){
+                        // onPoseidonError()
+                        console.log('onTryPoseidonError',err)
                     }
-                },1000)
+                }else{
+                    stream.attr('src',getApiPrefix(`mp4`)+'/'+monitor.mid + (subStreamChannel ? `/${subStreamChannel}` : '')+'/s.mp4?time=' + (new Date()).getTime())
+                    stream[0].onerror = function(err){
+                        console.error(err)
+                    }
+                }
             break;
             case'flv':
                 if (flvjs.isSupported()) {
@@ -630,6 +631,7 @@ function closeLiveGridPlayer(monitorId,killElement){
         var loadedPlayer = loadedLiveGrids[monitorId]
         if(loadedPlayer){
             if(loadedPlayer.hls){loadedPlayer.hls.destroy()}
+            clearTimeout(loadedPlayer.m3uCheck)
             if(loadedPlayer.Poseidon){loadedPlayer.Poseidon.stop()}
             if(loadedPlayer.Base64){loadedPlayer.Base64.disconnect()}
             if(loadedPlayer.dash){loadedPlayer.dash.reset()}
@@ -772,6 +774,10 @@ function fullScreenLiveGridStream(monitorItem){
         videoElement.attr('width',theBody.width())
     }
     fullScreenInit(videoElement[0])
+}
+function fullScreenLiveGridStreamById(monitorId){
+    const monitorItem = liveGrid.find(`[data-mid="${monitorId}"]`)
+    fullScreenLiveGridStream(monitorItem)
 }
 function toggleJpegMode(){
     var sendData = {
@@ -977,7 +983,7 @@ function setPauseScrollTimeout(){
     if(tabTree.name === 'liveGrid'){
         liveGridPauseScrollTimeout = setTimeout(function(){
             setPauseStatusForMonitorItems()
-        },700)
+        },200)
     }
 }
 function openAllLiveGridPlayers(){
@@ -1101,6 +1107,7 @@ $(document).ready(function(e){
     .on('click','.toggle-live-grid-monitor-ptz-controls',function(){
         var monitorItem = $(this).parents('[data-mid]').attr('data-mid')
         drawPtzControlsOnLiveGridBlock(monitorItem)
+        setGamepadMonitorSelection()
     })
     .on('click','.toggle-live-grid-monitor-menu,.mdl-overlay-menu-backdrop',function(){
         var monitorItem = $(this).parents('[data-mid]')
@@ -1114,6 +1121,7 @@ $(document).ready(function(e){
     .on('click','.toggle-live-grid-monitor-fullscreen',function(){
         var monitorItem = $(this).parents('[data-mid]')
         fullScreenLiveGridStream(monitorItem)
+        setGamepadMonitorSelection()
     })
     .on('click','.run-live-grid-monitor-pop',function(){
         var monitorId = $(this).parents('[data-mid]').attr('data-mid')
@@ -1277,6 +1285,7 @@ $(document).ready(function(e){
             break;
             case'substream_start':
                 loadedMonitors[d.mid].subStreamChannel = d.channel
+                loadedMonitors[d.mid].subStreamActive = true
                 showHideSubstreamActiveIcon(d.mid,true)
                 setTimeout(() => {
                     resetMonitorCanvas(d.mid,true,d.channel)
@@ -1284,6 +1293,7 @@ $(document).ready(function(e){
             break;
             case'substream_end':
                 loadedMonitors[d.mid].subStreamChannel = null
+                loadedMonitors[d.mid].subStreamActive = false
                 resetMonitorCanvas(d.mid,true,null)
                 showHideSubstreamActiveIcon(d.mid,false)
             break;

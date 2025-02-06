@@ -2,9 +2,9 @@
     const showMonitors = define.SideMenu.showMonitors; %>
 <nav id="<%- menuInfo.id || 'sidebarMenu' %>" class="<%- menuInfo.class || 'col-md-3 col-lg-2 d-md-block sidebar collapse' %>">
     <div id="menu-side" class="position-sticky">
-        <div class="align-items-center d-flex flex-row my-3 m-3 btn-default rounded shadow-sm cursor-pointer" style="overflow: hidden;">
+        <div class="align-items-center d-flex flex-row my-3 m-3 btn-default rounded shadow-sm cursor-pointer" style="overflow: hidden;border-bottom: 2px solid <%- config.userHasSubscribed ? '#1f80f9' : 'red' %>;">
             <div class="align-items-center mr-3 py-3 pl-3">
-                <div class="lh-1 <%- showMonitors ? `toggle-menu-collapse` : '' %>">
+                <div class="d-sm-none lh-1 <%- showMonitors ? `toggle-menu-collapse` : '' %>">
                     <img src="<%- window.libURL + config.logoLocation196x196 %>" width="42" style="<%- config.logoLocation76x76Style %>">
                 </div>
             </div>

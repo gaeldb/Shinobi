@@ -26,8 +26,8 @@ module.exports = function(s,config,lang,app){
                 startDate: req.query.start,
                 endDate: req.query.end,
                 startOperator: req.query.startOperator,
-                endOperator: req.query.endOperator,
-                limit: req.query.limit || 30,
+                endIsStartTo: true,
+                limit: req.query.limit,
             },(response) => {
                 response.rows.forEach(function(v,n){
                     response.rows[n].info = JSON.parse(v.info)
@@ -161,6 +161,7 @@ module.exports = function(s,config,lang,app){
                 const configError = await modifyConfiguration(Object.assign(currentConfig,{
                     subscriptionId: subscriptionId,
                 }))
+                config.subscriptionId = subscriptionId;
                 if(configError)s.systemLog(configError)
                 s.tx({f:'save_configuration'},'$')
             }

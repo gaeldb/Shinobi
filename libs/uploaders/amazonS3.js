@@ -253,6 +253,7 @@ module.exports = function(s,config,lang){
        "evaluation": "details.use_aws_s3 !== '0'",
        "name": lang["Amazon S3"],
        "color": "forestgreen",
+       "uploaderId": 's3',
        "info": [
            {
               "name": "detail=aws_s3_save",

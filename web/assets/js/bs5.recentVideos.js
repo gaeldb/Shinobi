@@ -94,7 +94,11 @@ $(document).ready(function(){
             liveStamp()
         })
     });
+    var loadedOnce = false;
     onDashboardReady(function(){
+        if(loadedOnce)return;
+        loadedOnce = true;
+        openTab('initial');
         drawMonitorListToSelector(monitorList.find('optgroup'))
         loadVideos({
             limit: 0,

@@ -239,6 +239,7 @@ module.exports = async function(s,config,lang){
                "evaluation": "details.use_webdav !== '0'",
                "name": lang.WebDAV,
                "color": "forestgreen",
+               "uploaderId": 'webdav',
                "info": [
                    {
                       "name": "detail=webdav_save",

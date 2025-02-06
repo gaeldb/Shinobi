@@ -646,7 +646,7 @@ function launchImportMonitorWindow(callback){
         reader.readAsText(f);
     });
 }
-function readAlertNotice(title, text, type) {
+function redAlertNotify({ title, text, type }) {
     var redAlertNotice = redAlertNotices[title];
     if (redAlertNotice) {
         redAlertNotice.update({
@@ -667,29 +667,6 @@ function readAlertNotice(title, text, type) {
         redAlertNotices[title].on('close', function() {
             redAlertNotices[title] = null;
         });
-    }
-}
-function redAlertNotify(options) {
-    var title = options.title;
-    var redAlertNotice = redAlertNotices[title];
-    var notifyOptions = {
-        title: title,
-        text: options.text,
-        type: options.type,
-        hide: options.hide === undefined ? false : options.hide,
-        delay: options.delay || 30000
-    };
-    try{
-        if (redAlertNotice) {
-            redAlertNotice.update(notifyOptions);
-        } else {
-            redAlertNotices[title] = new PNotify(notifyOptions);
-            redAlertNotices[title].on('close', function() {
-                redAlertNotices[title] = null;
-            });
-        }
-    }catch(err){
-        console.error('redAlertNotify ERROR',err)
     }
 }
 function buildPosePoints(bodyParts, x, y){
@@ -760,7 +737,11 @@ function drawMatrices(event, options, autoRemoveTimeout, drawTrails){
         }
         if(matrix.redAlert){
             var monitor = loadedMonitors[monitorId]
-            readAlertNotice(`${monitor.name}`,`${matrix.tag} (${matrix.id})<br>${matrix.notice}`,'danger');
+            redAlertNotify({
+                title: `${monitor.name}`,
+                text: `${matrix.tag} (${matrix.id})<br>${matrix.notice}`,
+                type: 'danger'
+            });
         }
         html += '</div>'
     }

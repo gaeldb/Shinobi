@@ -152,7 +152,9 @@ $(document).ready(function(e){
         var newMon = mergeDeep(generateDefaultMonitorSettings(),monitorToPost)
         $.post(getApiPrefix(`configureMonitor`) + '/' + monitorToPost.mid,{data:JSON.stringify(newMon,null,3)},function(d){
             debugLog(d)
-        })
+        }).fail(function(xhr, status, error) {
+            console.error(error)
+        });
     }
     function loadLocalOptions(){
         var currentOptions = dashboardOptions()

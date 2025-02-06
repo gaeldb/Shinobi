@@ -10,6 +10,7 @@ var httpProxy = require('http-proxy');
 var proxy = httpProxy.createProxyServer({})
 var ejs = require('ejs');
 module.exports = function(s,config,lang,app){
+    const { getAdminUser } = require('./user/utils.js')(s,config,lang);
     function cantLiveStreamPermission(user,monitorId,permission){
         const {
             monitorPermissions,
@@ -419,7 +420,7 @@ module.exports = function(s,config,lang,app){
     * Page : Get WallView
      */
     app.get(config.webPaths.apiPrefix+':auth/wallview/:ke', function (req,res){
-        s.auth(req.params,function(user){
+        s.auth(req.params, async function(user){
             const authKey = req.params.auth
             const groupKey = req.params.ke
             if(
@@ -429,6 +430,7 @@ module.exports = function(s,config,lang,app){
                 res.end(user.lang['Not Permitted'])
                 return
             }
+            const $user = await getAdminUser(groupKey, user.uid);
             s.renderPage(req,res,config.renderPaths.wallview,{
                 forceUrlPrefix: req.query.host || '',
                 data: req.params,
@@ -437,7 +439,7 @@ module.exports = function(s,config,lang,app){
                 config: s.getConfigWithBranding(req.hostname),
                 define: s.getDefinitonFile(user.details ? user.details.lang : config.lang),
                 lang: lang,
-                $user: user,
+                $user,
                 authKey: authKey,
                 groupKey: groupKey,
                 originalURL: s.getOriginalUrl(req)

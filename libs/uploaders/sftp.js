@@ -94,6 +94,8 @@ module.exports = function(s,config,lang){
        "evaluation": "details.use_sftp !== '0'",
        "name": lang['SFTP (SSH File Transfer)'],
        "color": "forestgreen",
+       "uploaderId": 'sftp',
+       "simpleUploader": true,
        "info": [
            {
               "name": "detail=sftp_save",

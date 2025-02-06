@@ -28,7 +28,7 @@ function createWebsocket(theURL,thePath){
             data.callbackId = callbackId
             queuedCallbacks[callbackId] = callback
         }
-        console.log('Sending Data',data)
+        // console.log('Sending Data',data)
         return mainSocket.emit('f',data)
     }
     mainSocket.on('ping', function(){
@@ -36,25 +36,12 @@ function createWebsocket(theURL,thePath){
     })
     mainSocket.on('connect',function (d){
         console.log('Connected to Websocket!')
-        if(location.search === '?p2p=1'){
-            mainSocket.emit('p2pInitUser',{
-              user: {
-                ke: $user.ke,
-                mail: $user.mail,
-                auth_token: $user.auth_token,
-                details: $user.details,
-                uid: $user.uid,
-            },
-            machineId: machineId
-          })
-        }else{
-            mainSocket.f({
-                f: 'init',
-                ke: $user.ke,
-                auth: $user.auth_token,
-                uid: $user.uid
-            })
-        }
+        mainSocket.f({
+            f: 'init',
+            ke: $user.ke,
+            auth: $user.auth_token,
+            uid: $user.uid
+        })
     })
     mainSocket.on('f',function (d){
         switch(d.f){

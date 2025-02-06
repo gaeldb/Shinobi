@@ -6,7 +6,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title><%-pageTitle%></title>
+    <%- include('header-title'); %>
     <meta charset="utf-8">
     <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
     <meta name="description" content="Shinobi">
@@ -70,7 +70,7 @@
     %>
     <script>
         window.getAdminApiPrefix = function(piece){
-            return "<%=originalURL%><%= config.webPaths.adminApiPrefix %><%- $user.auth_token %>/"
+            return "<%= config.webPaths.adminApiPrefix %><%- $user.auth_token %>/"
         }
     </script>
     <% customAutoLoad.LibsCss.forEach(function(lib){ %>

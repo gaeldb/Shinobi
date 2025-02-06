@@ -46,7 +46,7 @@ representative at support@shinobi.systems.
 
 As of 2022-07-12 the noted situations below are seen the same as "Commercial Use".
 
-- 25 Active Monitor Rule : Having at least 25 Active Monitors and not a Primary School or Secondary School. Does not apply to Personal Use.
+- 15 Active Monitor Rule : Having at least 15 Active Monitors and not a Primary School or Secondary School. Does not apply to Personal Use.
 - 150 Active Monitor Rule : If you have more than 150 Active Monitors please contact support for an Enterprise License. The retail Shinobi Pro license will not be applicable for these installations.
 - Used on a Device that was part of a commercial transaction. This can be, but not limited to, being sold or provided additionally to a sale.
 

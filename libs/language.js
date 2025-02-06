@@ -1,5 +1,6 @@
 var fs = require('fs')
 module.exports = function(s,config){
+    s.languageModifications = {};
     if(!config.language){
         config.language='en_CA'
     }
@@ -8,6 +9,11 @@ module.exports = function(s,config){
         let gotLang = {}
         try{
             eval(`gotLang = ${fs.readFileSync(s.location.languages+'/'+choice+'.json','utf8')}`)
+            if(s.languageModifications[choice]){
+                for(mods of s.languageModifications[choice]){
+                    Object.assign(gotLang, mods)
+                }
+            }
         }catch(er){
             console.error(er)
             console.log('There was an error loading your language file.')
@@ -34,6 +40,11 @@ module.exports = function(s,config){
     s.getLanguageFile = function(rule){
         if(rule && rule !== ''){
             var file = s.loadedLanguages[file]
+            // if(s.languageModifications[file]){
+            //     for(mods of s.languageModifications[file]){
+            //         Object.assign(file, mods)
+            //     }
+            // }
             s.debugLog(file)
             if(!file){
                 try{

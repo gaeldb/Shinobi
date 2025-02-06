@@ -75,6 +75,7 @@ module.exports = function(s,config){
     ///////// SYSTEM ////////
     createExtension(`onProcessReady`)
     createExtension(`onProcessExit`)
+    createExtension(`onLoadedUsersAtStartup`)
     createExtension(`onBeforeDatabaseLoad`)
     createExtension(`onFFmpegLoaded`)
     createExtension(`beforeMonitorsLoadedOnStartup`)

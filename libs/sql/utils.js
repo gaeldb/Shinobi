@@ -3,6 +3,7 @@ module.exports = (s,config,databaseOptions) => {
     var databaseOptions = {
         client: config.databaseType,
         connection: config.db,
+        pool: { min: 0, max: 10, propagateCreateError: true }
     }
     if(databaseOptions.client.indexOf('sqlite')>-1){
         databaseOptions.client = 'sqlite3';
