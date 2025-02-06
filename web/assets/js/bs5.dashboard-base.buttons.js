@@ -2,7 +2,6 @@ $(document).ready(function(){
     onInitWebsocket(function(){
         loadMonitorsIntoMemory(function(data){
             setInterfaceCounts(data)
-            openTab('initial')
             onDashboardReadyExecute()
         })
     });

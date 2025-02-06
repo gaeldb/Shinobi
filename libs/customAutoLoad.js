@@ -283,11 +283,13 @@ module.exports = async (s,config,lang,app,io) => {
                                         if(config.language === rule){
                                             lang = Object.assign(lang,fileData)
                                         }
-                                        if(s.loadedLanguages[rule]){
-                                            s.loadedLanguages[rule] = Object.assign(s.loadedLanguages[rule],fileData)
-                                        }else{
-                                            s.loadedLanguages[rule] = Object.assign(s.copySystemDefaultLanguage(),fileData)
-                                        }
+                                        if(!s.languageModifications[rule])s.languageModifications[rule] = [];
+                                        s.languageModifications[rule].push(fileData);
+                                        // if(s.loadedLanguages[rule]){
+                                        //     s.loadedLanguages[rule] = Object.assign(s.loadedLanguages[rule],fileData)
+                                        // }else{
+                                        //     s.loadedLanguages[rule] = Object.assign(s.copySystemDefaultLanguage(),fileData)
+                                        // }
                                     })
                                 })
                             break;
@@ -345,6 +347,7 @@ module.exports = async (s,config,lang,app,io) => {
             LibsCss: [],
             AssetsJs: [],
             AssetsCss: [],
+            superPageTabs: [],
             superPageBlocks: [],
             superLibsJs: [],
             superRawJs: [],

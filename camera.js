@@ -91,10 +91,14 @@ require('./libs/ffmpeg.js')(s,config,lang, async () => {
     require('./libs/auth/logins.js')(s,config,lang,app)
     //rally other Shinobi
     require('./libs/rally.js')(s,config,lang,app,io)
-    //on-start actions, daemon(s) starter
-    await require('./libs/startup.js')(s,config,lang)
+    //rally other Shinobi
+    require('./libs/mountManager.js')(s,config,lang,app,io)
+    // management server connect
+    require('./libs/connectToManagementServer/index.js')(s,config,lang,app)
     //p2p, commander
     require('./libs/commander.js')(s,config,lang,app)
+    //on-start actions, daemon(s) starter
+    await require('./libs/startup.js')(s,config,lang)
     //cron
     require('./libs/cron.js')(s,config,lang)
     //video browser functions

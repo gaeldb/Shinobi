@@ -238,8 +238,6 @@ onWebSocketEvent(function(d){
         case'monitor_snapshot':
             setTimeout(function(){
                 var snapElement = $(`[data-mid="${d.mid}"] .snapshot`)
-                console.log(d)
-                console.log(snapElement)
                 switch(d.snapshot_format){
                     case'plc':
                         snapElement.attr('src',placeholder.getData(placeholder.plcimg({text:d.snapshot.toUpperCase().split('').join(' '), fsize: 25, bgcolor:'#1462a5'})))

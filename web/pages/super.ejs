@@ -89,6 +89,17 @@
                             <li class="nav-item">
                                 <a class="nav-link" data-bs-toggle="tab" data-bs-target="#superPluginManager" role="tab"><%-lang['Plugin Manager']%></a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#superMountManager" role="tab"><%-lang['Mount Manager']%></a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#centralManagement" role="tab"><%-lang['Central Management']%></a>
+                            </li>
+                            <% customAutoLoad.superPageTabs.forEach(function(block){ %>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" data-bs-target="#<%- block.target %>" role="tab"><%- block.label %></a>
+                                </li>
+                            <% }) %>
                         </ul>
                         <div class="card-body text-white" style="background:#263343">
                             <!-- Tab panes -->
@@ -125,6 +136,10 @@
                                 <div class="tab-pane text-left" id="superPluginManager" role="tabpanel">
                                     <%- include('blocks/superPluginManager'); %>
                                 </div>
+                                <div class="tab-pane text-left" id="superMountManager" role="tabpanel">
+                                    <%- include('blocks/superMountManager'); %>
+                                </div>
+                                <%- include('blocks/superCentralManagement'); %>
                                 <% customAutoLoad.superPageBlocks.forEach(function(block){ %>
                                     <%- include(block) %>
                                 <% }) %>
@@ -220,7 +235,10 @@ switch($user.lang){
 $.ccio.ws = io(`${location.origin.split('/super')[0]}/`,{
     path : tool.checkCorrectPathEnding(location.pathname)+'socket.io'
 });
-
+const onInitSuccessExtensions = [];
+function onInitSuccess(theAction){
+    onInitSuccessExtensions.push(theAction)
+}
 $.ccio.cx=function(x){return $.ccio.ws.emit('super',x)}
 $.ccio.ws.on('connect',function(d){
     $.ccio.cx({f:'init',mail:$user.mail,pass:$user.pass,machineId: `<%- config.machineId %>`})
@@ -232,6 +250,9 @@ $.ccio.ws.on('f',function(d){
             drawUserList()
             drawSystemLogs()
             drawSystemInfo()
+            onInitSuccessExtensions.forEach((theAction) => {
+                theAction()
+            })
         break;
         case'log':
             $.ccio.tm(4,d.log,'#logs-list')

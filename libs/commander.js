@@ -131,7 +131,9 @@ module.exports = function(s,config,lang,app){
         runningWorker = startWorker()
     }
     if(config.p2pEnabled){
-        beginConnection()
+        s.onLoadedUsersAtStartup(() => {
+            beginConnection()
+        })
     }
     /**
     * API : Superuser : Save P2P Server choice

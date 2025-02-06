@@ -303,6 +303,7 @@ module.exports = (s,config,lang,app,io) => {
        "evaluation": "details.use_googd !== '0'",
        "name": lang["Google Drive"],
        "color": "forestgreen",
+       "uploaderId": 'googd',
        "info": [
            {
               "name": "detail=googd_save",

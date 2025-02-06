@@ -424,7 +424,9 @@ var copyMonitorSettingsToSelected = function(monitorConfig){
         })
         $.post(getApiPrefix()+'/configureMonitor/'+$user.ke+'/'+monitor.mid,{data:JSON.stringify(monitor)},function(d){
             debugLog(d)
-        })
+        }).fail(function(xhr, status, error) {
+            console.error(error)
+        });
         chosenMonitors[monitor.mid] = monitor;
     })
 }
@@ -570,7 +572,7 @@ function drawInputMapSelectorHtml(options,parent){
 function getPluginsList(monitorConfig){
     return new Promise((resolve) => {
         const chosenDetectors = safeJsonParse(monitorConfig.details).detectors_selected || [];
-        $.get(getApiPrefix() + '/plugins/list',function(data){
+        $.get(getApiPrefix('plugins') + '/list',function(data){
             var plugins = data.plugins || {};
             var pluginNames = Object.keys(plugins)
             var disconnectedPlugins = chosenDetectors.filter(item => !pluginNames.includes(item));
@@ -594,6 +596,9 @@ function getPluginsList(monitorConfig){
             });
             detectorsSelected.html(html)
             resolve(plugins)
+        }).fail((err) => {
+            console.error(err);
+            resolve({})
         })
     })
 }
@@ -826,6 +831,13 @@ editorForm.submit(function(e){
             })
         }
         debugLog(d)
+        setSubmitButton(editorForm, lang.Save, `check`, false)
+    }).fail((err) => {
+        new PNotify({
+            title: lang['Action Failed'],
+            text: JSON.stringify(err, null, 3),
+            type: 'danger'
+        })
         setSubmitButton(editorForm, lang.Save, `check`, false)
     })
     //

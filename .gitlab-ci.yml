@@ -1,0 +1,55 @@
+docker-latest-build:
+  image: docker:latest
+  stage: build
+  variables:
+    BASE_IMAGE: "node:20-bullseye-slim"
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - |
+      BRANCH_PREFIX="$(if [ $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH ]; then echo ${CI_COMMIT_REF_SLUG} ; else echo 'latest'; fi)"
+      BASE_IMAGE_ARCH="$(echo ${BASE_IMAGE} | cut -d'/' -f1)"
+      BASE_IMAGE_TYPE="$(echo ${BASE_IMAGE} | cut -d'/' -f2)"
+      ARCH_TYPE="$(if [ $BASE_IMAGE_ARCH != $BASE_IMAGE_TYPE ]; then echo '-'${BASE_IMAGE_ARCH}; else echo ''; fi )"
+
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}"
+      echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
+
+    - docker build --pull --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
+    - docker push "${IMAGE_NAME}"
+  rules:
+    - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
+      when: never
+    - if: $CI_COMMIT_BRANCH
+      exists:
+        - Dockerfile
+
+docker-nvidia-build:
+  image: docker:latest
+  stage: build
+  variables:
+    BASE_IMAGE: "nvidia/cuda:11.7.1-cudnn8-runtime-ubuntu22.04"
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - |
+      BRANCH_PREFIX="$(if [ $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH ]; then echo ${CI_COMMIT_REF_SLUG} ; else echo 'latest'; fi)"
+      BASE_IMAGE_ARCH="$(echo ${BASE_IMAGE} | cut -d'/' -f1)"
+      BASE_IMAGE_TYPE="$(echo ${BASE_IMAGE} | cut -d'/' -f2)"
+      ARCH_TYPE="$(if [ $BASE_IMAGE_ARCH != $BASE_IMAGE_TYPE ]; then echo '-'${BASE_IMAGE_ARCH}; else echo ''; fi )"
+
+      export IMAGE_NAME="$CI_REGISTRY_IMAGE:${BRANCH_PREFIX}${ARCH_TYPE}${NO_DB_SUFIX}"
+      echo "Running on branch '${CI_COMMIT_BRANCH}', Image: ${IMAGE_NAME}" ;
+
+    - docker build --pull --build-arg BASE_IMAGE="${BASE_IMAGE}" -t "${IMAGE_NAME}" . -f "Dockerfile"
+    - docker push "${IMAGE_NAME}"
+  rules:
+    - if: $CI_COMMIT_BRANCH != "master" && $CI_COMMIT_BRANCH != "main" && $CI_COMMIT_BRANCH != "dev"
+      when: never
+    - if: $CI_COMMIT_BRANCH
+      exists:
+        - Dockerfile

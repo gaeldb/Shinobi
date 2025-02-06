@@ -343,6 +343,7 @@ $(document).ready(function () {
       schema: schema,
     }
     );
+    window.configurationEditor = configurationEditor;
 
     configurationEditor.setValue(data.config);
 
@@ -404,5 +405,4 @@ $(document).ready(function () {
     }
   });
 
-  window.configurationEditor = configurationEditor;
 })

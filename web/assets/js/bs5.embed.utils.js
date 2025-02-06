@@ -81,3 +81,15 @@ function getQueryString(){
     })
     return theObject
 }
+function getListOfTagsFromMonitors(){
+    var listOftags = {}
+    $.each(loadedMonitors,function(monitorId,monitor){
+        if(monitor.tags){
+           monitor.tags.split(',').forEach((tag) => {
+               if(!listOftags[tag])listOftags[tag] = [];
+               listOftags[tag].push(monitorId)
+           })
+        }
+    })
+    return listOftags
+}

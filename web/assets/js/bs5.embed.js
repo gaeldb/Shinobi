@@ -189,45 +189,43 @@ function initiateLiveGridPlayer(monitor){
             })
         break;
         case'mp4':
-            setTimeout(function(){
-                var stream = containerElement.find('.stream-element');
-                var onPoseidonError = function(){
-                    // setTimeout(function(){
-                    //     mainSocket.f({f:'monitor',ff:'watch_on',id:monitorId})
-                    // },2000)
+            var stream = containerElement.find('.stream-element');
+            var onPoseidonError = function(){
+                // setTimeout(function(){
+                //     mainSocket.f({f:'monitor',ff:'watch_on',id:monitorId})
+                // },2000)
+            }
+            if(!loadedPlayer.PoseidonErrorCount)loadedPlayer.PoseidonErrorCount = 0
+            if(loadedPlayer.PoseidonErrorCount >= 5)return
+            if(subStreamChannel ? details.substream.output.stream_flv_type === 'ws' : monitor.details.stream_flv_type === 'ws'){
+                if(loadedPlayer.Poseidon){
+                    loadedPlayer.Poseidon.stop()
+                    revokeVideoPlayerUrl(monitorId)
                 }
-                if(!loadedPlayer.PoseidonErrorCount)loadedPlayer.PoseidonErrorCount = 0
-                if(loadedPlayer.PoseidonErrorCount >= 5)return
-                if(subStreamChannel ? details.substream.output.stream_flv_type === 'ws' : monitor.details.stream_flv_type === 'ws'){
-                    if(loadedPlayer.Poseidon){
-                        loadedPlayer.Poseidon.stop()
-                        revokeVideoPlayerUrl(monitorId)
-                    }
-                    try{
-                        loadedPlayer.Poseidon = new Poseidon({
-                            video: stream[0],
-                            auth_token: $user.auth_token,
-                            ke: monitor.ke,
-                            uid: $user.uid,
-                            id: monitor.mid,
-                            url: location.origin,
-                            path: websocketPath,
-                            query: websocketQuery,
-                            onError : onPoseidonError,
-                            channel : subStreamChannel
-                        })
-                        loadedPlayer.Poseidon.start();
-                    }catch(err){
-                        // onPoseidonError()
-                        console.log('onTryPoseidonError',err)
-                    }
-                }else{
-                    stream.attr('src',getApiPrefix(`mp4`)+'/'+monitor.mid + (subStreamChannel ? `/${subStreamChannel}` : '')+'/s.mp4?time=' + (new Date()).getTime())
-                    stream[0].onerror = function(err){
-                        console.error(err)
-                    }
+                try{
+                    loadedPlayer.Poseidon = new Poseidon({
+                        video: stream[0],
+                        auth_token: $user.auth_token,
+                        ke: monitor.ke,
+                        uid: $user.uid,
+                        id: monitor.mid,
+                        url: location.origin,
+                        path: websocketPath,
+                        query: websocketQuery,
+                        onError : onPoseidonError,
+                        channel : subStreamChannel
+                    })
+                    loadedPlayer.Poseidon.start();
+                }catch(err){
+                    // onPoseidonError()
+                    console.log('onTryPoseidonError',err)
                 }
-            },1000)
+            }else{
+                stream.attr('src',getApiPrefix(`mp4`)+'/'+monitor.mid + (subStreamChannel ? `/${subStreamChannel}` : '')+'/s.mp4?time=' + (new Date()).getTime())
+                stream[0].onerror = function(err){
+                    console.error(err)
+                }
+            }
         break;
         case'flv':
             if (flvjs.isSupported()) {
@@ -345,6 +343,7 @@ function closeLiveGridPlayer(monitorId,killElement){
         var livePlayerElement = loadedLiveGrids[monitorId]
         if(livePlayerElement){
             if(livePlayerElement.hls){livePlayerElement.hls.destroy()}
+            clearTimeout(livePlayerElement.m3uCheck)
             if(livePlayerElement.Poseidon){livePlayerElement.Poseidon.stop()}
             if(livePlayerElement.Base64){livePlayerElement.Base64.disconnect()}
             if(livePlayerElement.dash){livePlayerElement.dash.reset()}
@@ -452,7 +451,7 @@ function signalCheckLiveStream(options){
                     }
                 })
             }
-            mainSocket.f({f:'monitor',ff:'watch_on',id:monitorId});
+            requestMonitorInit()
         }
         function succeededStreamCheck(){
             if(monitorConfig.signal_check_log == 1){
@@ -513,7 +512,7 @@ function signalCheckLiveStream(options){
         var errorStack = err.stack;
         function phraseFoundInErrorStack(x){return errorStack.indexOf(x) > -1}
         if(phraseFoundInErrorStack("The HTMLImageElement provided is in the 'broken' state.")){
-            mainSocket.f({f:'monitor',ff:'watch_on',id:monitorId});
+            requestMonitorInit()
         }
         clearInterval(liveGridData.signal);
         delete(liveGridData.signal);
@@ -563,12 +562,7 @@ $(document).ready(function(e){
         fullScreenLiveGridStream(monitorItem)
     })
     .on('click','.reconnect-live-grid-monitor',function(){
-        var monitorId = $(this).parents('[data-mid]').attr('data-mid')
-        mainSocket.f({
-            f: 'monitor',
-            ff: 'watch_on',
-            id: monitorId
-        })
+        requestMonitorInit()
     })
     .on('click','.toggle-live-grid-monitor-fullscreen',function(){
         var monitorItem = $(this).parents('[data-mid]')
@@ -580,11 +574,12 @@ $(document).ready(function(e){
                 // loadPreviouslyOpenedLiveGridBlocks()
             break;
             case'monitor_watch_off':case'monitor_stopping':
-                var monitorId = d.mid || d.id
-                closeLiveGridPlayer(monitorId,(d.f === 'monitor_watch_off'))
+                if(monitorId === d.id){
+                    closeLiveGridPlayer(monitorId,(d.f === 'monitor_watch_off'))
+                }
             break;
             case'monitor_status':
-                if(monitorId === d.mid && d.code === 2 || d.code === 3){
+                if(monitorId === d.id && (d.code === 2 || d.code === 3)){
                     setTimeout(function(){
                         requestMonitorInit()
                     },2000)

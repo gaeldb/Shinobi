@@ -255,6 +255,7 @@ module.exports = function(s,config,lang){
        "evaluation": "details.use_whcs !== '0'",
        "name": lang["S3-Based Network Storage"],
        "color": "forestgreen",
+       "uploaderId": 'whcs',
        "info": [
            {
               "name": "detail=whcs_save",

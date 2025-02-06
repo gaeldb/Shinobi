@@ -6,7 +6,10 @@ async function addExtender(extenderContainer){
         dashboardExtensions[extenderContainer].push(...extender)
     };
 }
-async function executeExtender(extenderContainer, args){
+async function addActionToExtender(extenderContainer, action){
+    return on[extenderContainer](action)
+}
+async function executeExtender(extenderContainer, args = []){
     for(extender of dashboardExtensions[extenderContainer]){
         await extender(...args)
     }

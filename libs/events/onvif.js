@@ -43,11 +43,14 @@ module.exports = function (s, config, lang) {
 
         return new Cam(options, function (error) {
             if (error) {
-                onvifEventLog(`ONVIF Event Error`,e)
+                onvifEventLog(`ONVIF Event Error`,error)
                 return
             }
             this.on('event', function (event) {
                 handleEvent(event, monitorConfig, onvifEventLog);
+            })
+            this.on('eventsError', function (e) {
+                onvifEventLog(`ONVIF Event Error`,e)
             })
 
         })

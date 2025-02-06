@@ -137,14 +137,16 @@ module.exports = function(s,config,lang,app,io){
         if(onvifOptions.mid && onvifOptions.ke){
             const groupKey = onvifOptions.ke
             const monitorId = onvifOptions.mid
-            const theDevice = s.group[groupKey].activeMonitors[monitorId].onvifConnection
-            theUrl = addCredentialsToUrl({
-                username: onvifOptions.username,
-                password: onvifOptions.password,
-                url: (await theDevice.services.media.getSnapshotUri({
-                    ProfileToken : theDevice.current_profile.token,
-                })).GetSnapshotUriResponse.MediaUri.Uri
-            });
+            const theDevice = s.group[groupKey].activeMonitors[monitorId].onvifConnection || (await s.createOnvifDevice({ id: e.mid, ke: e.ke })).device;
+            if(theDevice){
+                theUrl = addCredentialsToUrl({
+                    username: theDevice.user,
+                    password: theDevice.pass,
+                    url: (await theDevice.services.media.getSnapshotUri({
+                        ProfileToken : theDevice.current_profile.token,
+                    })).data.GetSnapshotUriResponse.MediaUri.Uri
+                });
+            }
         }else{
             theUrl = addCredentialsToStreamLink({
                 username: onvifOptions.username,

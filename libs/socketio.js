@@ -336,6 +336,7 @@ module.exports = function(s,config,lang,io){
                     tx({f:'users_online',users:s.group[d.ke].users})
                     s.tx({f:'user_status_change',ke:d.ke,uid:cn.uid,status:1,user:s.group[d.ke].users[d.auth]},'GRP_'+d.ke)
                     s.sendDiskUsedAmountToClients(d.ke)
+                    s.sendCloudDiskUsedAmountToClients(d.ke)
                     tx({
                         f:'init_success',
                         users:s.group[d.ke].vid,
@@ -728,81 +729,77 @@ module.exports = function(s,config,lang,io){
         // super page socket functions
         cn.on('super',function(d){
             if(!cn.init&&d.f=='init'){
-                d.ok=s.superAuth({mail:d.mail,pass:d.pass},function(data){
-                    cn.mail=d.mail
+                d.ok=s.superAuth(d.auth ? { auth: d.auth } : {mail:d.mail,pass:d.pass},function(data){
+                    cn.mail = data.$user.mail
                     cn.join('$');
-                    var tempSessionKey = s.gid(30)
+                    var tempSessionKey = d.auth || s.gid(30)
                     cn.superSessionKey = tempSessionKey
                     s.superUsersApi[tempSessionKey] = data
                     s.superUsersApi[tempSessionKey].cnid = cn.id
-                    if(!data.$user.tokens)data.$user.tokens = {}
-                    data.$user.tokens[tempSessionKey] = {}
                     cn.ip=cn.request.connection.remoteAddress
                     s.userLog({ke:'$',mid:'$USER'},{type:lang['Websocket Connected'],msg:{for:lang['Superuser'],id:cn.mail,ip:cn.ip}})
                     cn.init='super';
-                    s.tx({f:'init_success',mail:d.mail,superSessionKey:tempSessionKey},cn.id);
+                    s.tx({f:'init_success',mail:cn.mail,superSessionKey:tempSessionKey},cn.id);
                 })
                 if(d.ok===false){
                     cn.disconnect();
                 }
-            }else{
-                if(cn.mail&&cn.init=='super'){
-                    switch(d.f){
-                        case'logs':
-                            switch(d.ff){
-                                case'delete':
-                                    s.knexQuery({
-                                        action: "delete",
-                                        table: "Logs",
-                                        where: {
-                                            ke: d.ke,
-                                        }
-                                    })
-                                break;
-                            }
-                        break;
-                        case'system':
-                            switch(d.ff){
-                                case'update':
+            }else if(cn.mail&&cn.init=='super'){
+                switch(d.f){
+                    case'logs':
+                        switch(d.ff){
+                            case'delete':
+                                s.knexQuery({
+                                    action: "delete",
+                                    table: "Logs",
+                                    where: {
+                                        ke: d.ke,
+                                    }
+                                })
+                            break;
+                        }
+                    break;
+                    case'system':
+                        switch(d.ff){
+                            case'update':
+                                s.ffmpegKill()
+                                s.systemLog('Shinobi ordered to update',{
+                                    by:cn.mail,
+                                    ip:cn.ip
+                                })
+                                var updateProcess = spawn('sh',(s.mainDirectory+'/UPDATE.sh').split(' '),{detached: true})
+                                updateProcess.stderr.on('data',function(data){
+                                    s.systemLog('Update Info',data.toString())
+                                })
+                                updateProcess.stdout.on('data',function(data){
+                                    s.systemLog('Update Info',data.toString())
+                                })
+                            break;
+                            case'restart':
+                                //config.webPaths.superApiPrefix+':auth/restart/:script'
+                                d.check=function(x){return d.target.indexOf(x)>-1}
+                                if(d.check('system')){
+                                    s.systemLog('Shinobi ordered to restart',{by:cn.mail,ip:cn.ip})
                                     s.ffmpegKill()
-                                    s.systemLog('Shinobi ordered to update',{
-                                        by:cn.mail,
-                                        ip:cn.ip
-                                    })
-                                    var updateProcess = spawn('sh',(s.mainDirectory+'/UPDATE.sh').split(' '),{detached: true})
-                                    updateProcess.stderr.on('data',function(data){
-                                        s.systemLog('Update Info',data.toString())
-                                    })
-                                    updateProcess.stdout.on('data',function(data){
-                                        s.systemLog('Update Info',data.toString())
-                                    })
-                                break;
-                                case'restart':
-                                    //config.webPaths.superApiPrefix+':auth/restart/:script'
-                                    d.check=function(x){return d.target.indexOf(x)>-1}
-                                    if(d.check('system')){
-                                        s.systemLog('Shinobi ordered to restart',{by:cn.mail,ip:cn.ip})
-                                        s.ffmpegKill()
-                                        exec('pm2 restart '+s.mainDirectory+'/camera.js')
-                                    }
-                                    if(d.check('cron')){
-                                        s.systemLog('Shinobi CRON ordered to restart',{by:cn.mail,ip:cn.ip})
-                                        exec('pm2 restart '+s.mainDirectory+'/cron.js')
-                                    }
-                                    if(d.check('logs')){
-                                        s.systemLog('Flush PM2 Logs',{by:cn.mail,ip:cn.ip})
-                                        exec('pm2 flush')
-                                    }
-                                break;
-                                case'configure':
-                                    s.systemLog('conf.json Modified',{by:cn.mail,ip:cn.ip,old:jsonfile.readFileSync(s.location.config)})
-                                    jsonfile.writeFile(s.location.config,d.data,{spaces: 2},function(){
-                                        s.tx({f:'save_configuration'},cn.id)
-                                    })
-                                break;
-                            }
-                        break;
-                    }
+                                    exec('pm2 restart '+s.mainDirectory+'/camera.js')
+                                }
+                                if(d.check('cron')){
+                                    s.systemLog('Shinobi CRON ordered to restart',{by:cn.mail,ip:cn.ip})
+                                    exec('pm2 restart '+s.mainDirectory+'/cron.js')
+                                }
+                                if(d.check('logs')){
+                                    s.systemLog('Flush PM2 Logs',{by:cn.mail,ip:cn.ip})
+                                    exec('pm2 flush')
+                                }
+                            break;
+                            case'configure':
+                                s.systemLog('conf.json Modified',{by:cn.mail,ip:cn.ip,old:jsonfile.readFileSync(s.location.config)})
+                                jsonfile.writeFile(s.location.config,d.data,{spaces: 2},function(){
+                                    s.tx({f:'save_configuration'},cn.id)
+                                })
+                            break;
+                        }
+                    break;
                 }
             }
         })

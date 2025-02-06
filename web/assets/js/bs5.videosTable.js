@@ -5,6 +5,7 @@ $(document).ready(function(e){
     var videosTableDrawArea = $('#videosTable_draw_area')
     var videosTablePreviewArea = $('#videosTable_preview_area')
     var objectTagSearchField = $('#videosTable_tag_search')
+    var objectTagSearchFieldAndOnly = $('#videosTable_tag_search_andonly')
     var cloudVideoCheckSwitch = $('#videosTable_cloudVideos')
     var sideLinkListBox = $('#side-menu-link-videosTableView ul')
     var loadedVideosTable = [];
@@ -28,18 +29,18 @@ $(document).ready(function(e){
     }
     //Lazy Load Thumbnails
     function loadFramesForVideosInView() {
-    videosTableDrawArea.find('.video-thumbnail').each(async (n, imgEl) => {
-        const el = $(imgEl);
-        const monitorId = el.attr('data-mid');
-        const startDate = el.attr('data-time');
-        const endDate = el.attr('data-end');
-        const imgBlock = el.find('.video-thumbnail-img-block');
+        videosTableDrawArea.find('.video-thumbnail').each(async (n, imgEl) => {
+            const el = $(imgEl);
+            const monitorId = el.attr('data-mid');
+            const startDate = el.attr('data-time');
+            const endDate = el.attr('data-end');
+            const imgBlock = el.find('.video-thumbnail-img-block');
 
-        if (el.is(':visible')) {  // Only load if visible
-            const href = await getSnapshotFromVideoTimeFrame(monitorId, startDate, endDate);
-            imgBlock.find('img').attr('src', href);
-        }
-    });
+            if (el.is(':visible')) {  // Only load if visible
+                const href = await getSnapshotFromVideoTimeFrame(monitorId, startDate, endDate);
+                imgBlock.find('img').attr('src', href);
+            }
+        });
     }
     window.openVideosTableView = function(monitorId){
         drawMonitorListToSelector(monitorsList,null,null,true)
@@ -54,32 +55,29 @@ $(document).ready(function(e){
         }
     })
     function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
     };
-    }
 
-    monitorsList.change(debounce(function(){
-        videosTableDrawArea.bootstrapTable('destroy');
-	drawVideosTableViewElements();
-    }, 300));
-
-    objectTagSearchField.change(debounce(function(){
-    	videosTableDrawArea.bootstrapTable('destroy');
-	drawVideosTableViewElements();
-    }, 300));
-
-    cloudVideoCheckSwitch.change(debounce(function(){
-    	videosTableDrawArea.bootstrapTable('destroy');
-	drawVideosTableViewElements();
-    }, 300));
+    [
+        monitorsList,
+        objectTagSearchField,
+        objectTagSearchFieldAndOnly,
+        cloudVideoCheckSwitch,
+    ].forEach(function(theElement){
+        theElement.change(debounce(function(){
+            videosTableDrawArea.bootstrapTable('destroy');
+            drawVideosTableViewElements();
+        }, 300));
+    });
 
     // Event listener for the Refresh link styled as a button
     $('.refresh-data').click(function(e) {
         e.preventDefault();
-	videosTableDrawArea.bootstrapTable('destroy');
+        videosTableDrawArea.bootstrapTable('destroy');
         drawVideosTableViewElements();
     });
 
@@ -90,18 +88,19 @@ $(document).ready(function(e){
 
     var dateRange = getSelectedTime(dateSelector);
     var searchQuery = objectTagSearchField.val() || null;
+    var andOnly = objectTagSearchFieldAndOnly.val() || '0';
     var startDate = dateRange.startDate;
     var endDate = dateRange.endDate;
     var monitorId = monitorsList.val();
     var wantsArchivedVideo = getVideoSetSelected() === 'archive';
     var wantCloudVideo = wantCloudVideos();
-
     if (!usePreloadedData) {
         var result = await getVideos({
             monitorId,
             startDate,
             endDate,
             searchQuery,
+            andOnly,
             archived: wantsArchivedVideo,
             customVideoSet: wantCloudVideo ? 'cloudVideos' : null,
             pageSize: pageSize, // Pass pageSize to server

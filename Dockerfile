@@ -63,9 +63,8 @@ RUN sed -i -e 's/\r//g' /home/Shinobi/Docker/init.sh
 RUN apt-get update -y --fix-missing
 RUN apt-get upgrade -y
 
-VOLUME ["/home/Shinobi/videos"]
-VOLUME ["/home/Shinobi/libs/customAutoLoad"]
-VOLUME ["/config"]
+VOLUME ["/home/Shinobi"]
+VOLUME ["/var/lib/mysql"]
 
 EXPOSE 8080 443 21 25
 
