@@ -146,6 +146,14 @@ module.exports = (processCwd,config) => {
             console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
             console.log('https://licenses.shinobi.video/subscribe')
         }
+
+        if(subscriptionId && subscriptionId === 'sub_skip'){
+            console.log('Skipping Subscription Check (offline mode)')
+            callback(true)
+            s.systemLog('This Install of Shinobi is Activated (subscription check skipped => offline mode)')
+            return
+        }
+
         if(subscriptionId && subscriptionId !== 'sub_XXXXXXXXXXXX' && !config.disableOnlineSubscriptionCheck){
             var url = 'https://licenses.shinobi.video/subscribe/check?subscriptionId=' + subscriptionId
             var hasSubcribed = false
